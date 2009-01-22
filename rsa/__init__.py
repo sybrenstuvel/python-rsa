@@ -5,29 +5,19 @@ signing and verification. Includes generating public and private keys.
 """
 
 __author__ = "Sybren Stuvel, Marloes de Boer and Ivo Tamboer"
-__date__ = "2008-04-23"
+__date__ = "2009-01-22"
 
 # NOTE: Python's modulo can return negative numbers. We compensate for
 # this behaviour using the abs() function
 
-import math
-import sys
-import random   # For picking semi-random numbers
-import types
 from cPickle import dumps, loads
 import base64
+import math
+import os
+import random
+import sys
+import types
 import zlib
-
-RANDOM_DEV="/dev/urandom"
-has_broken_randint = False
-
-try:
-    random.randint(1, 10000000000000000000000000L)
-except:
-    has_broken_randint = True
-    print "This system's random.randint() can't handle large numbers"
-    print "Random integers will all be read from %s" % RANDOM_DEV
-
 
 def log(x, base = 10):
     return math.log(x) / math.log(base)
@@ -97,31 +87,20 @@ def fast_exponentiation(a, p, n):
     return result
 
 def read_random_int(nbits):
-    """Reads a random integer from RANDOM_DEV of approximately nbits
-    bits rounded up to whole bytes"""
+    """Reads a random integer of approximately nbits bits rounded up
+    to whole bytes"""
 
     nbytes = ceil(nbits/8)
-
-    # Read 'nbits' bits of random data
-    fd = open(RANDOM_DEV)
-    randomdata = fd.read(nbytes)
-    fd.close()
-
-    if len(randomdata) != nbytes:
-        raise Exception("Unable to read enough random bytes")
-
+    randomdata = os.urandom(nbytes)
     return bytes2int(randomdata)
 
 def ceil(x):
-    """Returns int(math.ceil(x))"""
+    """ceil(x) -> int(math.ceil(x))"""
 
     return int(math.ceil(x))
     
 def randint(minvalue, maxvalue):
     """Returns a random integer x with minvalue <= x <= maxvalue"""
-
-    if not has_broken_randint:
-        return random.randint(minvalue, maxvalue)
 
     # Safety - get a lot of random data even if the range is fairly
     # small
@@ -309,6 +288,8 @@ def calculate_keys(p, q, nbits):
 
 def gen_keys(nbits):
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
+
+    Note: this can take a long time, depending on the key size.
     """
 
     while True:
