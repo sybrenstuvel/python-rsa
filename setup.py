@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='rsa',
-	version='1.3',
+	version='1.3.1',
     description='Pure-Python RSA implementation', 
     author='Sybren Stuvel',
     author_email='sybren@stuvel.eu', 
