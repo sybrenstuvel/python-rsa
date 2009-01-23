@@ -19,9 +19,6 @@ import sys
 import types
 import zlib
 
-def log(x, base = 10):
-    return math.log(x) / math.log(base)
-
 def gcd(p, q):
     """Returns the greatest common divisor of p and q
 
@@ -110,7 +107,7 @@ def randint(minvalue, maxvalue):
     range = maxvalue - minvalue
 
     # Which is this number of bytes
-    rangebytes = ceil(log(range, 2) / 8)
+    rangebytes = ceil(math.log(range, 2) / 8)
 
     # Convert to bits, but make sure it's always at least min_nbits*2
     rangebits = max(rangebytes * 8, min_nbits * 2)
@@ -166,8 +163,8 @@ def randomized_primality_testing(n, k):
 
     q = 0.5     # Property of the jacobi_witness function
 
-    # t = int(math.ceil(k / log(1/q, 2)))
-    t = ceil(k / log(1/q, 2))
+    # t = int(math.ceil(k / math.log(1/q, 2)))
+    t = ceil(k / math.log(1/q, 2))
     for i in range(t+1):
         x = randint(1, n-1)
         if jacobi_witness(x, n): return False
@@ -324,7 +321,8 @@ def encrypt_int(message, ekey, n):
     if not type(message) is types.LongType:
         raise TypeError("You must pass a long or an int")
 
-    if math.floor(log(message, 2)) > math.floor(log(n, 2)):
+    if message > 0 and \
+            math.floor(math.log(message, 2)) > math.floor(math.log(n, 2)):
         raise OverflowError("The message is too long")
 
     return fast_exponentiation(message, ekey, n)
@@ -367,7 +365,7 @@ def chopstring(message, key, n, funcref):
 
     msglen = len(message)
     mbits = msglen * 8
-    nbits = int(math.floor(log(n, 2)))
+    nbits = int(math.floor(math.log(n, 2)))
     nbytes = nbits / 8
     blocks = msglen / nbytes
 
