@@ -13,7 +13,7 @@ attacked.
 
 __author__ = "Sybren Stuvel, Marloes de Boer and Ivo Tamboer"
 __date__ = "2010-02-05"
-__version__ = '1.3.2'
+__version__ = '1.3.3'
 
 # NOTE: Python's modulo can return negative numbers. We compensate for
 # this behaviour using the abs() function
