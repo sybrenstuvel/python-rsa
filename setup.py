@@ -2,12 +2,14 @@
 
 from setuptools import setup
 
+import rsa
+
 setup(name='rsa',
-	version='1.3.1',
+	version=rsa.__version__,
     description='Pure-Python RSA implementation', 
-    author='Sybren Stuvel',
+    author='Sybren A. Stuvel',
     author_email='sybren@stuvel.eu', 
-    maintainer='Sybren Stuvel',
+    maintainer='Sybren A. Stuvel',
     maintainer_email='sybren@stuvel.eu',
 	url='http://www.stuvel.eu/rsa',
 	packages=['rsa'],

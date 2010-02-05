@@ -6,7 +6,8 @@ signing and verification. Includes generating public and private keys.
 """
 
 __author__ = "Sybren Stuvel, Marloes de Boer and Ivo Tamboer"
-__date__ = "2009-01-22"
+__date__ = "2010-02-05"
+__version__ = '1.3.2'
 
 # NOTE: Python's modulo can return negative numbers. We compensate for
 # this behaviour using the abs() function
