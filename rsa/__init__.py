@@ -1,4 +1,5 @@
 """RSA module
+pri = k[1]                               	//Private part of keys d,p,q
 
 Module for calculating large primes, and RSA encryption, decryption,
 signing and verification. Includes generating public and private keys.
@@ -87,7 +88,7 @@ def read_random_int(nbits):
     """Reads a random integer of approximately nbits bits rounded up
     to whole bytes"""
 
-    nbytes = ceil(nbits/8)
+    nbytes = ceil(nbits/8.)
     randomdata = os.urandom(nbytes)
     return bytes2int(randomdata)
 
@@ -107,7 +108,7 @@ def randint(minvalue, maxvalue):
     range = maxvalue - minvalue
 
     # Which is this number of bytes
-    rangebytes = ceil(math.log(range, 2) / 8)
+    rangebytes = ceil(math.log(range, 2) / 8.)
 
     # Convert to bits, but make sure it's always at least min_nbits*2
     rangebits = max(rangebytes * 8, min_nbits * 2)
@@ -207,7 +208,7 @@ def getprime(nbits):
     0
     """
 
-    nbytes = int(math.ceil(nbits/8))
+    nbytes = int(math.ceil(nbits/8.))
 
     while True:
         integer = read_random_int(nbits)
