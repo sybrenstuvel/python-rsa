@@ -340,7 +340,7 @@ def extended_gcd(a, b):
 # Main function: calculate encryption and decryption keys
 def calculate_keys(p, q, nbits):
     """Calculates an encryption and a decryption key for p and q, and
-    returns them as a tuple (e, d)"""
+    returns them as a tuple (e, dp, dq, qi)"""
 
     n = p * q
     phi_n = (p-1) * (q-1)
