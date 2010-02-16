@@ -328,11 +328,13 @@ def extended_euclid_gcd(a, b):
     y = 1
     lx = 1
     ly = 0
+    lb = b                             #Remember modulus (to remove negs)
     while b != 0:
         q = long(a/b)
         (a, b)  = (b, a % b)
         (x, lx) = ((lx - (q * x)),x)
         (y, ly) = ((ly - (q * y)),y)
+    if (lx < 0): lx += lb              #No Negative return values
     return (a, lx, ly)
 
 # Main function: calculate encryption and decryption keys
@@ -353,7 +355,7 @@ def calculate_keys(p, q, nbits):
 
     if not d == 1:
         raise Exception("e (%d) and phi_n (%d) are not relatively prime" % (e, phi_n))
-    if (i < 0): i += phi_n
+    if (i < 0): raise Exception("New gcd shouldn't return negative values")
     if not (e * i) % phi_n == 1:
         raise Exception("e (%d) and i (%d) are not mult. inv. modulo phi_n (%d)" % (e, i, phi_n))
 
@@ -387,7 +389,7 @@ def encrypt_int(message, ekey, n):
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
     if type(message) is types.IntType:
-        return encrypt_int(long(message), ekey, n)
+        message = long(message)
 
     if not type(message) is types.LongType:
         raise TypeError("You must pass a long or int")
