@@ -312,22 +312,12 @@ def are_relatively_prime(a, b):
 
 def find_p_q(nbits):
     """Returns a tuple of two different primes of nbits bits"""
-    still_looking = True
-    small_primes=[3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79]
     pbits = nbits + (nbits/16)  #Make sure that p and q aren't too close
     qbits = nbits - (nbits/16)  #or the factoring programs can factor n
-    while still_looking:
-        p = getprime(pbits)
-        while True:
-            q = getprime(qbits)
-            if not q == p: break
-        #Now verify that phi_n (p-1)*(q-1) is not divisible by small primes
-        phi_n = (p-1)*(q-1)
-        still_looking = False
-        for sp in small_primes:
-            if phi_n % sp == 0:     #check each small prime for divisibility
-                still_looking = True
-                break               #Any divisible small prime, keep looking
+    p = getprime(pbits)
+    while True:
+        q = getprime(qbits)
+        if not q == p: break
     return (p, q)
 
 def extended_euclid_gcd(a, b):
