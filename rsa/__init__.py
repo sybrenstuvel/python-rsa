@@ -320,7 +320,7 @@ def find_p_q(nbits):
         if not q == p: break
     return (p, q)
 
-def extended_euclid_gcd(a, b):
+def extended_gcd(a, b):
     """Returns a tuple (d, i, j) such that d = gcd(a, b) = ia + jb
     """
     # Iterateive Version is faster and uses much less stack space
@@ -351,11 +351,12 @@ def calculate_keys(p, q, nbits):
         e = max(65537,getprime(nbits/4))
         if are_relatively_prime(e, n) and are_relatively_prime(e, phi_n): break
 
-    (d, i, j) = extended_euclid_gcd(e, phi_n)
+    (d, i, j) = extended_gcd(e, phi_n)
 
     if not d == 1:
         raise Exception("e (%d) and phi_n (%d) are not relatively prime" % (e, phi_n))
-    if (i < 0): raise Exception("New gcd shouldn't return negative values")
+    if (i < 0):
+        raise Exception("New extended_gcd shouldn't return negative values")
     if not (e * i) % phi_n == 1:
         raise Exception("e (%d) and i (%d) are not mult. inv. modulo phi_n (%d)" % (e, i, phi_n))
 
