@@ -328,6 +328,7 @@ def extended_gcd(a, b):
     y = 1
     lx = 1
     ly = 0
+    la = a
     lb = b                             #Remember modulus (to remove negs)
     while b != 0:
         q = long(a/b)
@@ -335,6 +336,7 @@ def extended_gcd(a, b):
         (x, lx) = ((lx - (q * x)),x)
         (y, ly) = ((ly - (q * y)),y)
     if (lx < 0): lx += lb              #No Negative return values
+    if (ly < 0): ly += la
     return (a, lx, ly)
 
 # Main function: calculate encryption and decryption keys
