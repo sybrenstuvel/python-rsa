@@ -348,7 +348,7 @@ def calculate_keys(p, q, nbits):
     while True:
         # Make sure e has enough bits so we ensure "wrapping" through
         # modulo n
-        e = getprime(max(8, nbits/2))
+        e = max(65537,getprime(nbits/4))
         if are_relatively_prime(e, n) and are_relatively_prime(e, phi_n): break
 
     (d, i, j) = extended_euclid_gcd(e, phi_n)
@@ -380,7 +380,7 @@ def newkeys(nbits):
     The public key consists of a dict {e: ..., , n: ....). The private
     key consists of a dict {d: ...., p: ...., q: ....).
     """
-    
+    nbits = max(9,nbits)           # Don't let nbits go below 9 bits
     (p, q, e, d) = gen_keys(nbits)
 
     return ( {'e': e, 'n': p*q}, {'d': d, 'p': p, 'q': q} )
@@ -491,23 +491,31 @@ def gluechops(string, key, n, funcref):
 
 def encrypt(message, key):
     """Encrypts a string 'message' with the public key 'key'"""
-    
-    return chopstring(message, key['e'], key['n'], encrypt_int)
+    if key.__contains__('n'):
+        return chopstring(message, key['e'], key['n'], encrypt_int)
+    else:
+        raise Exception("You must use the public key with encrypt")
 
 def sign(message, key):
     """Signs a string 'message' with the private key 'key'"""
-    
-    return chopstring(message, key['d'], key['p']*key['q'], encrypt_int)
+    if key.__contains__('p'):
+        return chopstring(message, key['d'], key['p']*key['q'], encrypt_int)
+    else:
+        raise Exception("You must use the private key with sign")
 
 def decrypt(cypher, key):
     """Decrypts a cypher with the private key 'key'"""
-
-    return gluechops(cypher, key['d'], key['p']*key['q'], decrypt_int)
+    if key.__contains__('p'):
+        return gluechops(cypher, key['d'], key['p']*key['q'], decrypt_int)
+    else:
+        raise Exception("You must use the private key with decrypt")
 
 def verify(cypher, key):
     """Verifies a cypher with the public key 'key'"""
-
-    return gluechops(cypher, key['e'], key['n'], decrypt_int)
+    if key.__contains__('n'):
+        return gluechops(cypher, key['e'], key['n'], decrypt_int)
+    else:
+        raise Exception("You must use the public key with verify")
 
 # Do doctest if we're not imported
 if __name__ == "__main__":
