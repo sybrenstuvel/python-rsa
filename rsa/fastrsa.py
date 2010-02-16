@@ -320,8 +320,8 @@ def find_p_q(nbits):
         if not q == p: break
     return (p, q)
 
-def extended_euclid_gcd(a, b):
-    """Returns a tuple (d, i, j) such that d = gcd(a, b) = ia + jb
+def extended_gcd(a, b):
+    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
     """
     # Iterateive Version is faster and uses much less stack space
     x = 0
@@ -351,17 +351,17 @@ def calculate_keys(p, q, nbits):
         e = max(65537,getprime(nbits/4)) #minimum e is 65537 per RSA spec
         if are_relatively_prime(e, n) and are_relatively_prime(e, phi_n): break
 
-    (r, dp, j) = extended_euclid_gcd(e, p-1) #Compute exponent dp
+    (r, dp, j) = extended_gcd(e, p-1) #Compute exponent dp
 
     if not r == 1:
         raise Exception("e (%d) and p-1 (%d) are not relatively prime" % (e, p-1))
 
-    (r, dq, j) = extended_euclid_gcd(e, q-1) #Compute exponent dq
+    (r, dq, j) = extended_gcd(e, q-1) #Compute exponent dq
 
     if not r == 1:
         raise Exception("e (%d) and q-1 (%d) are not relatively prime" % (e, q-1))
 
-    (r, qi, j) = extended_euclid_gcd(q, p)   #Compute coefficent qi
+    (r, qi, j) = extended_gcd(q, p)   #Compute coefficent qi
 
     if not r == 1:
         raise Exception("q (%d) and p (%d) are not relatively prime" % (q, p))
