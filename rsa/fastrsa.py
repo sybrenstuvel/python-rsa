@@ -409,7 +409,7 @@ def encrypt_int(message, key):
         raise OverflowError("The message is too long")
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
-    safebit = int(math.floor(math.log(key['n'],2))) - 1 #compute safe bit (MSB - 1)
+    safebit = int(math.floor(math.log(key['n'],2))) - 1 #safe bit is (MSB - 1)
     message += (1 << safebit)                    #add safebit to ensure folding
 
     return fast_exponentiation(message, key['e'], key['n'])
@@ -426,7 +426,7 @@ def verify_int(cyphertext, key):
     message = fast_exponentiation(cyphertext, key['e'], key['n'])
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
-    safebit = int(math.floor(math.log(key['n'],2))) - 1 #safe bit (MSB - 1)
+    safebit = int(math.floor(math.log(key['n'],2))) - 1 #safe bit is (MSB - 1)
     message -= (1 << safebit)                  #remove safe bit before decode
 
     return message
@@ -444,7 +444,7 @@ def decrypt_int(cyphertext, key):
     h = (key['qi'] * dif) % key['p']
     message = m2 + (h * key['q'])
 
-    safebit = int(math.floor(math.log(n,2))) - 1 #compute safe bit (MSB - 1)
+    safebit = int(math.floor(math.log(n,2))) - 1 #safe bit is (MSB - 1)
     message -= (1 << safebit)                    #remove safebit before decode
 
     return message
@@ -464,7 +464,7 @@ def sign_int(message, key):
     if message < 0 or message > n:
         raise OverflowError("The message is too long")
 
-    safebit = int(math.floor(math.log(n,2))) - 1 #compute safe bit (MSB - 1)
+    safebit = int(math.floor(math.log(n,2))) - 1 #safe bit is (MSB - 1)
     message += (1 << safebit)                    #add safebit before encrypt
 
     #Encrypt in 2 parts, using faster Chinese Remainder Theorem method
