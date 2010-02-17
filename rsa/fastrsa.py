@@ -330,15 +330,15 @@ def extended_gcd(a, b):
     y = 1
     lx = 1
     ly = 0
-    la = a
-    lb = b                             #Remember modulus (to remove negs)
+    oa = a                             #Remember original a/b to remove
+    ob = b                             #negative values modulo b or a
     while b != 0:
         q = long(a/b)
         (a, b)  = (b, a % b)
         (x, lx) = ((lx - (q * x)),x)
         (y, ly) = ((ly - (q * y)),y)
-    if (lx < 0): lx += lb              #No Negative return values
-    if (ly < 0): ly += la
+    if (lx < 0): lx += ob              #If negative wrap modulo original b
+    if (ly < 0): ly += oa              #If negative wrap modulo original a
     return (a, lx, ly)
 
 # Main function: calculate encryption and decryption keys
@@ -388,8 +388,8 @@ def newkeys(nbits):
     """Generates public and private keys, and returns them as (pub,
     priv).
 
-    The public key consists of a dict {e: ..., , n: ....). The private
-    key consists of a dict {d: ...., p: ...., q: ....).
+    The public key consists of a dict {e: ..., n: ...}. The private
+    key consists of a dict {p: ..., q: ..., dp: ..., dq: ..., qi: ...}.
     """
     nbits = max(9,nbits)         #Minimum key size is 9 bit for p and q 
     (p, q, e, dp, dq, qi) = gen_keys(nbits)
