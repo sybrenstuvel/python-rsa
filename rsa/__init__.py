@@ -496,31 +496,31 @@ def gluechops(string, key, n, funcref):
 
 def encrypt(message, key):
     """Encrypts a string 'message' with the public key 'key'"""
-    if key.__contains__('n'):
-        return chopstring(message, key['e'], key['n'], encrypt_int)
-    else:
+    if 'n' not in key:
         raise Exception("You must use the public key with encrypt")
+
+    return chopstring(message, key['e'], key['n'], encrypt_int)
 
 def sign(message, key):
     """Signs a string 'message' with the private key 'key'"""
-    if key.__contains__('p'):
-        return chopstring(message, key['d'], key['p']*key['q'], encrypt_int)
-    else:
+    if 'p' not in key:
         raise Exception("You must use the private key with sign")
+
+    return chopstring(message, key['d'], key['p']*key['q'], encrypt_int)
 
 def decrypt(cypher, key):
     """Decrypts a cypher with the private key 'key'"""
-    if key.__contains__('p'):
-        return gluechops(cypher, key['d'], key['p']*key['q'], decrypt_int)
-    else:
+    if 'p' not in key:
         raise Exception("You must use the private key with decrypt")
+
+    return gluechops(cypher, key['d'], key['p']*key['q'], decrypt_int)
 
 def verify(cypher, key):
     """Verifies a cypher with the public key 'key'"""
-    if key.__contains__('n'):
-        return gluechops(cypher, key['e'], key['n'], decrypt_int)
-    else:
+    if 'n' not in key:
         raise Exception("You must use the public key with verify")
+
+    return gluechops(cypher, key['e'], key['n'], decrypt_int)
 
 # Do doctest if we're not imported
 if __name__ == "__main__":

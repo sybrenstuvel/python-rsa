@@ -516,7 +516,7 @@ def chopstring(message, key, funcref):
     Used by 'encrypt' and 'sign'.
     """
 
-    if key.__contains__('n'):
+    if 'n' in key:
         n = key['n']                        #Public key has n already
     else:
         n = key['p'] * key['q']             #Private key has p & q
@@ -559,31 +559,31 @@ def gluechops(string, key, funcref):
 
 def encrypt(message, key):
     """Encrypts a string 'message' with the public key 'key'"""
-    if key.__contains__('n'):
-        return chopstring(message, key, encrypt_int)
-    else:
+    if 'n' not in key:
         raise Exception("You must use the public key with encrypt")
+
+    return chopstring(message, key, encrypt_int)
 
 def sign(message, key):
     """Signs a string 'message' with the private key 'key'"""
-    if key.__contains__('p'):
-        return chopstring(message, key, sign_int)
-    else:
+    if 'p' not in key:
         raise Exception("You must use the private key with sign")
 
+    return chopstring(message, key, sign_int)
+
 def decrypt(cypher, key):
-    """Decrypts a cypher with the private key 'key'"""
-    if key.__contains__('p'):
-        return gluechops(cypher, key, decrypt_int)
-    else:
+    """Decrypts a string 'cypher' with the private key 'key'"""
+    if 'p' not in key:
         raise Exception("You must use the private key with decrypt")
 
+    return gluechops(cypher, key, decrypt_int)
+
 def verify(cypher, key):
-    """Verifies a cypher with the public key 'key'"""
-    if key.__contains__('n'):
-        return gluechops(cypher, key, verify_int)
-    else:
+    """Verifies a string 'cypher' with the public key 'key'"""
+    if 'n' not in key:
         raise Exception("You must use the public key with verify")
+
+    return gluechops(cypher, key, verify_int)
 
 # Do doctest if we're not imported
 if __name__ == "__main__":
