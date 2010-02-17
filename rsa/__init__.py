@@ -509,14 +509,14 @@ def sign(message, key):
     return chopstring(message, key['d'], key['p']*key['q'], encrypt_int)
 
 def decrypt(cypher, key):
-    """Decrypts a cypher with the private key 'key'"""
+    """Decrypts a string 'cypher' with the private key 'key'"""
     if 'p' not in key:
         raise Exception("You must use the private key with decrypt")
 
     return gluechops(cypher, key['d'], key['p']*key['q'], decrypt_int)
 
 def verify(cypher, key):
-    """Verifies a cypher with the public key 'key'"""
+    """Verifies a string 'cypher' with the public key 'key'"""
     if 'n' not in key:
         raise Exception("You must use the public key with verify")
 
