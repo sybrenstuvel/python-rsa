@@ -391,7 +391,7 @@ def newkeys(nbits):
     The public key consists of a dict {e: ..., n: ...}. The private
     key consists of a dict {p: ..., q: ..., dp: ..., dq: ..., qi: ...}.
     """
-    nbits = max(9,nbits)         #Minimum key size is 9 bit for p and q 
+    nbits = max(9,nbits)         #Minimum key size is 9 bits for p and q 
     (p, q, e, dp, dq, qi) = gen_keys(nbits)
 
     return ( {'e':e,'n':p*q}, {'p':p,'q':q,'dp':dp,'dq':dq,'qi':qi} )
