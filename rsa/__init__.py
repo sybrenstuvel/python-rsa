@@ -168,8 +168,8 @@ def fast_exponentiation(a, e, n):
     #Single loop version is faster and uses less memory
     #MSB is always 1 so skip testing it and start with result = a
     msbe = int(math.ceil(math.log(e,2))) - 2  #Find MSB-1 of exponent
-    test = long(1 << msbe)
-    a %= n                      #Throw away any overflow
+    test = long(1 << msbe)      #Isolate each expoent bit with test value
+    a %= n                      #Throw away any overflow modulo n
     result = a                  #Start with result = a (skip MSB test)
     while test != 0:
         if e & test != 0:       #If exponent bit 1 square and mult by a
