@@ -434,15 +434,16 @@ def verify_int(cyphertext, key):
 def decrypt_int(cyphertext, key):
     """Decrypts a cypher text using the private key 'key', working
     modulo n"""
-
-    n = key['p'] * key['q']
+    p = key['p']                #Reduce dictionary lookups
+    q = key['q']
+    n = p * q
     #Decrypt in 2 parts, using faster Chinese Remainder Theorem method
-    m1 = fast_exponentiation(cyphertext, key['dp'], key['p'])
-    m2 = fast_exponentiation(cyphertext, key['dq'], key['q'])
+    m1 = fast_exponentiation(cyphertext, key['dp'], p)
+    m2 = fast_exponentiation(cyphertext, key['dq'], q)
     dif = m1 - m2
-    if dif < 0: dif += key['p']
-    h = (key['qi'] * dif) % key['p']
-    message = m2 + (h * key['q'])
+    if dif < 0: dif += p
+    h = (key['qi'] * dif) % p
+    message = m2 + (h * q)
 
     safebit = int(math.floor(math.log(n,2))) - 1 #safe bit is (MSB - 1)
     message -= (1 << safebit)                    #remove safebit before decode
@@ -459,7 +460,9 @@ def sign_int(message, key):
     if not type(message) is types.LongType:
         raise TypeError("You must pass a long or int")
 
-    n = key['p'] * key['q']                      #computer n from p and q
+    p = key['p']                #Reduce dictionary lookups
+    q = key['q']
+    n = p * q
 
     if message < 0 or message > n:
         raise OverflowError("The message is too long")
@@ -468,12 +471,12 @@ def sign_int(message, key):
     message += (1 << safebit)                    #add safebit before encrypt
 
     #Encrypt in 2 parts, using faster Chinese Remainder Theorem method
-    c1 = fast_exponentiation(message, key['dp'], key['p'])
-    c2 = fast_exponentiation(message, key['dq'], key['q'])
+    c1 = fast_exponentiation(message, key['dp'], p)
+    c2 = fast_exponentiation(message, key['dq'], q)
     dif = c1 - c2
-    if dif < 0: dif += key['p']
-    h = (key['qi'] * dif) % key['p']
-    cyphertext = c2 + (h * key['q'])
+    if dif < 0: dif += p
+    h = (key['qi'] * dif) % p
+    cyphertext = c2 + (h * q)
 
     return cyphertext
 
