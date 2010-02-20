@@ -314,12 +314,11 @@ def find_p_q(nbits):
     """Returns a tuple of two different primes of nbits bits"""
     pbits = nbits + (nbits/16)  #Make sure that p and q aren't too close
     qbits = nbits - (nbits/16)  #or the factoring programs can factor n
+    p = getprime(pbits)
     while True:
-        p = getprime(pbits)
         q = getprime(qbits)
-        phi_n = (p-1)*(q-1)
-        #Make sure p and q are different and phi_n is not divisible by 256
-        if not (q == p or phi_n & 255 == 0): break
+        #Make sure p and q are different.
+        if not q == p: break
     return (p, q)
 
 def extended_gcd(a, b):
