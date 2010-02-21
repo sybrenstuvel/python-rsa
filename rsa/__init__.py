@@ -171,16 +171,16 @@ def fast_exponentiation(a, e, n):
     """Calculates r = a^e mod n
     """
     #Single loop version is faster and uses less memory
-    #MSB is always 1 so skip testing it and start with result = a
+    #MSB is always 1 so skip testing it and, start with next exponent bit.
     msbe = bit_size(e) - 2      #Find MSB-1 of exponent
     test = long(1 << msbe)      #Isolate each expoent bit with test value
     a %= n                      #Throw away any overflow modulo n
     result = a                  #Start with result = a (skip MSB test)
-    while test != 0:
-        if e & test != 0:       #If exponent bit 1 square and mult by a
-            result = (result * result * a) % n
-        else:                   #If exponent bit 0 just square
-            result = (result * result) % n   
+    while test != 0:            #Repeat til all exponent bits have been tested
+        if e & test != 0:       #If exponent bit is 1, square and mult by a
+            result = (result * result * a) % n  #Then reduce modulo n
+        else:                   #If exponent bit is 0, just square
+            result = (result * result) % n      #Then reduce modulo n 
         test >>= 1              #Move to next exponent bit
     return result
 
@@ -464,7 +464,7 @@ def chopstring(message, key, n, funcref):
 
     msglen = len(message)
     mbits = msglen * 8
-    #Bit counts start at 1, bit numbers start at zero (so deduct 2)
+    #Set aside 2-bits so setting of safebit won't overflow modulo n.
     nbits = bit_size(n) - 2             # leave room for safebit
     nbytes = nbits / 8
     blocks = msglen / nbytes
