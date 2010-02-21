@@ -166,24 +166,6 @@ def str642int(string):
 
     return integer
 
-
-def fast_exponentiation(a, e, n):
-    """Calculates r = a^e mod n
-    """
-    #Single loop version is faster and uses less memory
-    #MSB is always 1 so skip testing it and, start with next exponent bit.
-    msbe = bit_size(e) - 2      #Find MSB-1 of exponent
-    test = long(1 << msbe)      #Isolate each expoent bit with test value
-    a %= n                      #Throw away any overflow modulo n
-    result = a                  #Start with result = a (skip MSB test)
-    while test != 0:            #Repeat til all exponent bits have been tested
-        if e & test != 0:       #If exponent bit is 1, square and mult by a
-            result = (result * result * a) % n  #Then reduce modulo n
-        else:                   #If exponent bit is 0, just square
-            result = (result * result) % n      #Then reduce modulo n 
-        test >>= 1              #Move to next exponent bit
-    return result
-
 def read_random_int(nbits):
     """Reads a random integer of approximately nbits bits rounded up
     to whole bytes"""
@@ -238,7 +220,7 @@ def jacobi_witness(x, n):
     """
 
     j = jacobi(x, n) % n
-    f = fast_exponentiation(x, (n-1)/2, n)
+    f = pow(x, (n-1)/2, n)
 
     if j == f: return False
     return True
@@ -410,13 +392,13 @@ def encrypt_int(message, ekey, n):
     safebit = bit_size(n) - 2                   #compute safe bit (MSB - 1)
     message += (1 << safebit)                   #add safebit to ensure folding
 
-    return fast_exponentiation(message, ekey, n)
+    return pow(message, ekey, n)
 
 def decrypt_int(cyphertext, dkey, n):
     """Decrypts a cypher text using the decryption key 'dkey', working
     modulo n"""
 
-    message = fast_exponentiation(cyphertext, dkey, n)
+    message = pow(cyphertext, dkey, n)
 
     safebit = bit_size(n) - 2                   #compute safe bit (MSB - 1)
     message -= (1 << safebit)                   #remove safebit before decode
