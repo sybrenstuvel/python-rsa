@@ -13,6 +13,11 @@ import random
 import sys
 import types
 
+def bit_size(number):
+    """Returns the number of bits required to hold a specific long number"""
+
+    return int(math.ceil(math.log(number,2)))
+
 def gcd(p, q):
     """Returns the greatest common divisor of p and q
     >>> gcd(48, 180)
@@ -167,7 +172,7 @@ def fast_exponentiation(a, e, n):
     """
     #Single loop version is faster and uses less memory
     #MSB is always 1 so skip testing it and start with result = a
-    msbe = int(math.ceil(math.log(e,2))) - 2  #Find MSB-1 of exponent
+    msbe = bit_size(e) - 2      #Find MSB-1 of exponent
     test = long(1 << msbe)      #Isolate each expoent bit with test value
     a %= n                      #Throw away any overflow modulo n
     result = a                  #Start with result = a (skip MSB test)
@@ -198,7 +203,7 @@ def randint(minvalue, maxvalue):
     range = maxvalue - minvalue
 
     # Which is this number of bytes
-    rangebytes = int(math.ceil(math.log(range, 2) / 8.))
+    rangebytes = int(bit_size(range) / 8.)
 
     # Convert to bits, but make sure it's always at least min_nbits*2
     rangebits = max(rangebytes * 8, min_nbits * 2)
@@ -402,8 +407,8 @@ def encrypt_int(message, ekey, n):
         raise OverflowError("The message is too long")
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
-    safebit = int(math.floor(math.log(n,2))) - 1 #compute safe bit (MSB - 1)
-    message += (1 << safebit)                    #add safebit to ensure folding
+    safebit = bit_size(n) - 2                   #compute safe bit (MSB - 1)
+    message += (1 << safebit)                   #add safebit to ensure folding
 
     return fast_exponentiation(message, ekey, n)
 
@@ -413,8 +418,8 @@ def decrypt_int(cyphertext, dkey, n):
 
     message = fast_exponentiation(cyphertext, dkey, n)
 
-    safebit = int(math.floor(math.log(n,2))) - 1 #compute safe bit (MSB - 1)
-    message -= (1 << safebit)                    #remove safebit before decode
+    safebit = bit_size(n) - 2                   #compute safe bit (MSB - 1)
+    message -= (1 << safebit)                   #remove safebit before decode
 
     return message
 
@@ -459,8 +464,8 @@ def chopstring(message, key, n, funcref):
 
     msglen = len(message)
     mbits = msglen * 8
-    # floor of log deducts 1 bit of n and the - 1, deducts the second bit.
-    nbits = int(math.floor(math.log(n, 2))) - 1 # leave room for safebit
+    #Bit counts start at 1, bit numbers start at zero (so deduct 2)
+    nbits = bit_size(n) - 2             # leave room for safebit
     nbytes = nbits / 8
     blocks = msglen / nbytes
 
