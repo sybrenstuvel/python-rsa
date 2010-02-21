@@ -203,7 +203,7 @@ def randint(minvalue, maxvalue):
     range = maxvalue - minvalue
 
     # Which is this number of bytes
-    rangebytes = int(bit_size(range) / 8.)
+    rangebytes = ((bit_size(range) + 7) / 8)
 
     # Convert to bits, but make sure it's always at least min_nbits*2
     rangebits = max(rangebytes * 8, min_nbits * 2)
