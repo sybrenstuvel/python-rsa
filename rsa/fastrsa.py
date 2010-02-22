@@ -390,15 +390,15 @@ def encrypt_int(message, key):
 
     if not type(message) is types.LongType:
         raise TypeError("You must pass a long or int")
-
-    if message < 0 or message > key['n']:
+    n = key['n']                                #reduce dictionary lookups
+    if message < 0 or message > n:
         raise OverflowError("The message is too long")
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
     safebit = bit_size(n) - 2                   #safe bit is (MSB - 1)
     message += (1 << safebit)                   #add safebit to ensure folding
 
-    return pow(message, key['e'], key['n'])
+    return pow(message, key['e'], n)
 
 def verify_int(cyphertext, key):
     """Decrypts cyphertext using public key 'key', working modulo n"""
@@ -408,8 +408,8 @@ def verify_int(cyphertext, key):
 
     if not type(cyphertext) is types.LongType:
         raise TypeError("You must pass a long or int")
-
-    message = pow(cyphertext, key['e'], key['n'])
+    n = key['n']                                #reduce dictionary lookups
+    message = pow(cyphertext, key['e'], n)
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
     safebit = bit_size(n) - 2                   #safe bit is (MSB - 1)
@@ -454,7 +454,7 @@ def sign_int(message, key):
         raise OverflowError("The message is too long")
 
     safebit = bit_size(n) - 2                   #safe bit is (MSB - 1)
-    message += (1 << safebit)                    #add safebit before encrypt
+    message += (1 << safebit)                   #add safebit before encrypt
 
     #Encrypt in 2 parts, using faster Chinese Remainder Theorem method
     c1 = pow(message, key['dp'], p)
