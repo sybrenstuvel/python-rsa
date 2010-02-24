@@ -208,7 +208,7 @@ def jacobi(a, b):
                 result = -result
             a, b = b % a, a
         else:
-            if (((b ** 2) - 1) >> 3) & 1:
+            if (((b * b) - 1) >> 3) & 1:
                 result = -result
             a >>= 1
     if a == 0: return 0
@@ -229,7 +229,7 @@ def randomized_primality_testing(n, k):
     """Calculates whether n is composite (which is always correct) or
     prime (which is incorrect with error probability 2**-k)
 
-    Returns False if the number if composite, and True if it's
+    Returns False if the number is composite, and True if it's
     probably prime.
     """
 
@@ -512,7 +512,7 @@ def chopstring(message, key, funcref):
     
     msglen = len(message)
     mbits = msglen * 8
-    # floor of log deducts 1 bit of n and the - 1, deducts the second bit.
+    #Set aside 2-bits so setting of safebit won't overflow modulo n
     nbits = bit_size(n) - 2                 # leave room for safebit
     nbytes = nbits / 8
     blocks = msglen / nbytes
