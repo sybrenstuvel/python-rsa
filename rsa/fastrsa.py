@@ -182,7 +182,7 @@ def randint(minvalue, maxvalue):
     min_nbits = 32
 
     # The range of the random numbers we need to generate
-    range = maxvalue - minvalue
+    range = (maxvalue - minvalue) + 1
 
     # Which is this number of bytes
     rangebytes = ((bit_size(range) + 7) / 8)
