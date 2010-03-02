@@ -311,6 +311,9 @@ def find_p_q(nbits):
 def extended_gcd(a, b):
     """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
     """
+    # r = gcd(a,b) i = multiplicitive inverse of a mod b
+    #      or      j = multiplicitive inverse of b mod a
+    # Neg return values for i or j are made positive mod b or a respectively
     # Iterateive Version is faster and uses much less stack space
     x = 0
     y = 1
@@ -325,7 +328,7 @@ def extended_gcd(a, b):
         (y, ly) = ((ly - (q * y)),y)
     if (lx < 0): lx += ob              #If negative wrap modulo original b
     if (ly < 0): ly += oa              #If negative wrap modulo original a
-    return (a, lx, ly)
+    return (a, lx, ly)                 #Return only positive values
 
 # Main function: calculate encryption and decryption keys
 def calculate_keys(p, q, nbits):
@@ -351,7 +354,7 @@ def calculate_keys(p, q, nbits):
     if not r == 1:
         raise Exception("e (%d) and q-1 (%d) are not relatively prime" % (e, q-1))
 
-    (r, qi, j) = extended_gcd(q, p)   #Compute coefficent qi
+    (r, qi, j) = extended_gcd(q, p)   #Compute q-inverse coefficent qi
 
     if not r == 1:
         raise Exception("q (%d) and p (%d) are not relatively prime" % (q, p))
