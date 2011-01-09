@@ -2,6 +2,11 @@
 
 Module for calculating large primes, and RSA encryption, decryption,
 signing and verification. Includes generating public and private keys.
+
+WARNING: this implementation does not use random padding, compression of the
+cleartext input to prevent repetitions, or other common security improvements.
+Use with care.
+
 """
 
 __author__ = "Sybren Stuvel, Marloes de Boer, Ivo Tamboer, and Barry Mead"
