@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import rsa
 
 (pub, priv) = rsa.newkeys(64)
