@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Ensure that setuptools are installed.
+import ez_setup
+ez_setup.use_setuptools()
+
 from setuptools import setup
 
 import rsa
