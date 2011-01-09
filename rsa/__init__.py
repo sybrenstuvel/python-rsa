@@ -6,6 +6,7 @@ signing and verification. Includes generating public and private keys.
 
 __author__ = "Sybren Stuvel, Marloes de Boer, Ivo Tamboer, and Barry Mead"
 __date__ = "2010-02-08"
+__version__ = '2.0'
 
 import math
 import os
@@ -98,6 +99,8 @@ def to64(number):
     if number == 63:                # 63   translates to '_' (underscore)
         return chr(95)
 
+    raise ValueError(u'Invalid Base64 value: %i' % number)
+
 
 def from64(number):
     """Converts an ordinal character value in the range of
@@ -125,6 +128,7 @@ def from64(number):
     if number == 95:               #ord('_') translates to 63
         return(63)
 
+    raise ValueError(u'Invalid Base64 value: %i' % number)
 
 
 def int2str64(number):
