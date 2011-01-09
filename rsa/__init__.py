@@ -420,10 +420,8 @@ def encode64chops(chops):
     for value in chops:
         chips.append(int2str64(value))
 
-    encoded = ""
-
-    for string in chips:
-        encoded = encoded + string + ','    #delimit chops with comma
+    #delimit chops with comma
+    encoded = ','.join(chips)
 
     return encoded
 
