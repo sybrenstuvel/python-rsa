@@ -1,6 +1,6 @@
 import rsa
 
-(pub, priv) = rsa.gen_pubpriv_keys(64)
+(pub, priv) = rsa.newkeys(64)
 
 print "Testing integer operations:"
 
@@ -13,10 +13,10 @@ print "\tEncrypted: %d" % encrypted
 decrypted = rsa.decrypt_int(encrypted, priv['d'], pub['n'])
 print "\tDecrypted: %d" % decrypted
 
-signed = rsa.sign_int(message,priv['d'], pub['n'])
+signed = rsa.encrypt_int(message,priv['d'], pub['n'])
 print "\tSigned:    %d" % signed
 
-verified = rsa.verify_int(signed, pub['e'],pub['n'])
+verified = rsa.decrypt_int(signed, pub['e'],pub['n'])
 print "\tVerified:  %d" % verified
 
 
