@@ -1,4 +1,13 @@
-'''RSA key generation code.'''
+'''RSA key generation code.
+
+Create new keys with the newkeys() function.
+
+The private key consists of a dict {d: ...., p: ...., q: ....).
+
+The public key consists of a dict {e: ..., , n: p*q)
+
+
+'''
 
 import rsa.prime
 
@@ -86,7 +95,7 @@ def newkeys(nbits):
     key consists of a dict {d: ...., p: ...., q: ....).
     """
 
-    nbits = max(9,nbits)           # Don't let nbits go below 9 bits
+    nbits = max(9, nbits)           # Don't let nbits go below 9 bits
     (p, q, e, d) = gen_keys(nbits)
 
     return ( {'e': e, 'n': p*q}, {'d': d, 'p': p, 'q': q} )

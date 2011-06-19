@@ -19,6 +19,7 @@ def bytes2int(bytes):
     >>> l = [128, 64, 15]
     >>> bytes2int(l)              #same as bytes2int('\x80@\x0f')
     8405007
+
     """
 
     if not (type(bytes) is types.ListType or type(bytes) is types.StringType):
@@ -34,13 +35,14 @@ def bytes2int(bytes):
     return integer
 
 def int2bytes(number):
-    """Converts a number to a string of bytes.
+    r'''Converts a number to a string of bytes.
 
-    >>>int2bytes(123456789)
+    >>> int2bytes(123456789)
     '\x07[\xcd\x15'
     >>> bytes2int(int2bytes(123456789))
     123456789
-    """
+
+    '''
 
     if not (type(number) is types.LongType or type(number) is types.IntType):
         raise TypeError("You must pass a long or an int")
@@ -60,6 +62,7 @@ def to64(number):
     
     >>> to64(10)
     'A'
+
     """
 
     if not (type(number) is types.LongType or type(number) is types.IntType):
@@ -89,6 +92,7 @@ def from64(number):
     
     >>> from64(49)
     1
+
     """
 
     if not (type(number) is types.LongType or type(number) is types.IntType):
@@ -118,6 +122,7 @@ def int2str64(number):
     
     >>> int2str64(123456789)
     '7MyqL'
+
     """
 
     if not (type(number) is types.LongType or type(number) is types.IntType):
@@ -138,6 +143,7 @@ def str642int(string):
     
     >>> str642int('7MyqL')
     123456789
+
     """
 
     if not (type(string) is types.ListType or type(string) is types.StringType):
