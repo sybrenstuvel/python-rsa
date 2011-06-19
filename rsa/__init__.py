@@ -147,7 +147,8 @@ def encode64chops(chops):
     chips = []                              #chips are character chops
 
     for value in chops:
-        chips.append(rsa.transform.int2str64(value))
+        as_str = rsa.transform.int2str64(value)
+        chips.append(as_str)
 
     #delimit chops with comma
     encoded = ','.join(chips)
@@ -162,25 +163,29 @@ def decode64chops(string):
     chops = []
 
     for string in chips:                    #make char chops (chips) into chops
-        chops.append(rsa.transform.str642int(string))
+        as_int = rsa.transform.str642int(string)
+        chops.append(as_int)
 
     return chops
 
-def chopstring(message, key, n, funcref):
-    """Chops the 'message' into integers that fit into n,
-    leaving room for a safebit to be added to ensure that all
-    messages fold during exponentiation.  The MSB of the number n
-    is not independant modulo n (setting it could cause overflow), so
-    use the next lower bit for the safebit.  Therefore reserve 2-bits
-    in the number n for non-data bits.  Calls specified encryption
-    function for each chop.
+def chopstring(message, key, n, int_op):
+    """Chops the 'message' into integers that fit into n.
+    
+    Leaves room for a safebit to be added to ensure that all messages fold
+    during exponentiation. The MSB of the number n is not independent modulo n
+    (setting it could cause overflow), so use the next lower bit for the
+    safebit. Therefore this function reserves 2 bits in the number n for
+    non-data bits.
+
+    Calls specified encryption function 'int_op' for each chop before storing.
 
     Used by 'encrypt' and 'sign'.
     """
 
     msglen = len(message)
     mbits = msglen * 8
-    #Set aside 2-bits so setting of safebit won't overflow modulo n.
+
+    # Set aside 2 bits so setting of safebit won't overflow modulo n.
     nbits = bit_size(n) - 2             # leave room for safebit
     nbytes = nbits / 8
     blocks = msglen / nbytes
@@ -194,7 +199,7 @@ def chopstring(message, key, n, funcref):
         offset = bindex * nbytes
         block = message[offset:offset+nbytes]
         value = rsa.transform.bytes2int(block)
-        cypher.append(funcref(value, key, n))
+        cypher.append(int_op(value, key, n))
 
     return encode64chops(cypher)   #Encode encrypted ints to base64 strings
 
