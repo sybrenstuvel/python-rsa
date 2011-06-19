@@ -11,311 +11,19 @@ Use with care.
 
 __author__ = "Sybren Stuvel, Marloes de Boer, Ivo Tamboer, and Barry Mead"
 __date__ = "2010-02-08"
-__version__ = '2.0'
+__version__ = '2.1-beta0'
 
 import math
-import os
-import random
-import sys
 import types
+
+import rsa.prime
+import rsa.transform
 
 def bit_size(number):
     """Returns the number of bits required to hold a specific long number"""
 
     return int(math.ceil(math.log(number,2)))
 
-def gcd(p, q):
-    """Returns the greatest common divisor of p and q
-    >>> gcd(48, 180)
-    12
-    """
-    # Iterateive Version is faster and uses much less stack space
-    while q != 0:
-        if p < q: (p,q) = (q,p)
-        (p,q) = (q, p % q)
-    return p
-    
-
-def bytes2int(bytes):
-    """Converts a list of bytes or a string to an integer
-
-    >>> (((128 * 256) + 64) * 256) + 15
-    8405007
-    >>> l = [128, 64, 15]
-    >>> bytes2int(l)              #same as bytes2int('\x80@\x0f')
-    8405007
-    """
-
-    if not (type(bytes) is types.ListType or type(bytes) is types.StringType):
-        raise TypeError("You must pass a string or a list")
-
-    # Convert byte stream to integer
-    integer = 0
-    for byte in bytes:
-        integer *= 256
-        if type(byte) is types.StringType: byte = ord(byte)
-        integer += byte
-
-    return integer
-
-def int2bytes(number):
-    """Converts a number to a string of bytes
-    
-    >>>int2bytes(123456789)
-    '\x07[\xcd\x15'
-    >>> bytes2int(int2bytes(123456789))
-    123456789
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    string = ""
-
-    while number > 0:
-        string = "%s%s" % (chr(number & 0xFF), string)
-        number /= 256
-    
-    return string
-
-def to64(number):
-    """Converts a number in the range of 0 to 63 into base 64 digit
-    character in the range of '0'-'9', 'A'-'Z', 'a'-'z','-','_'.
-    
-    >>> to64(10)
-    'A'
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    if 0 <= number <= 9:            #00-09 translates to '0' - '9'
-        return chr(number + 48)
-
-    if 10 <= number <= 35:
-        return chr(number + 55)     #10-35 translates to 'A' - 'Z'
-
-    if 36 <= number <= 61:
-        return chr(number + 61)     #36-61 translates to 'a' - 'z'
-
-    if number == 62:                # 62   translates to '-' (minus)
-        return chr(45)
-
-    if number == 63:                # 63   translates to '_' (underscore)
-        return chr(95)
-
-    raise ValueError(u'Invalid Base64 value: %i' % number)
-
-
-def from64(number):
-    """Converts an ordinal character value in the range of
-    0-9,A-Z,a-z,-,_ to a number in the range of 0-63.
-    
-    >>> from64(49)
-    1
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    if 48 <= number <= 57:         #ord('0') - ord('9') translates to 0-9
-        return(number - 48)
-
-    if 65 <= number <= 90:         #ord('A') - ord('Z') translates to 10-35
-        return(number - 55)
-
-    if 97 <= number <= 122:        #ord('a') - ord('z') translates to 36-61
-        return(number - 61)
-
-    if number == 45:               #ord('-') translates to 62
-        return(62)
-
-    if number == 95:               #ord('_') translates to 63
-        return(63)
-
-    raise ValueError(u'Invalid Base64 value: %i' % number)
-
-
-def int2str64(number):
-    """Converts a number to a string of base64 encoded characters in
-    the range of '0'-'9','A'-'Z,'a'-'z','-','_'.
-    
-    >>> int2str64(123456789)
-    '7MyqL'
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    string = ""
-
-    while number > 0:
-        string = "%s%s" % (to64(number & 0x3F), string)
-        number /= 64
-
-    return string
-
-
-def str642int(string):
-    """Converts a base64 encoded string into an integer.
-    The chars of this string in in the range '0'-'9','A'-'Z','a'-'z','-','_'
-    
-    >>> str642int('7MyqL')
-    123456789
-    """
-
-    if not (type(string) is types.ListType or type(string) is types.StringType):
-        raise TypeError("You must pass a string or a list")
-
-    integer = 0
-    for byte in string:
-        integer *= 64
-        if type(byte) is types.StringType: byte = ord(byte)
-        integer += from64(byte)
-
-    return integer
-
-def read_random_int(nbits):
-    """Reads a random integer of approximately nbits bits rounded up
-    to whole bytes"""
-
-    nbytes = int(math.ceil(nbits/8.))
-    randomdata = os.urandom(nbytes)
-    return bytes2int(randomdata)
-
-def randint(minvalue, maxvalue):
-    """Returns a random integer x with minvalue <= x <= maxvalue"""
-
-    # Safety - get a lot of random data even if the range is fairly
-    # small
-    min_nbits = 32
-
-    # The range of the random numbers we need to generate
-    range = (maxvalue - minvalue) + 1
-
-    # Which is this number of bytes
-    rangebytes = ((bit_size(range) + 7) / 8)
-
-    # Convert to bits, but make sure it's always at least min_nbits*2
-    rangebits = max(rangebytes * 8, min_nbits * 2)
-    
-    # Take a random number of bits between min_nbits and rangebits
-    nbits = random.randint(min_nbits, rangebits)
-    
-    return (read_random_int(nbits) % range) + minvalue
-
-def jacobi(a, b):
-    """Calculates the value of the Jacobi symbol (a/b)
-    where both a and b are positive integers, and b is odd
-    """
-
-    if a == 0: return 0
-    result = 1
-    while a > 1:
-        if a & 1:
-            if ((a-1)*(b-1) >> 2) & 1:
-                result = -result
-            a, b = b % a, a
-        else:
-            if (((b * b) - 1) >> 3) & 1:
-                result = -result
-            a >>= 1
-    if a == 0: return 0
-    return result
-
-def jacobi_witness(x, n):
-    """Returns False if n is an Euler pseudo-prime with base x, and
-    True otherwise.
-    """
-
-    j = jacobi(x, n) % n
-    f = pow(x, (n-1)/2, n)
-
-    if j == f: return False
-    return True
-
-def randomized_primality_testing(n, k):
-    """Calculates whether n is composite (which is always correct) or
-    prime (which is incorrect with error probability 2**-k)
-
-    Returns False if the number is composite, and True if it's
-    probably prime.
-    """
-
-    # 50% of Jacobi-witnesses can report compositness of non-prime numbers
-
-    for i in range(k):
-        x = randint(1, n-1)
-        if jacobi_witness(x, n): return False
-    
-    return True
-
-def is_prime(number):
-    """Returns True if the number is prime, and False otherwise.
-
-    >>> is_prime(42)
-    0
-    >>> is_prime(41)
-    1
-    """
-
-    if randomized_primality_testing(number, 6):
-        # Prime, according to Jacobi
-        return True
-    
-    # Not prime
-    return False
-
-    
-def getprime(nbits):
-    """Returns a prime number of max. 'math.ceil(nbits/8)*8' bits. In
-    other words: nbits is rounded up to whole bytes.
-
-    >>> p = getprime(8)
-    >>> is_prime(p-1)
-    0
-    >>> is_prime(p)
-    1
-    >>> is_prime(p+1)
-    0
-    """
-
-    while True:
-        integer = read_random_int(nbits)
-
-        # Make sure it's odd
-        integer |= 1
-
-        # Test for primeness
-        if is_prime(integer): break
-
-        # Retry if not prime
-
-    return integer
-
-def are_relatively_prime(a, b):
-    """Returns True if a and b are relatively prime, and False if they
-    are not.
-
-    >>> are_relatively_prime(2, 3)
-    1
-    >>> are_relatively_prime(2, 4)
-    0
-    """
-
-    d = gcd(a, b)
-    return (d == 1)
-
-def find_p_q(nbits):
-    """Returns a tuple of two different primes of nbits bits"""
-    pbits = nbits + (nbits/16)  #Make sure that p and q aren't too close
-    qbits = nbits - (nbits/16)  #or the factoring programs can factor n
-    p = getprime(pbits)
-    while True:
-        q = getprime(qbits)
-        #Make sure p and q are different.
-        if not q == p: break
-    return (p, q)
 
 def extended_gcd(a, b):
     """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
@@ -339,6 +47,21 @@ def extended_gcd(a, b):
     if (ly < 0): ly += oa              #If neg wrap modulo orignal a
     return (a, lx, ly)                 #Return only positive values
 
+def find_p_q(nbits):
+    """Returns a tuple of two different primes of nbits bits"""
+    pbits = nbits + (nbits/16)  #Make sure that p and q aren't too close
+    qbits = nbits - (nbits/16)  #or the factoring programs can factor n
+    p = rsa.prime.getprime(pbits)
+    while True:
+        q = rsa.prime.getprime(qbits)
+
+        #Make sure p and q are different.
+        if q != p: break
+
+    return (p, q)
+
+
+
 # Main function: calculate encryption and decryption keys
 def calculate_keys(p, q, nbits):
     """Calculates an encryption and a decryption key for p and q, and
@@ -350,8 +73,9 @@ def calculate_keys(p, q, nbits):
     while True:
         # Make sure e has enough bits so we ensure "wrapping" through
         # modulo n
-        e = max(65537,getprime(nbits/4))
-        if are_relatively_prime(e, n) and are_relatively_prime(e, phi_n): break
+        e = max(65537, rsa.prime.getprime(nbits/4))
+        if rsa.prime.are_relatively_prime(e, n) and rsa.prime.are_relatively_prime(e, phi_n):
+            break
 
     (d, i, j) = extended_gcd(e, phi_n)
 
@@ -423,7 +147,7 @@ def encode64chops(chops):
     chips = []                              #chips are character chops
 
     for value in chops:
-        chips.append(int2str64(value))
+        chips.append(rsa.transform.int2str64(value))
 
     #delimit chops with comma
     encoded = ','.join(chips)
@@ -438,7 +162,7 @@ def decode64chops(string):
     chops = []
 
     for string in chips:                    #make char chops (chips) into chops
-        chops.append(str642int(string))
+        chops.append(rsa.transform.str642int(string))
 
     return chops
 
@@ -469,7 +193,7 @@ def chopstring(message, key, n, funcref):
     for bindex in range(blocks):
         offset = bindex * nbytes
         block = message[offset:offset+nbytes]
-        value = bytes2int(block)
+        value = rsa.transform.bytes2int(block)
         cypher.append(funcref(value, key, n))
 
     return encode64chops(cypher)   #Encode encrypted ints to base64 strings
@@ -486,7 +210,7 @@ def gluechops(string, key, n, funcref):
     
     for cpart in chops:
         mpart = funcref(cpart, key, n) #Decrypt each chop
-        message += int2bytes(mpart)    #Combine decrypted strings into a msg
+        message += rsa.transform.int2bytes(mpart)    #Combine decrypted strings into a msg
     
     return message
 
