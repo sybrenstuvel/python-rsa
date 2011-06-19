@@ -42,6 +42,19 @@ def decode64chops(string):
 
     return chops
 
+def block_size(n):
+    '''Returns the block size in bytes, given the public key.
+
+    The block size is determined by the 'n=p*q' component of the key.
+    '''
+
+    # Set aside 2 bits so setting of safebit won't overflow modulo n.
+    nbits = rsa.common.bit_size(n) - 2
+    nbytes = nbits / 8
+
+    return nbytes
+
+
 def chopstring(message, key, n, int_op):
     """Chops the 'message' into integers that fit into n.
     
@@ -56,13 +69,10 @@ def chopstring(message, key, n, int_op):
     Used by 'encrypt' and 'sign'.
     """
 
+
+    nbytes = block_size(n)
+
     msglen = len(message)
-    mbits = msglen * 8
-
-    # Set aside 2 bits so setting of safebit won't overflow modulo n.
-    nbits = rsa.common.bit_size(n) - 2
-
-    nbytes = nbits / 8
     blocks = msglen / nbytes
 
     if msglen % nbytes > 0:
@@ -90,14 +100,25 @@ def gluechops(string, key, n, funcref):
 
     messageparts = []
     chops = decode64chops(string)  #Decode base64 strings into integer chops
+
+    nbytes = block_size(n)
     
     for chop in chops:
         value = funcref(chop, key, n) #Decrypt each chop
         block = rsa.transform.int2bytes(value)
+
+        # Pad block with 0-bytes until we have reached the block size
+        blocksize = len(block)
+        padsize = nbytes - blocksize
+        if padsize < 0:
+            raise ValueError('Block larger than block size (%i > %i)!' %
+                    (blocksize, nbytes))
+        elif padsize > 0:
+            block = '\x00' * padsize + block
+
         messageparts.append(block)
 
     # Combine decrypted strings into a msg
-    
     return ''.join(messageparts)
 
 def encrypt(message, key):

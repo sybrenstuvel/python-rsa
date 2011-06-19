@@ -12,7 +12,9 @@ def bit_size(number):
     return int(math.ceil(math.log(number,2)))
 
 def bytes2int(bytes):
-    """Converts a list of bytes or a string to an integer
+    """Converts a list of bytes or an 8-bit string to an integer.
+
+    When using unicode strings, encode it to some encoding like UTF8 first.
 
     >>> (((128 * 256) + 64) * 256) + 15
     8405007
