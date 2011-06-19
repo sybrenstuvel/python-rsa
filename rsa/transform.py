@@ -34,8 +34,8 @@ def bytes2int(bytes):
     return integer
 
 def int2bytes(number):
-    """Converts a number to a string of bytes
-    
+    """Converts a number to a string of bytes.
+
     >>>int2bytes(123456789)
     '\x07[\xcd\x15'
     >>> bytes2int(int2bytes(123456789))

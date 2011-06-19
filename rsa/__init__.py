@@ -23,13 +23,10 @@ from rsa.core import encrypt_int, decrypt_int
 def encode64chops(chops):
     """base64encodes chops and combines them into a ',' delimited string"""
 
-    chips = []                              #chips are character chops
+    # chips are character chops
+    chips = [rsa.transform.int2str64(chop) for chop in chops]
 
-    for value in chops:
-        as_str = rsa.transform.int2str64(value)
-        chips.append(as_str)
-
-    #delimit chops with comma
+    # delimit chops with comma
     encoded = ','.join(chips)
 
     return encoded
@@ -37,13 +34,11 @@ def encode64chops(chops):
 def decode64chops(string):
     """base64decodes and makes a ',' delimited string into chops"""
 
-    chips = string.split(',')               #split chops at commas
+    # split chops at commas
+    chips = string.split(',')
 
-    chops = []
-
-    for string in chips:                    #make char chops (chips) into chops
-        as_int = rsa.transform.str642int(string)
-        chops.append(as_int)
+    # make character chips into numeric chops
+    chops = [rsa.transform.str642int(chip) for chip in chips]
 
     return chops
 
@@ -65,7 +60,8 @@ def chopstring(message, key, n, int_op):
     mbits = msglen * 8
 
     # Set aside 2 bits so setting of safebit won't overflow modulo n.
-    nbits = rsa.common.bit_size(n) - 2             # leave room for safebit
+    nbits = rsa.common.bit_size(n) - 2
+
     nbytes = nbits / 8
     blocks = msglen / nbytes
 
@@ -76,9 +72,12 @@ def chopstring(message, key, n, int_op):
     
     for bindex in range(blocks):
         offset = bindex * nbytes
-        block = message[offset:offset+nbytes]
+        block = message[offset:offset + nbytes]
+
         value = rsa.transform.bytes2int(block)
-        cypher.append(int_op(value, key, n))
+        to_store = int_op(value, key, n)
+
+        cypher.append(to_store)
 
     return encode64chops(cypher)   #Encode encrypted ints to base64 strings
 
@@ -88,15 +87,18 @@ def gluechops(string, key, n, funcref):
 
     Used by 'decrypt' and 'verify'.
     """
-    message = ""
 
+    messageparts = []
     chops = decode64chops(string)  #Decode base64 strings into integer chops
     
-    for cpart in chops:
-        mpart = funcref(cpart, key, n) #Decrypt each chop
-        message += rsa.transform.int2bytes(mpart)    #Combine decrypted strings into a msg
+    for chop in chops:
+        value = funcref(chop, key, n) #Decrypt each chop
+        block = rsa.transform.int2bytes(value)
+        messageparts.append(block)
+
+    # Combine decrypted strings into a msg
     
-    return message
+    return ''.join(messageparts)
 
 def encrypt(message, key):
     """Encrypts a string 'message' with the public key 'key'"""
