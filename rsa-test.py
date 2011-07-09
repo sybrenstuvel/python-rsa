@@ -2,7 +2,8 @@
 
 import rsa
 
-(pub, priv) = rsa.newkeys(64)
+keysize = 64 # bits
+(pub, priv) = rsa.newkeys(keysize)
 
 print "Testing integer operations:"
 
@@ -27,7 +28,7 @@ print "Testing string operations:"
 message = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 print "\tMessage:   %s" % message
 
-encrypted = rsa.encrypt(message, pub)
+encrypted = rsa.encrypt(message, pub, 17)
 print "\tEncrypted: %s" % encrypted
 
 decrypted = rsa.decrypt(encrypted, priv)

@@ -9,7 +9,21 @@ import types
 def bit_size(number):
     """Returns the number of bits required to hold a specific long number"""
 
+    if number < 0:
+        raise ValueError('Only nonnegative numbers possible: %s' % number)
+
+    if number == 0:
+        return 1
+    
     return int(math.ceil(math.log(number, 2)))
+
+def byte_size(number):
+    """Returns the number of bytes required to hold a specific long number.
+    
+    The number of bytes is rounded up.
+    """
+
+    return int(math.ceil(bit_size(number) / 8.0))
 
 def bytes2int(bytes):
     """Converts a list of bytes or an 8-bit string to an integer.
@@ -27,6 +41,7 @@ def bytes2int(bytes):
     if not (type(bytes) is types.ListType or type(bytes) is types.StringType):
         raise TypeError("You must pass a string or a list")
 
+    
     # Convert byte stream to integer
     integer = 0
     for byte in bytes:
@@ -72,7 +87,7 @@ def int2bytes(number, block_size=None):
 
     # Do some bounds checking
     if block_size is not None:
-        needed_bytes = int(math.ceil(bit_size(number) / 8.0))
+        needed_bytes = byte_size(number)
         if needed_bytes > block_size:
             raise OverflowError('Needed %i bytes for number, but block size '
                 'is %i' % (needed_bytes, block_size))
@@ -91,108 +106,29 @@ def int2bytes(number, block_size=None):
 
     return padding + ''.join(bytes)
 
-
-def to64(number):
-    """Converts a number in the range of 0 to 63 into base 64 digit
-    character in the range of '0'-'9', 'A'-'Z', 'a'-'z','-','_'.
+def block_op(block_provider, block_size, operation):
+    r'''Generator, applies the operation on each block and yields the result
     
-    >>> to64(10)
-    'A'
-
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    if 0 <= number <= 9:            #00-09 translates to '0' - '9'
-        return chr(number + 48)
-
-    if 10 <= number <= 35:
-        return chr(number + 55)     #10-35 translates to 'A' - 'Z'
-
-    if 36 <= number <= 61:
-        return chr(number + 61)     #36-61 translates to 'a' - 'z'
-
-    if number == 62:                # 62   translates to '-' (minus)
-        return chr(45)
-
-    if number == 63:                # 63   translates to '_' (underscore)
-        return chr(95)
-
-    raise ValueError(u'Invalid Base64 value: %i' % number)
-
-
-def from64(number):
-    """Converts an ordinal character value in the range of
-    0-9,A-Z,a-z,-,_ to a number in the range of 0-63.
+    Each block is converted to a number, the given operation is applied and then
+    the resulting number is converted back to a block of data. The resulting
+    block is yielded.
     
-    >>> from64(49)
-    1
-
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    if 48 <= number <= 57:         #ord('0') - ord('9') translates to 0-9
-        return(number - 48)
-
-    if 65 <= number <= 90:         #ord('A') - ord('Z') translates to 10-35
-        return(number - 55)
-
-    if 97 <= number <= 122:        #ord('a') - ord('z') translates to 36-61
-        return(number - 61)
-
-    if number == 45:               #ord('-') translates to 62
-        return(62)
-
-    if number == 95:               #ord('_') translates to 63
-        return(63)
-
-    raise ValueError(u'Invalid Base64 value: %i' % number)
-
-
-def int2str64(number):
-    """Converts a number to a string of base64 encoded characters in
-    the range of '0'-'9','A'-'Z,'a'-'z','-','_'.
+    @param block_provider: an iterable that iterates over the data blocks.
+    @param block_size: the used block size
+    @param operation: a function that accepts an integer and returns an integer 
     
-    >>> int2str64(123456789)
-    '7MyqL'
-
-    """
-
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
-
-    string = ""
-
-    while number > 0:
-        string = "%s%s" % (to64(number & 0x3F), string)
-        number /= 64
-
-    return string
-
-
-def str642int(string):
-    """Converts a base64 encoded string into an integer.
-    The chars of this string in in the range '0'-'9','A'-'Z','a'-'z','-','_'
+    >>> blocks = ['\x00\x01\x02', '\x03\x04\x05']
+    >>> list(block_op(blocks, 3, lambda x: (x + 6)))
+    ['\x00\x01\x08', '\x03\x04\x0b']
     
-    >>> str642int('7MyqL')
-    123456789
+    '''
 
-    """
-
-    if not (type(string) is types.ListType or type(string) is types.StringType):
-        raise TypeError("You must pass a string or a list")
-
-    integer = 0
-    for byte in string:
-        integer *= 64
-        if type(byte) is types.StringType: byte = ord(byte)
-        integer += from64(byte)
-
-    return integer
-
+    for block in block_provider:
+        number = bytes2int(block)
+        print 'In : %i (%i bytes)' % (number, byte_size(number))
+        after_op = operation(number)
+        print 'Out: %i (%i bytes)' % (after_op, byte_size(after_op))
+        yield int2bytes(after_op, block_size)
 
 if __name__ == '__main__':
     import doctest
