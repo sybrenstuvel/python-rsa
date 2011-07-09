@@ -9,7 +9,7 @@ import types
 def bit_size(number):
     """Returns the number of bits required to hold a specific long number"""
 
-    return int(math.ceil(math.log(number,2)))
+    return int(math.ceil(math.log(number, 2)))
 
 def bytes2int(bytes):
     """Converts a list of bytes or an 8-bit string to an integer.
@@ -36,26 +36,60 @@ def bytes2int(bytes):
 
     return integer
 
-def int2bytes(number):
+def int2bytes(number, block_size=None):
     r'''Converts a number to a string of bytes.
+
+    @param number: the number to convert
+    @param block_size: the number of bytes to output. If the number encoded to
+        bytes is less than this, the block will be zero-padded. When not given,
+        the returned block is not padded.
+
+    @throws OverflowError when block_size is given and the number takes up more
+        bytes than fit into the block.
+
 
     >>> int2bytes(123456789)
     '\x07[\xcd\x15'
     >>> bytes2int(int2bytes(123456789))
     123456789
 
+    >>> int2bytes(123456789, 6)
+    '\x00\x00\x07[\xcd\x15'
+    >>> bytes2int(int2bytes(123456789, 128))
+    123456789
+
+    >>> int2bytes(123456789, 3)
+    Traceback (most recent call last):
+    ...
+    OverflowError: Needed 4 bytes for number, but block size is 3
+
     '''
 
-    if not (type(number) is types.LongType or type(number) is types.IntType):
-        raise TypeError("You must pass a long or an int")
+    # Type checking
+    if type(number) not in (types.LongType, types.IntType):
+        raise TypeError("You must pass an integer for 'number', not %s" %
+            number.__class__)
 
-    string = ""
-
-    while number > 0:
-        string = "%s%s" % (chr(number & 0xFF), string)
-        number /= 256
+    # Do some bounds checking
+    if block_size is not None:
+        needed_bytes = int(math.ceil(bit_size(number) / 8.0))
+        if needed_bytes > block_size:
+            raise OverflowError('Needed %i bytes for number, but block size '
+                'is %i' % (needed_bytes, block_size))
     
-    return string
+    # Convert the number to bytes.
+    bytes = []
+    while number > 0:
+        bytes.insert(0, chr(number & 0xFF))
+        number >>= 8
+
+    # Pad with zeroes to fill the block
+    if block_size is not None:
+        padding = (block_size - needed_bytes) * '\x00'
+    else:
+        padding = ''
+
+    return padding + ''.join(bytes)
 
 
 def to64(number):
@@ -158,3 +192,9 @@ def str642int(string):
         integer += from64(byte)
 
     return integer
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+

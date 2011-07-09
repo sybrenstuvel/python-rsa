@@ -21,8 +21,8 @@ def encrypt_int(message, ekey, n):
         raise OverflowError("The message is too long")
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
-    safebit = rsa.common.bit_size(n) - 2                   #compute safe bit (MSB - 1)
-    message += (1 << safebit)                   #add safebit to ensure folding
+    safebit = rsa.common.bit_size(n) - 2        # compute safe bit (MSB - 1)
+    message += (1 << safebit)                   # add safebit to ensure folding
 
     return pow(message, ekey, n)
 
@@ -32,8 +32,8 @@ def decrypt_int(cyphertext, dkey, n):
 
     message = pow(cyphertext, dkey, n)
 
-    safebit = rsa.common.bit_size(n) - 2                   #compute safe bit (MSB - 1)
-    message -= (1 << safebit)                   #remove safebit before decode
+    safebit = rsa.common.bit_size(n) - 2        # compute safe bit (MSB - 1)
+    message -= (1 << safebit)                   # remove safebit before decode
 
     return message
 
