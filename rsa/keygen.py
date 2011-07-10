@@ -36,10 +36,28 @@ def extended_gcd(a, b):
 
 
 def find_p_q(nbits):
-    """Returns a tuple of two different primes of nbits bits"""
-    pbits = nbits + (nbits/16)  #Make sure that p and q aren't too close
-    qbits = nbits - (nbits/16)  #or the factoring programs can factor n
+    ''''Returns a tuple of two different primes of nbits bits each.
+    
+    >>> (p, q) = find_p_q(128)
+    
+    The resulting p and q should be very close to 2*nbits bits, and no more
+    than 2*nbits bits:
+    >>> from rsa import common
+    >>> common.bit_size(p * q) <= 256
+    True
+    >>> common.bit_size(p * q) > 240
+    True
+    
+    '''
+    
+    # Make sure that p and q aren't too close or the factoring programs can
+    # factor n.
+    shift = nbits / 16
+    pbits = nbits + shift
+    qbits = nbits - shift
+    
     p = rsa.prime.getprime(pbits)
+    
     while True:
         q = rsa.prime.getprime(qbits)
 
@@ -64,7 +82,7 @@ def calculate_keys(p, q, nbits):
         if rsa.prime.are_relatively_prime(e, n) and rsa.prime.are_relatively_prime(e, phi_n):
             break
 
-    (d, i, j) = extended_gcd(e, phi_n)
+    (d, i, _) = extended_gcd(e, phi_n)
 
     if not d == 1:
         raise Exception("e (%d) and phi_n (%d) are not relatively prime" % (e, phi_n))
@@ -80,10 +98,13 @@ def gen_keys(nbits):
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
+    
+    @param nbits: the total number of bits in ``p`` and ``q``. Both ``p`` and
+        ``q`` will use ``nbits/2`` bits.
     """
 
-    (p, q) = find_p_q(nbits)
-    (e, d) = calculate_keys(p, q, nbits)
+    (p, q) = find_p_q(nbits / 2)
+    (e, d) = calculate_keys(p, q, nbits / 2)
 
     return (p, q, e, d)
 
@@ -92,12 +113,31 @@ def newkeys(nbits):
     priv).
 
     The public key consists of a dict {e: ..., , n: ....). The private
-    key consists of a dict {d: ...., p: ...., q: ....).
+    key consists of a dict {d: ...., p: ...., q: ...., n: p*q).
+    
+    @param nbits: the number of bits required to store ``n = p*q``.
+    
     """
 
     # Don't let nbits go below 9 bits
     nbits = max(9, nbits)
     (p, q, e, d) = gen_keys(nbits)
+    
+    n = p * q
 
-    return ( {'e': e, 'n': p*q}, {'d': d, 'p': p, 'q': q} )
+    return ( {'e': e, 'n': n}, {'d': d, 'p': p, 'q': q, 'n': n} )
 
+    
+if __name__ == '__main__':
+    print 'Running doctests 1000x or until failure'
+    import doctest
+    
+    for count in range(1000):
+        (failures, tests) = doctest.testmod()
+        if failures:
+            break
+        
+        if count and count % 100 == 0:
+            print '%i times' % count
+    
+    print 'Doctests done'

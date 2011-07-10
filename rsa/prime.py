@@ -58,7 +58,7 @@ def randomized_primality_testing(n, k):
     # 50% of Jacobi-witnesses can report compositness of non-prime numbers
 
     for i in range(k):
-        x = rsa.randnum.randint(1, n-1)
+        x = rsa.randnum.randint(n-1)
         if jacobi_witness(x, n): return False
     
     return True
@@ -81,16 +81,20 @@ def is_prime(number):
 
     
 def getprime(nbits):
-    """Returns a prime number of max. 'math.ceil(nbits/8)*8' bits. In
-    other words: nbits is rounded up to whole bytes.
+    """Returns a prime number that can be stored in 'nbits' bits.
 
-    >>> p = getprime(8)
+    >>> p = getprime(128)
     >>> is_prime(p-1)
     0
     >>> is_prime(p)
     1
     >>> is_prime(p+1)
     0
+    
+    >>> from rsa import common
+    >>> common.bit_size(p) <= 128
+    True
+    
     """
 
     while True:
@@ -100,11 +104,11 @@ def getprime(nbits):
         integer |= 1
 
         # Test for primeness
-        if is_prime(integer): break
+        if is_prime(integer):
+            return integer
 
         # Retry if not prime
 
-    return integer
 
 def are_relatively_prime(a, b):
     """Returns True if a and b are relatively prime, and False if they
@@ -118,3 +122,17 @@ def are_relatively_prime(a, b):
 
     d = gcd(a, b)
     return (d == 1)
+    
+if __name__ == '__main__':
+    print 'Running doctests 1000x or until failure'
+    import doctest
+    
+    for count in range(1000):
+        (failures, tests) = doctest.testmod()
+        if failures:
+            break
+        
+        if count and count % 100 == 0:
+            print '%i times' % count
+    
+    print 'Doctests done'

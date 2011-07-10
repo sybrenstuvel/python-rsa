@@ -3,27 +3,9 @@
 From bytes to a number, number to bytes, base64-like-encoding, etc.
 '''
 
-import math
 import types
 
-def bit_size(number):
-    """Returns the number of bits required to hold a specific long number"""
-
-    if number < 0:
-        raise ValueError('Only nonnegative numbers possible: %s' % number)
-
-    if number == 0:
-        return 1
-    
-    return int(math.ceil(math.log(number, 2)))
-
-def byte_size(number):
-    """Returns the number of bytes required to hold a specific long number.
-    
-    The number of bytes is rounded up.
-    """
-
-    return int(math.ceil(bit_size(number) / 8.0))
+from rsa import common
 
 def bytes2int(bytes):
     """Converts a list of bytes or an 8-bit string to an integer.
@@ -86,7 +68,7 @@ def int2bytes(number, block_size=None):
 
     # Do some bounds checking
     if block_size is not None:
-        needed_bytes = byte_size(number)
+        needed_bytes = common.byte_size(number)
         if needed_bytes > block_size:
             raise OverflowError('Needed %i bytes for number, but block size '
                 'is %i' % (needed_bytes, block_size))
@@ -125,9 +107,9 @@ def block_op(block_provider, block_size, operation):
 
     for block in block_provider:
         number = bytes2int(block)
-        print 'In : %i (%i bytes)' % (number, byte_size(number))
+        print 'In : %i (%i bytes)' % (number, common.byte_size(number))
         after_op = operation(number)
-        print 'Out: %i (%i bytes)' % (after_op, byte_size(after_op))
+        print 'Out: %i (%i bytes)' % (after_op, common.byte_size(after_op))
         yield int2bytes(after_op, block_size)
 
 
