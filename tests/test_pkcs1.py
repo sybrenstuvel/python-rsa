@@ -34,6 +34,17 @@ class BinaryTest(unittest.TestCase):
         
         self.assertRaises(ValueError, pkcs1.decrypt, encrypted, self.priv)
 
+    def test_randomness(self):
+        '''Encrypting the same message twice should result in different
+        cryptos.
+        '''
+        
+        message = struct.pack('>IIII', 0, 0, 0, 1)
+        encrypted1 = pkcs1.encrypt(message, self.pub)
+        encrypted2 = pkcs1.encrypt(message, self.pub)
+        
+        self.assertNotEqual(encrypted1, encrypted2)
+
 #    def test_sign_verify(self):
 #
 #        message = struct.pack('>IIII', 0, 0, 0, 1) + 20 * '\x00'
