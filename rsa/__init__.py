@@ -13,9 +13,8 @@ __author__ = "Sybren Stuvel, Marloes de Boer, Ivo Tamboer, and Barry Mead"
 __date__ = "2010-02-08"
 __version__ = '2.1-beta0'
 
-import rsa.prime
-import rsa.transform
-import rsa.common
+from rsa import transform
+from rsa import common
 
 from rsa.keygen import newkeys
 from rsa.core import encrypt_int, decrypt_int
@@ -24,7 +23,7 @@ def encode64chops(chops):
     """base64encodes chops and combines them into a ',' delimited string"""
 
     # chips are character chops
-    chips = [rsa.transform.int2str64(chop) for chop in chops]
+    chips = [transform.int2str64(chop) for chop in chops]
 
     # delimit chops with comma
     encoded = ','.join(chips)
@@ -38,7 +37,7 @@ def decode64chops(string):
     chips = string.split(',')
 
     # make character chips into numeric chops
-    chops = [rsa.transform.str642int(chip) for chip in chips]
+    chops = [transform.str642int(chip) for chip in chips]
 
     return chops
 
@@ -49,7 +48,7 @@ def block_size(n):
     '''
 
     # Set aside 2 bits so setting of safebit won't overflow modulo n.
-    nbits = rsa.common.bit_size(n) - 2
+    nbits = common.bit_size(n) - 2
     nbytes = nbits / 8
 
     return nbytes
@@ -84,7 +83,7 @@ def chopstring(message, key, n, int_op):
         offset = bindex * nbytes
         block = message[offset:offset + nbytes]
 
-        value = rsa.transform.bytes2int(block)
+        value = transform.bytes2int(block)
         to_store = int_op(value, key, n)
 
         cypher.append(to_store)
@@ -105,7 +104,7 @@ def gluechops(string, key, n, funcref):
     
     for chop in chops:
         value = funcref(chop, key, n) #Decrypt each chop
-        block = rsa.transform.int2bytes(value)
+        block = transform.int2bytes(value)
 
         # Pad block with 0-bytes until we have reached the block size
         blocksize = len(block)
@@ -149,7 +148,7 @@ def verify(cypher, key):
 
     return gluechops(cypher, key['e'], key['n'], decrypt_int)
 
-# Do doctest if we're not imported
+# Do doctest if we're run directly
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
