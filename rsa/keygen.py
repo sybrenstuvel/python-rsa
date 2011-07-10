@@ -61,9 +61,9 @@ def find_p_q(nbits):
     while True:
         q = rsa.prime.getprime(qbits)
 
-        #Make sure p and q are different.
+        # Make sure p and q are different.
         if q != p: break
-
+        
     return (p, q)
 
 def calculate_keys(p, q, nbits):
@@ -72,15 +72,10 @@ def calculate_keys(p, q, nbits):
 
     """
 
-    n = p * q
     phi_n = (p-1) * (q-1)
 
-    while True:
-        # Make sure e has enough bits so we ensure "wrapping" through
-        # modulo n
-        e = max(65537, rsa.prime.getprime(nbits/4))
-        if rsa.prime.are_relatively_prime(e, n) and rsa.prime.are_relatively_prime(e, phi_n):
-            break
+    # A very common choice for e is 65537
+    e = 65537
 
     (d, i, _) = extended_gcd(e, phi_n)
 
