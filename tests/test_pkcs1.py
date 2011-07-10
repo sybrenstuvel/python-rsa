@@ -13,7 +13,7 @@ class BinaryTest(unittest.TestCase):
 
     def test_enc_dec(self):
 
-        message = struct.pack('>IIII', 0, 0, 0, 1) + 5 * '\x00'
+        message = struct.pack('>IIII', 0, 0, 0, 1)
         print "\tMessage:   %r" % message
 
         encrypted = pkcs1.encrypt(message, self.pub)
@@ -23,6 +23,16 @@ class BinaryTest(unittest.TestCase):
         print "\tDecrypted: %r" % decrypted
 
         self.assertEqual(message, decrypted)
+
+    def test_decoding_failure(self):
+
+        message = struct.pack('>IIII', 0, 0, 0, 1)
+        encrypted = pkcs1.encrypt(message, self.pub)
+
+        # Alter the encrypted stream
+        encrypted = encrypted[:5] + chr(ord(encrypted[5]) + 1) + encrypted[6:]
+        
+        self.assertRaises(ValueError, pkcs1.decrypt, encrypted, self.priv)
 
 #    def test_sign_verify(self):
 #
