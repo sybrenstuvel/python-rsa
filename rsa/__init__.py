@@ -102,22 +102,10 @@ def gluechops(string, key, n, funcref):
 
     messageparts = []
     chops = decode64chops(string)  #Decode base64 strings into integer chops
-
-    nbytes = block_size(n)
     
     for chop in chops:
         value = funcref(chop, key, n) #Decrypt each chop
         block = transform.int2bytes(value)
-
-        # Pad block with 0-bytes until we have reached the block size
-        blocksize = len(block)
-        padsize = nbytes - blocksize
-        if padsize < 0:
-            raise ValueError('Block larger than block size (%i > %i)!' %
-                    (blocksize, nbytes))
-        elif padsize > 0:
-            block = '\x00' * padsize + block
-
         messageparts.append(block)
 
     # Combine decrypted strings into a msg
