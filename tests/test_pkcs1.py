@@ -32,7 +32,8 @@ class BinaryTest(unittest.TestCase):
         # Alter the encrypted stream
         encrypted = encrypted[:5] + chr(ord(encrypted[5]) + 1) + encrypted[6:]
         
-        self.assertRaises(ValueError, pkcs1.decrypt, encrypted, self.priv)
+        self.assertRaises(pkcs1.DecryptionError, pkcs1.decrypt, encrypted,
+                          self.priv)
 
     def test_randomness(self):
         '''Encrypting the same message twice should result in different
@@ -45,15 +46,46 @@ class BinaryTest(unittest.TestCase):
         
         self.assertNotEqual(encrypted1, encrypted2)
 
-#    def test_sign_verify(self):
-#
-#        message = struct.pack('>IIII', 0, 0, 0, 1) + 20 * '\x00'
-#        print "\tMessage:   %r" % message
-#
-#        signed = rsa.sign(message, self.priv)
-#        print "\tSigned:    %r" % signed
-#
-#        verified = rsa.verify(signed, self.pub)
-#        print "\tVerified:  %r" % verified
-#
-#        self.assertEqual(message, verified)
+class SignatureTest(unittest.TestCase):
+
+    def setUp(self):
+        (self.pub, self.priv) = rsa.newkeys(512)
+
+    def test_sign_verify(self):
+        '''Test happy flow of sign and verify'''
+        
+        message = 'je moeder'
+        print "\tMessage:   %r" % message
+
+        signature = pkcs1.sign(message, self.priv, 'SHA-256')
+        print "\tSignature: %r" % signature
+
+        pkcs1.verify(message, signature, self.pub)
+
+    def test_alter_message(self):
+        '''Altering the message should let the verification fail.'''
+        
+        signature = pkcs1.sign('je moeder', self.priv, 'SHA-256')
+        self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
+                          'mijn moeder', signature, self.pub)
+
+    def test_sign_different_key(self):
+        '''Signing with another key should let the verification fail.'''
+        
+        (otherpub, _) = rsa.newkeys(512)
+        
+        message = 'je moeder'
+        signature = pkcs1.sign(message, self.priv, 'SHA-256')
+        self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
+                          message, signature, otherpub)
+
+    def test_multiple_signings(self):
+        '''Signing the same message twice should return the same signatures.'''
+        
+        message = struct.pack('>IIII', 0, 0, 0, 1)
+        signature1 = pkcs1.sign(message, self.priv, 'SHA-1')
+        signature2 = pkcs1.sign(message, self.priv, 'SHA-1')
+        
+        self.assertEqual(signature1, signature2)
+
+        

@@ -66,6 +66,9 @@ def int2bytes(number, block_size=None):
         raise TypeError("You must pass an integer for 'number', not %s" %
             number.__class__)
 
+    if number < 0:
+        raise ValueError('Negative numbers cannot be used: %i' % number)
+
     # Do some bounds checking
     if block_size is not None:
         needed_bytes = common.byte_size(number)
