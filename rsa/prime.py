@@ -57,7 +57,7 @@ def randomized_primality_testing(n, k):
 
     # 50% of Jacobi-witnesses can report compositness of non-prime numbers
 
-    for i in range(k):
+    for _ in range(k):
         x = rsa.randnum.randint(n-1)
         if jacobi_witness(x, n): return False
     
