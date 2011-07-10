@@ -3,11 +3,15 @@
 This module implements certain functionality from PKCS1 version 1.5. For a
 very clear example, read http://www.di-mgt.com.au/rsa_alg.html#pkcs1schemes
 
+At least 8 bytes of random padding is used when encrypting a message. This makes
+these methods much more secure than the ones in the ``rsa`` module.
+
 '''
 
 import os
 
 from rsa import common, transform, core
+
 
 def _pad_for_encryption(message, target_length):
     r'''Pads the message for encryption, returning the padded message.
