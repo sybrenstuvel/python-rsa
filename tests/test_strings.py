@@ -11,8 +11,7 @@ class StringTest(unittest.TestCase):
 
     def test_enc_dec(self):
 
-        # TODO: test with unicode strings and non-ascii chars
-        message = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        message = u"Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ".encode('utf-8')
         print "\tMessage:   %s" % message
 
         encrypted = rsa.encrypt(message, self.pub)
@@ -25,8 +24,8 @@ class StringTest(unittest.TestCase):
 
     def test_sign_verify(self):
 
-        # TODO: test with unicode strings and non-ascii chars
-        message = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        message = u"Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ".encode('utf-8')
+        print "\tMessage:   %s" % message
 
         signed = rsa.sign(message, self.priv)
         print "\tSigned:    %s" % signed

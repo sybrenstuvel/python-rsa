@@ -17,12 +17,15 @@ def encrypt_int(message, ekey, n):
     if not type(message) is types.LongType:
         raise TypeError("You must pass a long or int")
 
-    if message < 0 or message > n:
-        raise OverflowError("The message is too long")
+    if message < 0:
+        raise ValueError('Only non-negative numbers are supported')
+         
+    if message > n:
+        raise OverflowError("The message %i is too long for n=%i" % (message, n))
 
     #Note: Bit exponents start at zero (bit counts start at 1) this is correct
-    safebit = rsa.common.bit_size(n) - 2                   #compute safe bit (MSB - 1)
-    message += (1 << safebit)                   #add safebit to ensure folding
+    safebit = rsa.common.bit_size(n) - 2        # compute safe bit (MSB - 1)
+    message += (1 << safebit)                   # add safebit to ensure folding
 
     return pow(message, ekey, n)
 
@@ -32,8 +35,8 @@ def decrypt_int(cyphertext, dkey, n):
 
     message = pow(cyphertext, dkey, n)
 
-    safebit = rsa.common.bit_size(n) - 2                   #compute safe bit (MSB - 1)
-    message -= (1 << safebit)                   #remove safebit before decode
+    safebit = rsa.common.bit_size(n) - 2        # compute safe bit (MSB - 1)
+    message -= (1 << safebit)                   # remove safebit before decode
 
     return message
 
