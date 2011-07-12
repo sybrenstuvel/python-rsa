@@ -303,7 +303,7 @@ def _find_method_hash(method_hash):
     raise VerificationError('Verification failed')
 
 
-__all__ = ['encrypt', 'decript', 'sign', 'verify',
+__all__ = ['encrypt', 'decrypt', 'sign', 'verify',
            'DecryptionError', 'VerificationError', 'CryptoError']
 
 if __name__ == '__main__':
