@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# Ensure that setuptools are installed.
-import ez_setup
-ez_setup.use_setuptools()
+# Ensure that 'distribute' is installed.
+from distribute_setup import use_setuptools
+use_setuptools()
 
 from setuptools import setup
 
@@ -28,5 +28,8 @@ setup(name='rsa',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Security :: Cryptography',
+    ],
+    install_requires=[
+        'pyasn1 >= 0.0.13',
     ],
 )
