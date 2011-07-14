@@ -11,7 +11,7 @@ def read_random_int(nbits):
     resulting number can be stored in ``nbits`` bits.
     """
 
-    randomdata = os.urandom(nbits / 8)
+    randomdata = os.urandom(nbits // 8)
     return transform.bytes2int(randomdata)
 
 def randint(maxvalue):

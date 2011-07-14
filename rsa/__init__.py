@@ -52,7 +52,7 @@ def block_size(n):
 
     # Set aside 2 bits so setting of safebit won't overflow modulo n.
     nbits = common.bit_size(n) - 2
-    nbytes = nbits / 8
+    nbytes = nbits // 8
 
     return nbytes
 
@@ -75,7 +75,7 @@ def chopstring(message, key, n, int_op):
     nbytes = block_size(n)
 
     msglen = len(message)
-    blocks = msglen / nbytes
+    blocks = msglen // nbytes
 
     if msglen % nbytes > 0:
         blocks += 1

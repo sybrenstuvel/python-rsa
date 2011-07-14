@@ -25,7 +25,7 @@ def extended_gcd(a, b):
     oa = a                             #Remember original a/b to remove 
     ob = b                             #negative values from return results
     while b != 0:
-        q = long(a/b)
+        q = long(a // b)
         (a, b)  = (b, a % b)
         (x, lx) = ((lx - (q * x)),x)
         (y, ly) = ((ly - (q * y)),y)
@@ -52,7 +52,7 @@ def find_p_q(nbits):
     
     # Make sure that p and q aren't too close or the factoring programs can
     # factor n.
-    shift = nbits / 16
+    shift = nbits // 16
     pbits = nbits + shift
     qbits = nbits - shift
     
@@ -98,8 +98,8 @@ def gen_keys(nbits):
         ``q`` will use ``nbits/2`` bits.
     """
 
-    (p, q) = find_p_q(nbits / 2)
-    (e, d) = calculate_keys(p, q, nbits / 2)
+    (p, q) = find_p_q(nbits // 2)
+    (e, d) = calculate_keys(p, q, nbits // 2)
 
     return (p, q, e, d)
 

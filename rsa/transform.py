@@ -192,7 +192,7 @@ def int2str64(number):
 
     while number > 0:
         string = "%s%s" % (to64(number & 0x3F), string)
-        number /= 64
+        number //= 64
 
     return string
 

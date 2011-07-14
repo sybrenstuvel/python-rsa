@@ -42,7 +42,7 @@ def jacobi_witness(x, n):
     """
 
     j = jacobi(x, n) % n
-    f = pow(x, (n-1)/2, n)
+    f = pow(x, (n - 1) // 2, n)
 
     if j == f: return False
     return True
