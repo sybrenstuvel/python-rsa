@@ -11,6 +11,25 @@ The public key consists of a dict {e: ..., , n: p*q)
 
 import rsa.prime
 
+class PublicKey(object):
+    '''Represents a public RSA key.
+
+    This key is also known as the 'encryption key'. It contains the 'e' and 'n'
+    values.
+    '''
+
+    __slots__ = ('e', 'n')
+
+    def __init__(self, e, n):
+        self.e = e
+        self.n = n
+
+    def __getitem__(self, key):
+        return self.__slots__[key]
+
+class PrivateKey(object):
+    pass
+
 def extended_gcd(a, b):
     """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
     """
@@ -122,7 +141,6 @@ def newkeys(nbits):
 
     return ( {'e': e, 'n': n}, {'d': d, 'p': p, 'q': q, 'n': n} )
 
-    
 if __name__ == '__main__':
     print 'Running doctests 1000x or until failure'
     import doctest

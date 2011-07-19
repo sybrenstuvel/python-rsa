@@ -1,4 +1,4 @@
-'''Functions for PKCS1 version 1.5
+'''Functions for PKCS1 version 1.5 encryption and signing
 
 This module implements certain functionality from PKCS1 version 1.5. For a
 very clear example, read http://www.di-mgt.com.au/rsa_alg.html#pkcs1schemes
