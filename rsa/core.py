@@ -6,8 +6,6 @@ mathematically on integers.
 
 import types
 
-#import rsa.common
-
 def encrypt_int(message, ekey, n):
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
@@ -23,10 +21,6 @@ def encrypt_int(message, ekey, n):
     if message > n:
         raise OverflowError("The message %i is too long for n=%i" % (message, n))
 
-    #Note: Bit exponents start at zero (bit counts start at 1) this is correct
-#    safebit = rsa.common.bit_size(n) - 2        # compute safe bit (MSB - 1)
-#    message += (1 << safebit)                   # add safebit to ensure folding
-
     return pow(message, ekey, n)
 
 def decrypt_int(cyphertext, dkey, n):
@@ -34,9 +28,5 @@ def decrypt_int(cyphertext, dkey, n):
     modulo n"""
 
     message = pow(cyphertext, dkey, n)
-
-#    safebit = rsa.common.bit_size(n) - 2        # compute safe bit (MSB - 1)
-#    message -= (1 << safebit)                   # remove safebit before decode
-
     return message
 
