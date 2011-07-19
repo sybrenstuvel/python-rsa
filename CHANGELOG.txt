@@ -1,7 +1,7 @@
 Python-RSA changelog
 ========================================
 
-Version 2.1 - in development
+Version 3.0 - in development
 ----------------------------------------
 
 - Changed the meaning of the keysize to mean the size of ``n`` rather than
@@ -20,5 +20,8 @@ Version 2.1 - in development
 
 - Added hash-based signatures using PKCS#1v1.5
 
+- Modeling private and public key as real objects rather than dicts.
+
 Version 2.0
 ----------------------------------------
+

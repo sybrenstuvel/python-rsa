@@ -2,11 +2,6 @@
 
 Create new keys with the newkeys() function.
 
-The private key consists of a dict {d: ...., p: ...., q: ....).
-
-The public key consists of a dict {e: ..., , n: p*q)
-
-
 '''
 
 import rsa.prime
@@ -14,21 +9,115 @@ import rsa.prime
 class PublicKey(object):
     '''Represents a public RSA key.
 
-    This key is also known as the 'encryption key'. It contains the 'e' and 'n'
+    This key is also known as the 'encryption key'. It contains the 'n' and 'e'
     values.
+
+    Supports attributes as well as dictionary-like access.
+
+    >>> PublicKey(5, 3)
+    PublicKey(5, 3)
+
+    >>> key = PublicKey(5, 3)
+    >>> key.n
+    5
+    >>> key['n']
+    5
+    >>> key.e
+    3
+    >>> key['e']
+    3
+
     '''
 
-    __slots__ = ('e', 'n')
+    __slots__ = ('n', 'e')
 
-    def __init__(self, e, n):
-        self.e = e
+    def __init__(self, n, e):
         self.n = n
+        self.e = e
 
     def __getitem__(self, key):
-        return self.__slots__[key]
+        return getattr(self, key)
+
+    def __repr__(self):
+        return u'PublicKey(%i, %i)' % (self.n, self.e)
 
 class PrivateKey(object):
-    pass
+    '''Represents a private RSA key.
+
+    This key is also known as the 'decryption key'. It contains the 'n', 'e',
+    'd', 'p', 'q' and other values.
+
+    Supports attributes as well as dictionary-like access.
+
+    >>> PrivateKey(3247, 65537, 833, 191, 17)
+    PrivateKey(3247, 65537, 833, 191, 17)
+
+    exp1, exp2 and coef don't have to be given, they will be calculated:
+
+    >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+    >>> pk.exp1
+    55063L
+    >>> pk.exp2
+    10095L
+    >>> pk.coef
+    50797L
+
+    If you give exp1, exp2 or coef, they will be used as-is:
+
+    >>> pk = PrivateKey(1, 2, 3, 4, 5, 6, 7, 8)
+    >>> pk.exp1
+    6
+    >>> pk.exp2
+    7
+    >>> pk.coef
+    8
+
+    '''
+
+    # RSAPrivateKey ::= SEQUENCE {
+    #     version           Version, 
+    #     modulus           INTEGER,  -- n
+    #     publicExponent    INTEGER,  -- e
+    #     privateExponent   INTEGER,  -- d
+    #     prime1            INTEGER,  -- p
+    #     prime2            INTEGER,  -- q
+    #     exponent1         INTEGER,  -- d mod (p-1)
+    #     exponent2         INTEGER,  -- d mod (q-1) 
+    #     coefficient       INTEGER,  -- (inverse of q) mod p
+    #     otherPrimeInfos   OtherPrimeInfos OPTIONAL 
+    # }
+
+    __slots__ = ('n', 'e', 'd', 'p', 'q', 'exp1', 'exp2', 'coef')
+
+    def __init__(self, n, e, d, p, q, exp1=None, exp2=None, coef=None):
+        self.n = n
+        self.e = e
+        self.d = d
+        self.p = p
+        self.q = q
+
+        # Calculate the other values if they aren't supplied
+        if exp1 is None:
+            self.exp1 = d % (p - 1)
+        else:
+            self.exp1 = exp1
+
+        if exp1 is None:
+            self.exp2 = d % (q - 1)
+        else:
+            self.exp2 = exp2
+
+        if coef is None:
+            (_, self.coef, _) = extended_gcd(q, p)
+        else:
+            self.coef = coef
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __repr__(self):
+        return u'PrivateKey(%(n)i, %(e)i, %(d)i, %(p)i, %(q)i)' % self
+
 
 def extended_gcd(a, b):
     """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
@@ -51,8 +140,6 @@ def extended_gcd(a, b):
     if (lx < 0): lx += ob              #If neg wrap modulo orignal b
     if (ly < 0): ly += oa              #If neg wrap modulo orignal a
     return (a, lx, ly)                 #Return only positive values
-
-
 
 def find_p_q(nbits):
     ''''Returns a tuple of two different primes of nbits bits each.
@@ -107,7 +194,6 @@ def calculate_keys(p, q, nbits):
 
     return (e, i)
 
-
 def gen_keys(nbits):
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
@@ -123,34 +209,42 @@ def gen_keys(nbits):
     return (p, q, e, d)
 
 def newkeys(nbits):
-    """Generates public and private keys, and returns them as (pub,
-    priv).
+    """Generates public and private keys, and returns them as (pub, priv).
 
-    The public key consists of a dict {e: ..., , n: ....). The private
-    key consists of a dict {d: ...., p: ...., q: ...., n: p*q).
+    The public key is also known as the 'encryption key', and is a PublicKey
+    object. The private key is also known as the 'decryption key' and is a
+    PrivateKey object.
     
     @param nbits: the number of bits required to store ``n = p*q``.
+
+    @return: a tuple (PublicKey, PrivateKey)
     
     """
 
-    # Don't let nbits go below 9 bits
-    nbits = max(9, nbits)
+    if nbits < 16:
+        raise ValueError('Key too small')
+
     (p, q, e, d) = gen_keys(nbits)
     
     n = p * q
 
-    return ( {'e': e, 'n': n}, {'d': d, 'p': p, 'q': q, 'n': n} )
+    return (
+        PublicKey(n, e),
+        PrivateKey(n, e, d, p, q)
+    )
 
 if __name__ == '__main__':
-    print 'Running doctests 1000x or until failure'
     import doctest
     
-    for count in range(1000):
-        (failures, tests) = doctest.testmod()
-        if failures:
-            break
-        
-        if count and count % 100 == 0:
-            print '%i times' % count
-    
-    print 'Doctests done'
+    try:
+        for count in range(100):
+            (failures, tests) = doctest.testmod()
+            if failures:
+                break
+
+            if (count and count % 10 == 0) or count == 1:
+                print '%i times' % count
+    except KeyboardInterrupt:
+        print 'Aborted'
+    else:
+        print 'Doctests done'

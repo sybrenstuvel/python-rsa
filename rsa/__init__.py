@@ -113,31 +113,35 @@ def gluechops(string, key, n, funcref):
 
 def encrypt(message, key):
     """Encrypts a string 'message' with the public key 'key'"""
-    if 'n' not in key:
-        raise Exception("You must use the public key with encrypt")
 
-    return chopstring(message, key['e'], key['n'], encrypt_int)
+    if not isinstance(key, keygen.PublicKey):
+        raise TypeError("You must use the public key with encrypt")
+
+    return chopstring(message, key.e, key.n, encrypt_int)
 
 def sign(message, key):
     """Signs a string 'message' with the private key 'key'"""
-    if 'p' not in key:
-        raise Exception("You must use the private key with sign")
 
-    return chopstring(message, key['d'], key['p']*key['q'], encrypt_int)
+    if not isinstance(key, keygen.PrivateKey):
+        raise TypeError("You must use the private key with sign")
+
+    return chopstring(message, key.d, key.n, encrypt_int)
 
 def decrypt(cypher, key):
     """Decrypts a string 'cypher' with the private key 'key'"""
-    if 'p' not in key:
-        raise Exception("You must use the private key with decrypt")
 
-    return gluechops(cypher, key['d'], key['p']*key['q'], decrypt_int)
+    if not isinstance(key, keygen.PrivateKey):
+        raise TypeError("You must use the private key with decrypt")
+
+    return gluechops(cypher, key.d, key.n, decrypt_int)
 
 def verify(cypher, key):
     """Verifies a string 'cypher' with the public key 'key'"""
-    if 'n' not in key:
-        raise Exception("You must use the public key with verify")
 
-    return gluechops(cypher, key['e'], key['n'], decrypt_int)
+    if not isinstance(key, keygen.PublicKey):
+        raise TypeError("You must use the public key with verify")
+
+    return gluechops(cypher, key.e, key.n, decrypt_int)
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
