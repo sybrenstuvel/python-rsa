@@ -22,6 +22,8 @@ Version 3.0 - in development
 
 - Modeling private and public key as real objects rather than dicts.
 
+- Support for saving and loading private keys as PEM and DER files
+
 Version 2.0
 ----------------------------------------
 

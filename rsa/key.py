@@ -3,10 +3,18 @@
 Create new keys with the newkeys() function. It will give you a PublicKey and a
 PrivateKey object.
 
+Loading and saving keys requires the pyasn1 module. This module is imported as
+late as possible, such that other functionality will remain working in absence
+of pyasn1.
+
 '''
 
 import rsa.prime
 import rsa.pem
+
+PEM_PRIVATE_KEY_START = '-----BEGIN RSA PRIVATE KEY-----'
+PEM_PRIVATE_KEY_END = '-----END RSA PRIVATE KEY-----'
+
 
 class PublicKey(object):
     '''Represents a public RSA key.
@@ -283,6 +291,43 @@ def load_private_key_der(keyfile):
 
     return PrivateKey(*priv[1:9])
 
+def save_private_key_der(priv_key):
+    '''Saves the private key in DER format.
+
+    @param priv_key: the private key to save
+    @returns: the DER-encoded private key.
+    '''
+
+    from pyasn1.type import univ, namedtype, tag
+    from pyasn1.codec.der import encoder
+
+    class AsnPrivKey(univ.Sequence):
+        componentType = namedtype.NamedTypes(
+            namedtype.NamedType('version', univ.Integer()),
+            namedtype.NamedType('modulus', univ.Integer()),
+            namedtype.NamedType('publicExponent', univ.Integer()),
+            namedtype.NamedType('privateExponent', univ.Integer()),
+            namedtype.NamedType('prime1', univ.Integer()),
+            namedtype.NamedType('prime2', univ.Integer()),
+            namedtype.NamedType('exponent1', univ.Integer()),
+            namedtype.NamedType('exponent2', univ.Integer()),
+            namedtype.NamedType('coefficient', univ.Integer()),
+        )
+
+    # Create the ASN object
+    asn_key = AsnPrivKey()
+    asn_key.setComponentByName('version', 0)
+    asn_key.setComponentByName('modulus', priv_key.n)
+    asn_key.setComponentByName('publicExponent', priv_key.e)
+    asn_key.setComponentByName('privateExponent', priv_key.d)
+    asn_key.setComponentByName('prime1', priv_key.p)
+    asn_key.setComponentByName('prime2', priv_key.q)
+    asn_key.setComponentByName('exponent1', priv_key.exp1)
+    asn_key.setComponentByName('exponent2', priv_key.exp2)
+    asn_key.setComponentByName('coefficient', priv_key.coef)
+
+    return encoder.encode(asn_key)
+
 def load_private_key_pem(keyfile):
     '''Loads a PEM-encoded private key file.
 
@@ -294,11 +339,18 @@ def load_private_key_pem(keyfile):
     @return: a PrivateKey object
     '''
 
-    PEM_START = '-----BEGIN RSA PRIVATE KEY-----'
-    PEM_END = '-----END RSA PRIVATE KEY-----'
-
-    der = rsa.pem.load_pem(keyfile, PEM_START, PEM_END)
+    der = rsa.pem.load_pem(keyfile, PEM_PRIVATE_KEY_START, PEM_PRIVATE_KEY_END)
     return load_private_key_der(der)
+
+def save_private_key_pem(priv_key):
+    '''Saves a PEM-encoded private key file.
+
+    @param keyfile: a PrivateKey object
+    @return: contents of a PEM-encoded file that contains the private key.
+    '''
+
+    der = save_private_key_der(priv_key)
+    return rsa.pem.save_pem(der, PEM_PRIVATE_KEY_START, PEM_PRIVATE_KEY_END)
 
 
 __all__ = ['PublicKey', 'PrivateKey', 'newkeys', 'load']

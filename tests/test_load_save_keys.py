@@ -20,6 +20,12 @@ Stuff after the key
 -----END CONFUSING STUFF-----
 ''' % B64PRIV_DER
 
+CLEAN_PRIVATE_PEM = '''\
+-----BEGIN RSA PRIVATE KEY-----
+%s
+-----END RSA PRIVATE KEY-----
+''' % B64PRIV_DER
+
 
 class DerTest(unittest.TestCase):
     '''Test saving and loading DER keys.'''
@@ -32,6 +38,13 @@ class DerTest(unittest.TestCase):
 
         self.assertEqual(expected, key)
 
+    def test_save_private_key(self):
+        '''Test saving private DER keys.'''
+
+        key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+        der = rsa.key.save_private_key_der(key)
+
+        self.assertEqual(PRIVATE_DER, der)
 
 class PemTest(unittest.TestCase):
     '''Test saving and loading PEM keys.'''
@@ -44,4 +57,12 @@ class PemTest(unittest.TestCase):
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
+
+    def test_save_private_key(self):
+        '''Test saving private PEM files.'''
+
+        key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+        pem = rsa.key.save_private_key_pem(key)
+
+        self.assertEqual(CLEAN_PRIVATE_PEM, pem)
 
