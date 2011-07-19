@@ -1,6 +1,7 @@
 '''RSA key generation code.
 
-Create new keys with the newkeys() function.
+Create new keys with the newkeys() function. It will give you a PublicKey and a
+PrivateKey object.
 
 '''
 
@@ -232,6 +233,8 @@ def newkeys(nbits):
         PublicKey(n, e),
         PrivateKey(n, e, d, p, q)
     )
+
+__all__ = ['PublicKey', 'PrivateKey', 'newkeys']
 
 if __name__ == '__main__':
     import doctest
