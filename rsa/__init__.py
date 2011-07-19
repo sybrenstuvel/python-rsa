@@ -16,11 +16,9 @@ __author__ = "Sybren Stuvel, Marloes de Boer, Ivo Tamboer, and Barry Mead"
 __date__ = "2010-02-08"
 __version__ = '2.1-beta0'
 
-from rsa import transform
-from rsa import common
-
-from rsa.keygen import newkeys
+from rsa import common, key, transform
 from rsa.core import encrypt_int, decrypt_int
+from rsa.key import newkeys
 
 def encode64chops(chops):
     """base64encodes chops and combines them into a ',' delimited string"""
@@ -111,37 +109,37 @@ def gluechops(string, key, n, funcref):
     # Combine decrypted strings into a msg
     return ''.join(messageparts)
 
-def encrypt(message, key):
-    """Encrypts a string 'message' with the public key 'key'"""
+def encrypt(message, pub_key):
+    """Encrypts a string 'message' with the public key 'pub_key'"""
 
-    if not isinstance(key, keygen.PublicKey):
+    if not isinstance(pub_key, key.PublicKey):
         raise TypeError("You must use the public key with encrypt")
 
-    return chopstring(message, key.e, key.n, encrypt_int)
+    return chopstring(message, pub_key.e, pub_key.n, encrypt_int)
 
-def sign(message, key):
-    """Signs a string 'message' with the private key 'key'"""
+def sign(message, priv_key):
+    """Signs a string 'message' with the private key 'priv_key'"""
 
-    if not isinstance(key, keygen.PrivateKey):
+    if not isinstance(priv_key, key.PrivateKey):
         raise TypeError("You must use the private key with sign")
 
-    return chopstring(message, key.d, key.n, encrypt_int)
+    return chopstring(message, priv_key.d, priv_key.n, encrypt_int)
 
-def decrypt(cypher, key):
-    """Decrypts a string 'cypher' with the private key 'key'"""
+def decrypt(cypher, priv_key):
+    """Decrypts a string 'cypher' with the private key 'priv_key'"""
 
-    if not isinstance(key, keygen.PrivateKey):
+    if not isinstance(priv_key, key.PrivateKey):
         raise TypeError("You must use the private key with decrypt")
 
-    return gluechops(cypher, key.d, key.n, decrypt_int)
+    return gluechops(cypher, priv_key.d, priv_key.n, decrypt_int)
 
-def verify(cypher, key):
-    """Verifies a string 'cypher' with the public key 'key'"""
+def verify(cypher, pub_key):
+    """Verifies a string 'cypher' with the public key 'pub_key'"""
 
-    if not isinstance(key, keygen.PublicKey):
-        raise TypeError("You must use the public key with verify")
+    if not isinstance(pub_key, key.PublicKey):
+        raise TypeError("You must use the public pub_key with verify")
 
-    return gluechops(cypher, key.e, key.n, decrypt_int)
+    return gluechops(cypher, pub_key.e, pub_key.n, decrypt_int)
 
 # Do doctest if we're run directly
 if __name__ == "__main__":

@@ -134,8 +134,8 @@ def encrypt(message, pub_key):
     @raise OverflowError: when the message is too large to fit in the padded
         block.
         
-    >>> from rsa import keygen, common
-    >>> (pub_key, priv_key) = keygen.newkeys(256)
+    >>> from rsa import key, common
+    >>> (pub_key, priv_key) = key.newkeys(256)
     >>> message = 'hello'
     >>> crypto = encrypt(message, pub_key)
     
@@ -168,8 +168,8 @@ def decrypt(crypto, priv_key):
         to why the code thinks the decryption fails, as this would leak
         information about the private key.
 
-    >>> from rsa import keygen, common
-    >>> (pub_key, priv_key) = keygen.newkeys(256)
+    >>> from rsa import key, common
+    >>> (pub_key, priv_key) = key.newkeys(256)
 
     It works with strings:
     >>> decrypt(encrypt('hello', pub_key), priv_key)
