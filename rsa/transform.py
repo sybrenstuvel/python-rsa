@@ -110,9 +110,7 @@ def block_op(block_provider, block_size, operation):
 
     for block in block_provider:
         number = bytes2int(block)
-        print 'In : %i (%i bytes)' % (number, common.byte_size(number))
         after_op = operation(number)
-        print 'Out: %i (%i bytes)' % (after_op, common.byte_size(after_op))
         yield int2bytes(after_op, block_size)
 
 
