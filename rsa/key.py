@@ -6,6 +6,7 @@ PrivateKey object.
 '''
 
 import rsa.prime
+import rsa.pem
 
 class PublicKey(object):
     '''Represents a public RSA key.
@@ -75,19 +76,6 @@ class PrivateKey(object):
 
     '''
 
-    # RSAPrivateKey ::= SEQUENCE {
-    #     version           Version, 
-    #     modulus           INTEGER,  -- n
-    #     publicExponent    INTEGER,  -- e
-    #     privateExponent   INTEGER,  -- d
-    #     prime1            INTEGER,  -- p
-    #     prime2            INTEGER,  -- q
-    #     exponent1         INTEGER,  -- d mod (p-1)
-    #     exponent2         INTEGER,  -- d mod (q-1) 
-    #     coefficient       INTEGER,  -- (inverse of q) mod p
-    #     otherPrimeInfos   OtherPrimeInfos OPTIONAL 
-    # }
-
     __slots__ = ('n', 'e', 'd', 'p', 'q', 'exp1', 'exp2', 'coef')
 
     def __init__(self, n, e, d, p, q, exp1=None, exp2=None, coef=None):
@@ -119,6 +107,24 @@ class PrivateKey(object):
     def __repr__(self):
         return u'PrivateKey(%(n)i, %(e)i, %(d)i, %(p)i, %(q)i)' % self
 
+    def __eq__(self, other):
+        if other is None:
+            return False
+
+        if not isinstance(other, PrivateKey):
+            return False
+
+        return (self.n == other.n and
+            self.e == other.e and
+            self.d == other.d and
+            self.p == other.p and
+            self.q == other.q and
+            self.exp1 == other.exp1 and
+            self.exp2 == other.exp2 and
+            self.coef == other.coef)
+
+    def __ne__(self, other):
+        return not (self == other)
 
 def extended_gcd(a, b):
     """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
@@ -234,7 +240,68 @@ def newkeys(nbits):
         PrivateKey(n, e, d, p, q)
     )
 
-__all__ = ['PublicKey', 'PrivateKey', 'newkeys']
+def load_private_key_der(keyfile):
+    r'''Loads a key in DER format.
+
+    @param keyfile: contents of a DER-encoded file that contains the private
+        key.
+    @return: a PrivateKey object
+
+    First let's construct a DER encoded key:
+
+    >>> import base64
+    >>> b64der = 'MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt'
+    >>> der = base64.decodestring(b64der)
+
+    This loads the file:
+
+    >>> load_private_key_der(der)
+    PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+
+    '''
+
+    from pyasn1.codec.der import decoder
+    (priv, _) = decoder.decode(keyfile)
+
+    # ASN.1 contents of DER encoded private key:
+    #
+    # RSAPrivateKey ::= SEQUENCE {
+    #     version           Version, 
+    #     modulus           INTEGER,  -- n
+    #     publicExponent    INTEGER,  -- e
+    #     privateExponent   INTEGER,  -- d
+    #     prime1            INTEGER,  -- p
+    #     prime2            INTEGER,  -- q
+    #     exponent1         INTEGER,  -- d mod (p-1)
+    #     exponent2         INTEGER,  -- d mod (q-1) 
+    #     coefficient       INTEGER,  -- (inverse of q) mod p
+    #     otherPrimeInfos   OtherPrimeInfos OPTIONAL 
+    # }
+
+    if priv[0] != 0:
+        raise ValueError('Unable to read this file, version %s != 0' % priv[0])
+
+    return PrivateKey(*priv[1:9])
+
+def load_private_key_pem(keyfile):
+    '''Loads a PEM-encoded private key file.
+
+    The contents of the file before the "-----BEGIN RSA PRIVATE KEY-----" and
+    after the "-----END RSA PRIVATE KEY-----" lines is ignored.
+
+    @param keyfile: contents of a PEM-encoded file that contains the private
+        key.
+    @return: a PrivateKey object
+    '''
+
+    PEM_START = '-----BEGIN RSA PRIVATE KEY-----'
+    PEM_END = '-----END RSA PRIVATE KEY-----'
+
+    der = rsa.pem.load_pem(keyfile, PEM_START, PEM_END)
+    return load_private_key_der(der)
+
+
+__all__ = ['PublicKey', 'PrivateKey', 'newkeys', 'load']
 
 if __name__ == '__main__':
     import doctest
