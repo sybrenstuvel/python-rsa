@@ -33,7 +33,7 @@ class DerTest(unittest.TestCase):
     def test_load_private_key(self):
         '''Test loading private DER keys.'''
 
-        key = rsa.key.load_private_key_der(PRIVATE_DER)
+        key = rsa.key.PrivateKey.load_pkcs1_der(PRIVATE_DER)
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
@@ -42,7 +42,7 @@ class DerTest(unittest.TestCase):
         '''Test saving private DER keys.'''
 
         key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
-        der = rsa.key.save_private_key_der(key)
+        der = key.save_pkcs1_der()
 
         self.assertEqual(PRIVATE_DER, der)
 
@@ -53,7 +53,7 @@ class PemTest(unittest.TestCase):
     def test_load_private_key(self):
         '''Test loading private PEM files.'''
 
-        key = rsa.key.load_private_key_pem(PRIVATE_PEM)
+        key = rsa.key.PrivateKey.load_pkcs1_pem(PRIVATE_PEM)
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
@@ -62,7 +62,7 @@ class PemTest(unittest.TestCase):
         '''Test saving private PEM files.'''
 
         key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
-        pem = rsa.key.save_private_key_pem(key)
+        pem = key.save_pkcs1_pem()
 
         self.assertEqual(CLEAN_PRIVATE_PEM, pem)
 
