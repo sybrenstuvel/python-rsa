@@ -12,9 +12,6 @@ of pyasn1.
 import rsa.prime
 import rsa.pem
 
-PEM_PRIVATE_KEY_START = '-----BEGIN RSA PRIVATE KEY-----'
-PEM_PRIVATE_KEY_END = '-----END RSA PRIVATE KEY-----'
-
 
 class PublicKey(object):
     '''Represents a public RSA key.
@@ -339,7 +336,7 @@ def load_private_key_pem(keyfile):
     @return: a PrivateKey object
     '''
 
-    der = rsa.pem.load_pem(keyfile, PEM_PRIVATE_KEY_START, PEM_PRIVATE_KEY_END)
+    der = rsa.pem.load_pem(keyfile, 'RSA PRIVATE KEY')
     return load_private_key_der(der)
 
 def save_private_key_pem(priv_key):
@@ -350,7 +347,7 @@ def save_private_key_pem(priv_key):
     '''
 
     der = save_private_key_der(priv_key)
-    return rsa.pem.save_pem(der, PEM_PRIVATE_KEY_START, PEM_PRIVATE_KEY_END)
+    return rsa.pem.save_pem(der, 'RSA PRIVATE KEY')
 
 
 __all__ = ['PublicKey', 'PrivateKey', 'newkeys', 'load']

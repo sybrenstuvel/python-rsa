@@ -2,18 +2,24 @@
 
 import base64
 
-def load_pem(contents, pem_start, pem_end):
+def _markers(pem_marker):
+    '''Returns the start and end PEM markers
+
+    >>> _markers('RSA PRIVATE KEY')
+    ('-----BEGIN RSA PRIVATE KEY-----', '-----END RSA PRIVATE KEY-----')
+
+    '''
+
+    return ('-----BEGIN %s-----' % pem_marker,
+            '-----END %s-----' % pem_marker)
+
+def load_pem(contents, pem_marker):
     '''Loads a PEM file.
 
-    Only considers the information between lines "pem_start" and "pem_end". For
-    private keys these are  '-----BEGIN RSA PRIVATE KEY-----' and 
-    '-----END RSA PRIVATE KEY-----'
-
     @param contents: the contents of the file to interpret
-    @param pem_start: the start marker of the PEM content, such as
-        '-----BEGIN RSA PRIVATE KEY-----'
-    @param pem_end: the end marker of the PEM content, such as
-        '-----END RSA PRIVATE KEY-----'
+    @param pem_marker: the marker of the PEM content, such as 'RSA PRIVATE KEY'
+        when your file has '-----BEGIN RSA PRIVATE KEY-----' and
+        '-----END RSA PRIVATE KEY-----' markers.
 
     @return the base64-decoded content between the start and end markers.
 
@@ -21,6 +27,8 @@ def load_pem(contents, pem_start, pem_end):
         marker cannot be found.
 
     '''
+
+    (pem_start, pem_end) = _markers(pem_marker)
 
     pem_lines = []
     in_pem_part = False
@@ -58,21 +66,19 @@ def load_pem(contents, pem_start, pem_end):
     pem = ''.join(pem_lines)
     return base64.decodestring(pem)
 
-def save_pem(contents, pem_start, pem_end):
+def save_pem(contents, pem_marker):
     '''Saves a PEM file.
 
-    The PEM file will start with the 'pem_start' marker, then the
-    base64-encoded content, and end with the 'pem_end' marker.
-
     @param contents: the contents to encode in PEM format
-    @param pem_start: the start marker of the PEM content, such as
-        '-----BEGIN RSA PRIVATE KEY-----'
-    @param pem_end: the end marker of the PEM content, such as
-        '-----END RSA PRIVATE KEY-----'
+    @param pem_marker: the marker of the PEM content, such as 'RSA PRIVATE KEY'
+        when your file has '-----BEGIN RSA PRIVATE KEY-----' and
+        '-----END RSA PRIVATE KEY-----' markers.
 
     @return the base64-encoded content between the start and end markers.
 
     '''
+
+    (pem_start, pem_end) = _markers(pem_marker)
 
     b64 = base64.encodestring(contents).strip()
     pem_lines = [pem_start]
