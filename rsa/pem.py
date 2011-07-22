@@ -80,7 +80,7 @@ def save_pem(contents, pem_marker):
 
     (pem_start, pem_end) = _markers(pem_marker)
 
-    b64 = base64.encodestring(contents).strip()
+    b64 = base64.encodestring(contents).replace('\n', '')
     pem_lines = [pem_start]
     
     for block_start in range(0, len(b64), 64):
