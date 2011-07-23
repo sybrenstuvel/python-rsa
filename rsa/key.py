@@ -11,6 +11,7 @@ of pyasn1.
 
 import rsa.prime
 import rsa.pem
+import rsa.common
 
 
 class PublicKey(object):
@@ -266,31 +267,55 @@ def find_p_q(nbits):
     
     >>> (p, q) = find_p_q(128)
     
-    The resulting p and q should be very close to 2*nbits bits, and no more
-    than 2*nbits bits:
+    The resulting p * q has exacty 2 * nbits bits
     >>> from rsa import common
-    >>> common.bit_size(p * q) <= 256
-    True
-    >>> common.bit_size(p * q) > 240
-    True
+    >>> common.bit_size(p * q)
+    256
     
     '''
     
+    total_bits = nbits * 2
+
     # Make sure that p and q aren't too close or the factoring programs can
     # factor n.
-    shift = nbits // 16
+    shift = nbits // 8
     pbits = nbits + shift
     qbits = nbits - shift
     
+    # Choose the two initial primes
     p = rsa.prime.getprime(pbits)
-    
+    q = rsa.prime.getprime(qbits)
+
+    # Keep choosing other primes until they match our requirements.
+    #   - p and q differ
+    #   - p * q has exactly total_bits bits.
+
+    tries = 0
     while True:
-        q = rsa.prime.getprime(qbits)
+        tries += 1
 
         # Make sure p and q are different.
-        if q != p: break
-        
-    return (p, q)
+        # Make sure we have just the right amount of bits
+        found_size = rsa.common.bit_size(p * q)
+        diff = (total_bits - found_size)
+
+        if p != q and not diff:
+            break
+            
+        # Change p on one iteration and q on the other
+        if tries & 1:
+            print 'Try %i, change q' % tries
+            qbits += diff
+            q = rsa.prime.getprime(qbits)
+        else:
+            print 'Try %i, change p' % tries
+            pbits += diff
+            p = rsa.prime.getprime(pbits)
+
+    # In the end we want p > q as described on
+    # http://www.di-mgt.com.au/rsa_alg.html#crt
+    #return (max(p, q), min(p, q))
+    return tries
 
 def calculate_keys(p, q, nbits):
     """Calculates an encryption and a decryption key given p and q, and
