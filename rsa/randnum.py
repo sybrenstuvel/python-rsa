@@ -1,6 +1,8 @@
 '''Functions for generating random numbers.'''
 
+import math
 import os
+import random
 
 from rsa import common, transform
 
@@ -11,16 +13,16 @@ def read_random_int(nbits):
     resulting number can be stored in ``nbits`` bits.
     """
 
-    randomdata = os.urandom(nbits // 8)
+    randomdata = os.urandom(int(math.ceil(nbits / 8.0)))
     return transform.bytes2int(randomdata)
 
 def randint(maxvalue):
     """Returns a random integer x with 1 <= x <= maxvalue"""
 
-
-    # Safety - get a lot of random data even if the range is fairly
-    # small
     readbits = max(common.bit_size(maxvalue), 32)
 
-    return (read_random_int(readbits) % maxvalue) + 1
+    while True:
+        value = read_random_int(readbits)
+        if value <= maxvalue:
+            return value
 
