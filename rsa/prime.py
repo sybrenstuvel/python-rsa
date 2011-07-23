@@ -67,29 +67,23 @@ def is_prime(number):
     """Returns True if the number is prime, and False otherwise.
 
     >>> is_prime(42)
-    0
+    False
     >>> is_prime(41)
-    1
+    True
     """
 
-    if randomized_primality_testing(number, 6):
-        # Prime, according to Jacobi
-        return True
-    
-    # Not prime
-    return False
+    return randomized_primality_testing(number, 6)
 
-    
 def getprime(nbits):
     """Returns a prime number that can be stored in 'nbits' bits.
 
     >>> p = getprime(128)
     >>> is_prime(p-1)
-    0
+    False
     >>> is_prime(p)
-    1
+    True
     >>> is_prime(p+1)
-    0
+    False
     
     >>> from rsa import common
     >>> common.bit_size(p) <= 128
