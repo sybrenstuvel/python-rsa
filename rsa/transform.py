@@ -4,33 +4,23 @@ From bytes to a number, number to bytes, base64-like-encoding, etc.
 '''
 
 import types
+import binascii
 
 from rsa import common
 
 def bytes2int(bytes):
-    """Converts a list of bytes or an 8-bit string to an integer.
+    r"""Converts a list of bytes or an 8-bit string to an integer.
 
     When using unicode strings, encode it to some encoding like UTF8 first.
 
     >>> (((128 * 256) + 64) * 256) + 15
     8405007
-    >>> l = [128, 64, 15]
-    >>> bytes2int(l)              #same as bytes2int('\x80@\x0f')
-    8405007
+    >>> bytes2int('\x80@\x0f')
+    8405007L
 
     """
 
-    if not (type(bytes) is types.ListType or type(bytes) is types.StringType):
-        raise TypeError("You must pass a string or a list")
-
-    # Convert byte stream to integer
-    integer = 0
-    for byte in bytes:
-        integer *= 256
-        if type(byte) is types.StringType: byte = ord(byte)
-        integer += byte
-
-    return integer
+    return long(binascii.hexlify(bytes), 16)
 
 def int2bytes(number, block_size=None):
     r'''Converts a number to a string of bytes.
@@ -47,12 +37,12 @@ def int2bytes(number, block_size=None):
     >>> int2bytes(123456789)
     '\x07[\xcd\x15'
     >>> bytes2int(int2bytes(123456789))
-    123456789
+    123456789L
 
     >>> int2bytes(123456789, 6)
     '\x00\x00\x07[\xcd\x15'
     >>> bytes2int(int2bytes(123456789, 128))
-    123456789
+    123456789L
 
     >>> int2bytes(123456789, 3)
     Traceback (most recent call last):
