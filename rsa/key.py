@@ -298,21 +298,24 @@ def calculate_keys(p, q, nbits):
 
     """
 
-    phi_n = (p-1) * (q-1)
+    phi_n = (p - 1) * (q - 1)
 
     # A very common choice for e is 65537
     e = 65537
 
-    (d, i, _) = extended_gcd(e, phi_n)
+    (divider, d, _) = extended_gcd(e, phi_n)
 
-    if not d == 1:
-        raise Exception("e (%d) and phi_n (%d) are not relatively prime" % (e, phi_n))
-    if (i < 0):
-        raise Exception("New extended_gcd shouldn't return negative values")
-    if not (e * i) % phi_n == 1:
-        raise Exception("e (%d) and i (%d) are not mult. inv. modulo phi_n (%d)" % (e, i, phi_n))
+    if divider != 1:
+        raise ValueError("e (%d) and phi_n (%d) are not relatively prime" %
+                (e, phi_n))
+    if (d < 0):
+        raise ValueError("extended_gcd shouldn't return negative values, "
+                "please file a bug")
+    if (e * d) % phi_n != 1:
+        raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "
+                "phi_n (%d)" % (e, d, phi_n))
 
-    return (e, i)
+    return (e, d)
 
 def gen_keys(nbits):
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
