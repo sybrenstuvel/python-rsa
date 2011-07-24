@@ -3,3 +3,4 @@
 ^build/
 ^dist/
 ^rsa.egg-info/
+^distribute-0.6.*
