@@ -32,4 +32,8 @@ setup(name='rsa',
     install_requires=[
         'pyasn1 >= 0.0.13',
     ],
+    entry_points={ 'console_scripts': [
+        'pyrsa-priv2pub = rsa.util:private_to_public',
+    ]},
+
 )
