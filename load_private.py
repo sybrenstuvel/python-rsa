@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 from rsa import pkcs1, key
 
 # pick q, pick p

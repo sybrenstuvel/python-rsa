@@ -9,10 +9,13 @@ of pyasn1.
 
 '''
 
+import logging
+
 import rsa.prime
 import rsa.pem
 import rsa.common
 
+log = logging.getLogger(__name__)
 
 class PublicKey(object):
     '''Represents a public RSA key.
@@ -283,7 +286,10 @@ def find_p_q(nbits):
     qbits = nbits - shift
     
     # Choose the two initial primes
+    log.debug('find_p_q(%i): Finding p', nbits)
     p = rsa.prime.getprime(pbits)
+
+    log.debug('find_p_q(%i): Finding q', nbits)
     q = rsa.prime.getprime(qbits)
 
     # Keep choosing other primes until they match our requirements.
@@ -304,12 +310,12 @@ def find_p_q(nbits):
             
         # Change p on one iteration and q on the other
         if tries & 1:
-            print 'Try %i, change q' % tries
-            qbits += diff
+            log.debug('Try %i, find another q', tries)
+            #qbits += diff
             q = rsa.prime.getprime(qbits)
         else:
-            print 'Try %i, change p' % tries
-            pbits += diff
+            log.debug('Try %i, find another p', tries)
+            #pbits += diff
             p = rsa.prime.getprime(pbits)
 
     # In the end we want p > q as described on
