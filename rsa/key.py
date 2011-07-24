@@ -38,18 +38,18 @@ class AbstractKey(object):
     '''Abstract superclass for private and public keys.'''
 
     @classmethod
-    def load_pkcs1(cls, keyfile, format='pem'):
+    def load_pkcs1(cls, keyfile, format='PEM'):
         r'''Loads a key in PKCS#1 DER or PEM format.
 
         @param keyfile: contents of a DER- or PEM-encoded file that contains
             the public key.
-        @param format: the format of the file to load; 'pem' or 'der'
+        @param format: the format of the file to load; 'PEM' or 'DER'
         @return: a PublicKey object
         '''
 
         methods = {
-            'pem': cls.load_pkcs1_pem,
-            'der': cls.load_pkcs1_der,
+            'PEM': cls.load_pkcs1_pem,
+            'DER': cls.load_pkcs1_der,
         }
 
         if format not in methods:
@@ -60,16 +60,16 @@ class AbstractKey(object):
         method = methods[format]
         return method(keyfile)
 
-    def save_pkcs1(self, format='pem'):
+    def save_pkcs1(self, format='PEM'):
         '''Saves the public key in PKCS#1 DER or PEM format.
 
-        @param format: the format to save; 'pem' or 'der'
+        @param format: the format to save; 'PEM' or 'DER'
         @returns: the DER- or PEM-encoded public key.
         '''
 
         methods = {
-            'pem': self.save_pkcs1_pem,
-            'der': self.save_pkcs1_der,
+            'PEM': self.save_pkcs1_pem,
+            'DER': self.save_pkcs1_der,
         }
 
         if format not in methods:
