@@ -8,6 +8,9 @@ import rsa.key
 B64PRIV_DER = 'MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt'
 PRIVATE_DER = base64.decodestring(B64PRIV_DER)
 
+B64PUB_DER = 'MAwCBQDeKYlRAgMBAAE='
+PUBLIC_DER = base64.decodestring(B64PUB_DER)
+
 PRIVATE_PEM = '''
 -----BEGIN CONFUSING STUFF-----
 Cruft before the key
@@ -25,6 +28,24 @@ CLEAN_PRIVATE_PEM = '''\
 %s
 -----END RSA PRIVATE KEY-----
 ''' % B64PRIV_DER
+
+PUBLIC_PEM = '''
+-----BEGIN CONFUSING STUFF-----
+Cruft before the key
+
+-----BEGIN RSA PUBLIC KEY-----
+%s
+-----END RSA PUBLIC KEY-----
+
+Stuff after the key
+-----END CONFUSING STUFF-----
+''' % B64PUB_DER
+
+CLEAN_PUBLIC_PEM = '''\
+-----BEGIN RSA PUBLIC KEY-----
+%s
+-----END RSA PUBLIC KEY-----
+''' % B64PUB_DER
 
 
 class DerTest(unittest.TestCase):
@@ -46,6 +67,22 @@ class DerTest(unittest.TestCase):
 
         self.assertEqual(PRIVATE_DER, der)
 
+    def test_load_public_key(self):
+        '''Test loading public DER keys.'''
+
+        key = rsa.key.PublicKey.load_pkcs1_der(PUBLIC_DER)
+        expected = rsa.key.PublicKey(3727264081, 65537)
+
+        self.assertEqual(expected, key)
+
+    def test_save_public_key(self):
+        '''Test saving public DER keys.'''
+
+        key = rsa.key.PublicKey(3727264081, 65537)
+        der = key.save_pkcs1_der()
+
+        self.assertEqual(PUBLIC_DER, der)
+
 class PemTest(unittest.TestCase):
     '''Test saving and loading PEM keys.'''
 
@@ -65,4 +102,21 @@ class PemTest(unittest.TestCase):
         pem = key.save_pkcs1_pem()
 
         self.assertEqual(CLEAN_PRIVATE_PEM, pem)
+
+    def test_load_public_key(self):
+        '''Test loading public PEM files.'''
+
+        key = rsa.key.PublicKey.load_pkcs1_pem(PUBLIC_PEM)
+        expected = rsa.key.PublicKey(3727264081, 65537)
+
+        self.assertEqual(expected, key)
+
+    def test_save_public_key(self):
+        '''Test saving public PEM files.'''
+
+        key = rsa.key.PublicKey(3727264081, 65537)
+        pem = key.save_pkcs1_pem()
+
+        self.assertEqual(CLEAN_PUBLIC_PEM, pem)
+
 

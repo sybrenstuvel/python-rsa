@@ -68,6 +68,18 @@ class PublicKey(object):
     def __repr__(self):
         return u'PublicKey(%i, %i)' % (self.n, self.e)
 
+    def __eq__(self, other):
+        if other is None:
+            return False
+
+        if not isinstance(other, PublicKey):
+            return False
+
+        return self.n == other.n and self.e == other.e
+
+    def __ne__(self, other):
+        return not (self == other)
+
     @classmethod
     def load_pkcs1_der(cls, keyfile):
         r'''Loads a key in PKCS#1 DER format.
@@ -121,6 +133,31 @@ class PublicKey(object):
         asn_key.setComponentByName('publicExponent', self.e)
 
         return encoder.encode(asn_key)
+
+    @classmethod
+    def load_pkcs1_pem(cls, keyfile):
+        '''Loads a PKCS#1 PEM-encoded public key file.
+
+        The contents of the file before the "-----BEGIN RSA PUBLIC KEY-----" and
+        after the "-----END RSA PUBLIC KEY-----" lines is ignored.
+
+        @param keyfile: contents of a PEM-encoded file that contains the public
+            key.
+        @return: a PublicKey object
+        '''
+
+        der = rsa.pem.load_pem(keyfile, 'RSA PUBLIC KEY')
+        return cls.load_pkcs1_der(der)
+
+    def save_pkcs1_pem(self):
+        '''Saves a PKCS#1 PEM-encoded public key file.
+
+        @return: contents of a PEM-encoded file that contains the public key.
+        '''
+
+        der = self.save_pkcs1_der()
+        return rsa.pem.save_pem(der, 'RSA PUBLIC KEY')
+
 
 class PrivateKey(object):
     '''Represents a private RSA key.
@@ -303,7 +340,6 @@ class PrivateKey(object):
     def save_pkcs1_pem(self):
         '''Saves a PKCS#1 PEM-encoded private key file.
 
-        @param keyfile: a PrivateKey object
         @return: contents of a PEM-encoded file that contains the private key.
         '''
 
