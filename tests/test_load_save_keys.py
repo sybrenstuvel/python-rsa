@@ -54,7 +54,7 @@ class DerTest(unittest.TestCase):
     def test_load_private_key(self):
         '''Test loading private DER keys.'''
 
-        key = rsa.key.PrivateKey.load_pkcs1_der(PRIVATE_DER)
+        key = rsa.key.PrivateKey.load_pkcs1(PRIVATE_DER, 'der')
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
@@ -63,14 +63,14 @@ class DerTest(unittest.TestCase):
         '''Test saving private DER keys.'''
 
         key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
-        der = key.save_pkcs1_der()
+        der = key.save_pkcs1('der')
 
         self.assertEqual(PRIVATE_DER, der)
 
     def test_load_public_key(self):
         '''Test loading public DER keys.'''
 
-        key = rsa.key.PublicKey.load_pkcs1_der(PUBLIC_DER)
+        key = rsa.key.PublicKey.load_pkcs1(PUBLIC_DER, 'der')
         expected = rsa.key.PublicKey(3727264081, 65537)
 
         self.assertEqual(expected, key)
@@ -79,7 +79,7 @@ class DerTest(unittest.TestCase):
         '''Test saving public DER keys.'''
 
         key = rsa.key.PublicKey(3727264081, 65537)
-        der = key.save_pkcs1_der()
+        der = key.save_pkcs1('der')
 
         self.assertEqual(PUBLIC_DER, der)
 
@@ -90,7 +90,7 @@ class PemTest(unittest.TestCase):
     def test_load_private_key(self):
         '''Test loading private PEM files.'''
 
-        key = rsa.key.PrivateKey.load_pkcs1_pem(PRIVATE_PEM)
+        key = rsa.key.PrivateKey.load_pkcs1(PRIVATE_PEM, 'pem')
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
@@ -99,14 +99,14 @@ class PemTest(unittest.TestCase):
         '''Test saving private PEM files.'''
 
         key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
-        pem = key.save_pkcs1_pem()
+        pem = key.save_pkcs1('pem')
 
         self.assertEqual(CLEAN_PRIVATE_PEM, pem)
 
     def test_load_public_key(self):
         '''Test loading public PEM files.'''
 
-        key = rsa.key.PublicKey.load_pkcs1_pem(PUBLIC_PEM)
+        key = rsa.key.PublicKey.load_pkcs1(PUBLIC_PEM, 'pem')
         expected = rsa.key.PublicKey(3727264081, 65537)
 
         self.assertEqual(expected, key)
@@ -115,7 +115,7 @@ class PemTest(unittest.TestCase):
         '''Test saving public PEM files.'''
 
         key = rsa.key.PublicKey(3727264081, 65537)
-        pem = key.save_pkcs1_pem()
+        pem = key.save_pkcs1('pem')
 
         self.assertEqual(CLEAN_PUBLIC_PEM, pem)
 

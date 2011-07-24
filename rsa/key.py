@@ -25,6 +25,7 @@ of pyasn1.
 
 '''
 
+import abc
 import logging
 
 import rsa.prime
@@ -33,7 +34,53 @@ import rsa.common
 
 log = logging.getLogger(__name__)
 
-class PublicKey(object):
+class AbstractKey(object):
+    '''Abstract superclass for private and public keys.'''
+
+    @classmethod
+    def load_pkcs1(cls, keyfile, format='pem'):
+        r'''Loads a key in PKCS#1 DER or PEM format.
+
+        @param keyfile: contents of a DER- or PEM-encoded file that contains
+            the public key.
+        @param format: the format of the file to load; 'pem' or 'der'
+        @return: a PublicKey object
+        '''
+
+        methods = {
+            'pem': cls.load_pkcs1_pem,
+            'der': cls.load_pkcs1_der,
+        }
+
+        if format not in methods:
+            formats = ', '.join(sorted(methods.keys()))
+            raise ValueError('Unsupported format: %r, try one of %s' % (format,
+                formats))
+
+        method = methods[format]
+        return method(keyfile)
+
+    def save_pkcs1(self, format='pem'):
+        '''Saves the public key in PKCS#1 DER or PEM format.
+
+        @param format: the format to save; 'pem' or 'der'
+        @returns: the DER- or PEM-encoded public key.
+        '''
+
+        methods = {
+            'pem': self.save_pkcs1_pem,
+            'der': self.save_pkcs1_der,
+        }
+
+        if format not in methods:
+            formats = ', '.join(sorted(methods.keys()))
+            raise ValueError('Unsupported format: %r, try one of %s' % (format,
+                formats))
+
+        method = methods[format]
+        return method()
+
+class PublicKey(AbstractKey):
     '''Represents a public RSA key.
 
     This key is also known as the 'encryption key'. It contains the 'n' and 'e'
@@ -158,8 +205,7 @@ class PublicKey(object):
         der = self.save_pkcs1_der()
         return rsa.pem.save_pem(der, 'RSA PUBLIC KEY')
 
-
-class PrivateKey(object):
+class PrivateKey(AbstractKey):
     '''Represents a private RSA key.
 
     This key is also known as the 'decryption key'. It contains the 'n', 'e',
@@ -347,7 +393,6 @@ class PrivateKey(object):
         return rsa.pem.save_pem(der, 'RSA PRIVATE KEY')
 
 
-
 def extended_gcd(a, b):
     """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
     """
@@ -512,8 +557,7 @@ def newkeys(nbits, accurate=True):
         PrivateKey(n, e, d, p, q)
     )
 
-__all__ = ['PublicKey', 'PrivateKey', 'newkeys', 'load_private_key_der',
-    'load_private_key_pem', 'save_private_key_der', 'save_private_key_pem']
+__all__ = ['PublicKey', 'PrivateKey', 'newkeys']
 
 if __name__ == '__main__':
     import doctest
