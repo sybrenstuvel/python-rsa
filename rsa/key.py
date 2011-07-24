@@ -68,6 +68,60 @@ class PublicKey(object):
     def __repr__(self):
         return u'PublicKey(%i, %i)' % (self.n, self.e)
 
+    @classmethod
+    def load_pkcs1_der(cls, keyfile):
+        r'''Loads a key in PKCS#1 DER format.
+
+        @param keyfile: contents of a DER-encoded file that contains the public
+            key.
+        @return: a PublicKey object
+
+        First let's construct a DER encoded key:
+
+        >>> import base64
+        >>> b64der = 'MAwCBQCNGmYtAgMBAAE='
+        >>> der = base64.decodestring(b64der)
+
+        This loads the file:
+
+        >>> PublicKey.load_pkcs1_der(der)
+        PublicKey(2367317549, 65537)
+
+        '''
+
+        from pyasn1.codec.der import decoder
+        (priv, _) = decoder.decode(keyfile)
+
+        # ASN.1 contents of DER encoded public key:
+        #
+        # RSAPublicKey ::= SEQUENCE {
+        #     modulus           INTEGER,  -- n
+        #     publicExponent    INTEGER,  -- e
+
+        return cls(*priv)
+
+    def save_pkcs1_der(self):
+        '''Saves the public key in PKCS#1 DER format.
+
+        @returns: the DER-encoded public key.
+        '''
+
+        from pyasn1.type import univ, namedtype
+        from pyasn1.codec.der import encoder
+
+        class AsnPubKey(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('modulus', univ.Integer()),
+                namedtype.NamedType('publicExponent', univ.Integer()),
+            )
+
+        # Create the ASN object
+        asn_key = AsnPubKey()
+        asn_key.setComponentByName('modulus', self.n)
+        asn_key.setComponentByName('publicExponent', self.e)
+
+        return encoder.encode(asn_key)
+
 class PrivateKey(object):
     '''Represents a private RSA key.
 
@@ -198,11 +252,10 @@ class PrivateKey(object):
     def save_pkcs1_der(self):
         '''Saves the private key in PKCS#1 DER format.
 
-        @param priv_key: the private key to save
         @returns: the DER-encoded private key.
         '''
 
-        from pyasn1.type import univ, namedtype, tag
+        from pyasn1.type import univ, namedtype
         from pyasn1.codec.der import encoder
 
         class AsnPrivKey(univ.Sequence):
