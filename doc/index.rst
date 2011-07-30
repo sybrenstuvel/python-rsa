@@ -10,16 +10,35 @@ Python-RSA is a pure-Python RSA implementation. It supports
 encryption and decryption, signing and verifying signatures, and key
 generation according to PKCS#1 version 1.5.
 
-Contents:
+
+Security notice
+--------------------------------------------------
+
+This RSA implementation has seen the eyes of a security expert, and it
+uses an industry standard random padding method. However, there are
+still possible vectors of attack. Just to name one example, it doesn't
+compress the input stream to remove repetitions, and if you display
+the stack trace of a ``Decryptionerror`` exception you'll leak
+information about the reason why decryption failed. And I'm sure that
+those aren't the only insecurities. Use your own judgement to decide
+whether this module is secure enough for your application.
+
+If you have the time and skill to improve the implementation, by all
+means be my guest. The best way is to clone the Mercurial repository
+and send me a merge request when you've got something worth merging.
+
+
+Contents
+--------------------------------------------------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   intro
-   installation
-   license
-   usage
-   compatibility
+    intro
+    installation
+    licence
+    usage
+    compatibility
 
 
 Indices and tables

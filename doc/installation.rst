@@ -10,4 +10,44 @@ or easy_install. Either one will work::
 Depending on your system you may need to use ``sudo pip`` or ``sudo
 easy_install``.
 
+Installation from source is also quite easy. Download the source and
+then type::
 
+    python setup.py install
+
+or if that doesn't work::
+
+    sudo python setup.py install
+
+
+.. todo::
+
+    Add a source link here
+
+
+Dependencies
+--------------------------------------------------
+
+Python-RSA has very few dependencies. As a matter of fact, to use it
+you only need Python itself. Loading and saving keys does require an
+extra module, though: pyasn1. If you used pip or easy_install like
+described above, you should be ready to go.
+
+Development dependencies
+--------------------------------------------------
+
+In order to start developing on Python-RSA you need a bit more. Use
+pip or easy_install to install the following packages:
+
+    - Mercurial
+    - nose
+    - sphinx
+    - pyasn1
+
+Once these are installed, use Mercurial_ to get a copy of the source::
+
+    hg clone http://hg.stuvel.eu/python-rsa
+    sudo python setup.py develop
+
+
+.. _Mercurial: http://hg-scm.com/
