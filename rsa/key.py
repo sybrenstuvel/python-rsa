@@ -221,11 +221,11 @@ class PrivateKey(AbstractKey):
 
     >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
     >>> pk.exp1
-    55063L
+    55063
     >>> pk.exp2
-    10095L
+    10095
     >>> pk.coef
-    50797L
+    50797
 
     If you give exp1, exp2 or coef, they will be used as-is:
 
@@ -250,12 +250,12 @@ class PrivateKey(AbstractKey):
 
         # Calculate the other values if they aren't supplied
         if exp1 is None:
-            self.exp1 = long(d % (p - 1))
+            self.exp1 = int(d % (p - 1))
         else:
             self.exp1 = exp1
 
         if exp1 is None:
-            self.exp2 = long(d % (q - 1))
+            self.exp2 = int(d % (q - 1))
         else:
             self.exp2 = exp2
 
@@ -409,7 +409,7 @@ def extended_gcd(a, b):
     oa = a                             #Remember original a/b to remove 
     ob = b                             #negative values from return results
     while b != 0:
-        q = long(a // b)
+        q = a // b
         (a, b)  = (b, a % b)
         (x, lx) = ((lx - (q * x)),x)
         (y, ly) = ((ly - (q * y)),y)
