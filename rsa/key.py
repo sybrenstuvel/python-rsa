@@ -157,7 +157,8 @@ class PublicKey(AbstractKey):
         #     modulus           INTEGER,  -- n
         #     publicExponent    INTEGER,  -- e
 
-        return cls(*priv)
+        as_ints = tuple(int(x) for x in priv)
+        return cls(*as_ints)
 
     def save_pkcs1_der(self):
         '''Saves the public key in PKCS#1 DER format.
@@ -330,7 +331,8 @@ class PrivateKey(AbstractKey):
         if priv[0] != 0:
             raise ValueError('Unable to read this file, version %s != 0' % priv[0])
 
-        return cls(*priv[1:9])
+        as_ints = tuple(int(x) for x in priv[1:9])
+        return cls(*as_ints)
 
     def save_pkcs1_der(self):
         '''Saves the private key in PKCS#1 DER format.

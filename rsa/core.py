@@ -21,14 +21,19 @@ mathematically on integers.
 
 import types
 
+def assert_int(var, name):
+
+    if type(var) in (types.IntType, types.LongType):
+        return
+
+    raise TypeError('%s should be an integer, not %s' % (name, var.__class__))
+
 def encrypt_int(message, ekey, n):
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
-    if type(message) is types.IntType:
-        message = long(message)
-
-    if not type(message) is types.LongType:
-        raise TypeError("You must pass a long or int")
+    assert_int(message, 'message')
+    assert_int(ekey, 'ekey')
+    assert_int(n, 'n')
 
     if message < 0:
         raise ValueError('Only non-negative numbers are supported')
@@ -41,6 +46,14 @@ def encrypt_int(message, ekey, n):
 def decrypt_int(cyphertext, dkey, n):
     """Decrypts a cypher text using the decryption key 'dkey', working
     modulo n"""
+
+    if type(cyphertext) not in (types.IntType, types.LongType):
+        raise TypeError('cyphertext should be an integer, not %s' %
+                cyphertext.__type__)
+
+    assert_int(cyphertext, 'cyphertext')
+    assert_int(dkey, 'dkey')
+    assert_int(n, 'n')
 
     message = pow(cyphertext, dkey, n)
     return message
