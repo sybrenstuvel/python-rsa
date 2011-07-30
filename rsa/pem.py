@@ -53,8 +53,8 @@ def load_pem(contents, pem_marker):
         line = line.strip()
 
         # Skip empty lines
-       if not line:
-           continue
+        if not line:
+            continue
 
         # Handle start marker
         if line == pem_start:
