@@ -16,6 +16,8 @@ PRIVATE_PEM = '''
 Cruft before the key
 
 -----BEGIN RSA PRIVATE KEY-----
+Comment: something blah
+
 %s
 -----END RSA PRIVATE KEY-----
 
@@ -34,6 +36,8 @@ PUBLIC_PEM = '''
 Cruft before the key
 
 -----BEGIN RSA PUBLIC KEY-----
+Comment: something blah
+
 %s
 -----END RSA PUBLIC KEY-----
 
