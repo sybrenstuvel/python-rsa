@@ -56,3 +56,13 @@ class VarintTest(unittest.TestCase):
         self.assertEqual('\x00', outfile.getvalue())
         self.assertEqual(1, written)
 
+
+class VarblockTest(unittest.TestCase):
+
+    def test_yield_varblock(self):
+        infile = StringIO('\x01\x0512345\x06Sybren')
+
+        varblocks = list(blocks.yield_varblocks(infile))
+        self.assertEqual(['12345', 'Sybren'], varblocks)
+
+

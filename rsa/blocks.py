@@ -33,10 +33,19 @@ The encrypted file format is as follows, where || denotes byte concatenation:
     to 1 indicates the next byte is also part of the varint. The last byte will
     have this bit set to 0.
 
+This file format is called the VARBLOCK format, in line with the varint format
+used to denote the block sizes.
+
 '''
+
+VARBLOCK_VERSION = 1
 
 def read_varint(infile):
     '''Reads a varint from the file.
+
+    When the first byte to be read indicates EOF, (0, 0) is returned. When an
+    EOF occurs when at least one byte has been read, an EOFError exception is
+    raised.
 
     @param infile: the file-like object to read from. It should have a read()
         method.
@@ -49,7 +58,10 @@ def read_varint(infile):
     while True:
         char = infile.read(1)
         if len(char) == 0:
-            raise EOFError('EOF while reading varint')
+            if read_bytes == 0:
+                return (0, 0)
+            raise EOFError('EOF while reading varint, value is %i so far' %
+                    varint)
 
         byte = ord(char)
         varint += (byte & 0x7F) << (7 * read_bytes)
@@ -87,5 +99,36 @@ def write_varint(outfile, value):
         written_bytes += 1
 
     return written_bytes
+
+
+def yield_varblocks(infile):
+    '''Generator, yields each block in the input file.
+    
+    @param infile: file to read, is expected to have the VARBLOCK format as
+        described in the module's docstring.
+    @yields the contents of each block.
+    '''
+
+    # Check the version number
+    version = ord(infile.read(1))
+    if version != VARBLOCK_VERSION:
+        raise ValueError('VARBLOCK version %i not supported' % version)
+
+    while True:
+        (block_size, read_bytes) = read_varint(infile)
+
+        # EOF at block boundary, that's fine.
+        if read_bytes == 0 and block_size == 0:
+            break
+
+        block = infile.read(block_size)
+
+        read_size = len(block)
+        if read_size != block_size:
+            raise EOFError('Block size is %i, but could read only %i bytes' %
+                    (block_size, read_size))
+
+
+        yield block
 
 
