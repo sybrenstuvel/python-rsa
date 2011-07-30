@@ -52,6 +52,10 @@ def load_pem(contents, pem_marker):
     for line in contents.split('\n'):
         line = line.strip()
 
+        # Skip empty lines
+       if not line:
+           continue
+
         # Handle start marker
         if line == pem_start:
             if in_pem_part:
@@ -69,8 +73,8 @@ def load_pem(contents, pem_marker):
             in_pem_part = False
             break
 
-        # Skip empty lines or 'key: value' pairs.
-        if ':' in line or not line.strip():
+        # Load fields
+        if ':' in line:
             continue
 
         pem_lines.append(line)
