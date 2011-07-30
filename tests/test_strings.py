@@ -7,7 +7,7 @@ import rsa
 class StringTest(unittest.TestCase):
 
     def setUp(self):
-        (self.pub, self.priv) = rsa.newkeys(64)
+        (self.pub, self.priv) = rsa.newkeys(384)
 
     def test_enc_dec(self):
 
@@ -21,17 +21,4 @@ class StringTest(unittest.TestCase):
         print "\tDecrypted: %s" % decrypted
 
         self.assertEqual(message, decrypted)
-
-    def test_sign_verify(self):
-
-        message = u"Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ".encode('utf-8')
-        print "\tMessage:   %s" % message
-
-        signed = rsa.sign(message, self.priv)
-        print "\tSigned:    %s" % signed
-
-        verified = rsa.verify(signed, self.pub)
-        print "\tVerified:  %s" % verified
-
-        self.assertEqual(message, verified)
 
