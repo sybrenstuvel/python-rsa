@@ -156,16 +156,16 @@ def encrypt(message, pub_key):
     >>> crypto = encrypt(message, pub_key)
     
     The crypto text should be just as long as the public key 'n' component:
-    >>> len(crypto) == common.byte_size(pub_key['n'])
+    >>> len(crypto) == common.byte_size(pub_key.n)
     True
     
     '''
     
-    keylength = common.byte_size(pub_key['n'])
+    keylength = common.byte_size(pub_key.n)
     padded = _pad_for_encryption(message, keylength)
     
     payload = transform.bytes2int(padded)
-    encrypted = core.encrypt_int(payload, pub_key['e'], pub_key['n'])
+    encrypted = core.encrypt_int(payload, pub_key.e, pub_key.n)
     block = transform.int2bytes(encrypted, keylength)
     
     return block
@@ -197,9 +197,9 @@ def decrypt(crypto, priv_key):
     
     '''
     
-    blocksize = common.byte_size(priv_key['n']) 
+    blocksize = common.byte_size(priv_key.n)
     encrypted = transform.bytes2int(crypto)
-    decrypted = core.decrypt_int(encrypted, priv_key['d'], priv_key['n'])
+    decrypted = core.decrypt_int(encrypted, priv_key.d, priv_key.n)
     cleartext = transform.int2bytes(decrypted, blocksize)
 
     # If we can't find the cleartext marker, decryption failed.
@@ -242,11 +242,11 @@ def sign(message, priv_key, hash):
 
     # Encrypt the hash with the private key
     cleartext = asn1code + hash
-    keylength = common.byte_size(priv_key['n'])
+    keylength = common.byte_size(priv_key.n)
     padded = _pad_for_signing(cleartext, keylength)
     
     payload = transform.bytes2int(padded)
-    encrypted = core.encrypt_int(payload, priv_key['d'], priv_key['n'])
+    encrypted = core.encrypt_int(payload, priv_key.d, priv_key.n)
     block = transform.int2bytes(encrypted, keylength)
     
     return block
@@ -263,9 +263,9 @@ def verify(message, signature, pub_key):
     @raise VerificationError: when the signature doesn't match the message.
     '''
     
-    blocksize = common.byte_size(pub_key['n']) 
+    blocksize = common.byte_size(pub_key.n)
     encrypted = transform.bytes2int(signature)
-    decrypted = core.decrypt_int(encrypted, pub_key['e'], pub_key['n'])
+    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
     clearsig = transform.int2bytes(decrypted, blocksize)
 
     # If we can't find the signature  marker, verification failed.
