@@ -38,6 +38,7 @@ Contents
     installation
     licence
     usage
+    cli
     compatibility
     reference
 
