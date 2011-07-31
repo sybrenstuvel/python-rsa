@@ -1,10 +1,10 @@
-'''Tests block operations.'''
+'''Tests varblock operations.'''
 
 from StringIO import StringIO
 import unittest
 
 import rsa
-from rsa import blocks
+from rsa import varblock
 
 class VarintTest(unittest.TestCase):
 
@@ -13,7 +13,7 @@ class VarintTest(unittest.TestCase):
         encoded = '\xac\x02crummy'
         infile = StringIO(encoded)
 
-        (decoded, read) = blocks.read_varint(infile)
+        (decoded, read) = varblock.read_varint(infile)
 
         # Test the returned values
         self.assertEqual(300, decoded)
@@ -27,7 +27,7 @@ class VarintTest(unittest.TestCase):
         encoded = '\x00crummy'
         infile = StringIO(encoded)
 
-        (decoded, read) = blocks.read_varint(infile)
+        (decoded, read) = varblock.read_varint(infile)
 
         # Test the returned values
         self.assertEqual(0, decoded)
@@ -41,7 +41,7 @@ class VarintTest(unittest.TestCase):
         expected = '\xac\x02'
         outfile = StringIO()
 
-        written = blocks.write_varint(outfile, 300)
+        written = varblock.write_varint(outfile, 300)
 
         # Test the returned values
         self.assertEqual(expected, outfile.getvalue())
@@ -51,7 +51,7 @@ class VarintTest(unittest.TestCase):
     def test_write_zero(self):
         
         outfile = StringIO()
-        written = blocks.write_varint(outfile, 0)
+        written = varblock.write_varint(outfile, 0)
 
         # Test the returned values
         self.assertEqual('\x00', outfile.getvalue())
@@ -63,7 +63,7 @@ class VarblockTest(unittest.TestCase):
     def test_yield_varblock(self):
         infile = StringIO('\x01\x0512345\x06Sybren')
 
-        varblocks = list(blocks.yield_varblocks(infile))
+        varblocks = list(varblock.yield_varblocks(infile))
         self.assertEqual(['12345', 'Sybren'], varblocks)
 
 class FixedblockTest(unittest.TestCase):
@@ -72,35 +72,6 @@ class FixedblockTest(unittest.TestCase):
 
         infile = StringIO('123456Sybren')
 
-        fixedblocks = list(blocks.yield_fixedblocks(infile, 6))
+        fixedblocks = list(varblock.yield_fixedblocks(infile, 6))
         self.assertEqual(['123456', 'Sybren'], fixedblocks)
-
-class BigfileTest(unittest.TestCase):
-
-    def test_encrypt_decrypt_bigfile(self):
-
-        # Expected block size + 11 bytes padding
-        pub_key, priv_key = rsa.newkeys((6 + 11) * 8)
-
-        # Encrypt the file
-        message = '123456Sybren'
-        infile = StringIO(message)
-        outfile = StringIO()
-
-        blocks.encrypt_bigfile(infile, outfile, pub_key)
-
-        # Test
-        crypto = outfile.getvalue()
-
-        cryptfile = StringIO(crypto)
-        clearfile = StringIO()
-
-        blocks.decrypt_bigfile(cryptfile, clearfile, priv_key)
-        self.assertEquals(clearfile.getvalue(), message)
-        
-        # We have 2x6 bytes in the message, so that should result in two
-        # blocks.
-        cryptfile.seek(0)
-        varblocks = list(blocks.yield_varblocks(cryptfile))
-        self.assertEqual(2, len(varblocks))
 
