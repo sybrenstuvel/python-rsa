@@ -3,6 +3,7 @@
 from StringIO import StringIO
 import unittest
 
+import rsa
 from rsa import blocks
 
 class VarintTest(unittest.TestCase):
@@ -73,3 +74,33 @@ class FixedblockTest(unittest.TestCase):
 
         fixedblocks = list(blocks.yield_fixedblocks(infile, 6))
         self.assertEqual(['123456', 'Sybren'], fixedblocks)
+
+class BigfileTest(unittest.TestCase):
+
+    def test_encrypt_decrypt_bigfile(self):
+
+        # Expected block size + 11 bytes padding
+        pub_key, priv_key = rsa.newkeys((6 + 11) * 8)
+
+        # Encrypt the file
+        message = '123456Sybren'
+        infile = StringIO(message)
+        outfile = StringIO()
+
+        blocks.encrypt_bigfile(infile, outfile, pub_key)
+
+        # Test
+        crypto = outfile.getvalue()
+
+        cryptfile = StringIO(crypto)
+        clearfile = StringIO()
+
+        blocks.decrypt_bigfile(cryptfile, clearfile, priv_key)
+        self.assertEquals(clearfile.getvalue(), message)
+        
+        # We have 2x6 bytes in the message, so that should result in two
+        # blocks.
+        cryptfile.seek(0)
+        varblocks = list(blocks.yield_varblocks(cryptfile))
+        self.assertEqual(2, len(varblocks))
+

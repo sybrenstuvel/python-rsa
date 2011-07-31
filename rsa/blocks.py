@@ -38,6 +38,8 @@ used to denote the block sizes.
 
 '''
 
+from rsa import key, common, pkcs1
+
 VARBLOCK_VERSION = 1
 
 def read_varint(infile):
@@ -70,7 +72,6 @@ def read_varint(infile):
 
         if not byte & 0x80:
             return (varint, read_bytes)
-
 
 def write_varint(outfile, value):
     '''Writes a varint to a file.
@@ -110,7 +111,11 @@ def yield_varblocks(infile):
     '''
 
     # Check the version number
-    version = ord(infile.read(1))
+    first_char = infile.read(1)
+    if len(first_char) == 0:
+        raise EOFError('Unable to read VARBLOCK version number')
+
+    version = ord(first_char)
     if version != VARBLOCK_VERSION:
         raise ValueError('VARBLOCK version %i not supported' % version)
 
@@ -131,7 +136,6 @@ def yield_varblocks(infile):
 
         yield block
 
-
 def yield_fixedblocks(infile, blocksize):
     '''Generator, yields each block of ``blocksize`` bytes in the input file.
 
@@ -150,4 +154,46 @@ def yield_fixedblocks(infile, blocksize):
 
         if read_bytes < blocksize:
             break
+
+
+def encrypt_bigfile(infile, outfile, pub_key):
+    '''Encrypts a file, writing it to 'outfile' in VARBLOCK format.
+    
+    :param infile: file-like object to read the cleartext from
+    :param outfile: file-like object to write the crypto in VARBLOCK format to
+    :param pub_key: :py:class:`rsa.PublicKey` to encrypt with
+
+    '''
+
+    if not isinstance(pub_key, key.PublicKey):
+        raise TypeError('Public key required, but got %r' % pub_key)
+
+    key_bytes = common.bit_size(pub_key.n) // 8
+    blocksize = key_bytes - 11 # keep space for PKCS#1 padding
+
+    # Write the version number to the VARBLOCK file
+    outfile.write(chr(VARBLOCK_VERSION))
+
+    # Encrypt and write each block
+    for block in yield_fixedblocks(infile, blocksize):
+        crypto = pkcs1.encrypt(block, pub_key)
+
+        write_varint(outfile, len(crypto))
+        outfile.write(crypto)
+
+def decrypt_bigfile(infile, outfile, priv_key):
+    '''Decrypts an encrypted VARBLOCK file, writing it to 'outfile'
+    
+    :param infile: file-like object to read the crypto in VARBLOCK format from
+    :param outfile: file-like object to write the cleartext to
+    :param priv_key: :py:class:`rsa.PrivateKey` to decrypt with
+
+    '''
+
+    if not isinstance(priv_key, key.PrivateKey):
+        raise TypeError('Private key required, but got %r' % priv_key)
+    
+    for block in yield_varblocks(infile):
+        cleartext = pkcs1.decrypt(block, priv_key)
+        outfile.write(cleartext)
 
