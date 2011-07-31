@@ -88,7 +88,7 @@ that only Bob can read.
 #. Alice encrypts the message using Bob's public key, and sends the
    encrypted message.
 
-    >>> cryto = rsa.encrypt(message, bob_pub)
+    >>> crypto = rsa.encrypt(message, bob_pub)
 
 #. Bob receives the message, and decrypts it with his private key.
 
