@@ -35,6 +35,8 @@ setup(name='rsa',
     entry_points={ 'console_scripts': [
         'pyrsa-priv2pub = rsa.util:private_to_public',
         'pyrsa-keygen = rsa.cli:keygen',
+        'pyrsa-encrypt = rsa.cli:encrypt',
+        'pyrsa-decrypt = rsa.cli:decrypt',
     ]},
 
 )
