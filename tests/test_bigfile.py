@@ -4,7 +4,7 @@ from StringIO import StringIO
 import unittest
 
 import rsa
-from rsa import bigfile, varblock
+from rsa import bigfile, varblock, pkcs1
 
 class BigfileTest(unittest.TestCase):
 
@@ -34,4 +34,23 @@ class BigfileTest(unittest.TestCase):
         cryptfile.seek(0)
         varblocks = list(varblock.yield_varblocks(cryptfile))
         self.assertEqual(2, len(varblocks))
+
+
+    def test_sign_verify_bigfile(self):
+
+        # Large enough to store MD5-sum and ASN.1 code for MD5
+        pub_key, priv_key = rsa.newkeys((34 + 11) * 8)
+
+        # Sign the file
+        msgfile = StringIO('123456Sybren')
+        signature = pkcs1.sign(msgfile, priv_key, 'MD5')
+
+        # Check the signature
+        msgfile.seek(0)
+        pkcs1.verify(msgfile, signature, pub_key)
+
+        # Alter the message, re-check
+        msgfile = StringIO('123456sybren')
+        self.assertRaises(pkcs1.VerificationError,
+            pkcs1.verify, msgfile, signature, pub_key)
 
