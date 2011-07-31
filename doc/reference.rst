@@ -25,5 +25,14 @@ Classes
     :members:
     :inherited-members:
 
+Exceptions
+--------------------------------------------------
+
+.. autoclass:: rsa.pkcs1.CryptoError(Exception)
+
+.. autoclass:: rsa.pkcs1.DecryptionError(CryptoError)
+
+.. autoclass:: rsa.pkcs1.VerificationError(CryptoError)
+
 
 
