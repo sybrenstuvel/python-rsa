@@ -37,6 +37,8 @@ setup(name='rsa',
         'pyrsa-keygen = rsa.cli:keygen',
         'pyrsa-encrypt = rsa.cli:encrypt',
         'pyrsa-decrypt = rsa.cli:decrypt',
+        'pyrsa-sign = rsa.cli:sign',
+        'pyrsa-verify = rsa.cli:verify',
     ]},
 
 )

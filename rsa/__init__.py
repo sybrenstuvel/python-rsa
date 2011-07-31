@@ -32,7 +32,8 @@ __date__ = "2010-02-08"
 __version__ = '3.0-beta0'
 
 from rsa.key import newkeys, PrivateKey, PublicKey
-from rsa.pkcs1 import encrypt, decrypt, sign, verify
+from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
+    VerificationError
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
@@ -40,5 +41,5 @@ if __name__ == "__main__":
     doctest.testmod()
 
 __all__ = ["newkeys", "encrypt", "decrypt", "sign", "verify", 'PublicKey',
-    'PrivateKey']
+    'PrivateKey', 'DecryptionError', 'VerificationError']
 
