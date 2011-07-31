@@ -16,6 +16,7 @@
 
 '''Commandline scripts.
 
+These scripts are called by the executables defined in setup.py.
 '''
 
 import sys
@@ -25,6 +26,8 @@ import rsa
 import rsa.bigfile
 
 def keygen():
+    '''Key generator.'''
+
     # Parse the CLI options
     parser = OptionParser(usage='usage: %prog [options] keysize',
             description='Generates a new RSA keypair of "keysize" bits.')
@@ -77,3 +80,4 @@ def keygen():
         print >>sys.stderr, 'Writing private key to stdout'
         sys.stdout.write(data)
 
+# vim: foldnestmax=1
