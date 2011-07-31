@@ -14,6 +14,6 @@ numbers. It also included generating public and private keys. There
 was no functionality for working with byte sequences (such as files)
 yet.
 
-.. TODO:: write more history
+.. todo:: write more history
 
 

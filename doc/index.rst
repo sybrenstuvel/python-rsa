@@ -39,6 +39,7 @@ Contents
     licence
     usage
     compatibility
+    reference
 
 
 Indices and tables

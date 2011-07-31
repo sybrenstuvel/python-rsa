@@ -41,15 +41,17 @@ class AbstractKey(object):
     def load_pkcs1(cls, keyfile, format='PEM'):
         r'''Loads a key in PKCS#1 DER or PEM format.
 
-        @param keyfile: contents of a DER- or PEM-encoded file that contains
+        :param keyfile: contents of a DER- or PEM-encoded file that contains
             the public key.
-        @param format: the format of the file to load; 'PEM' or 'DER'
-        @return: a PublicKey object
+        :param format: the format of the file to load; 'PEM' or 'DER'
+
+        :return: a PublicKey object
+
         '''
 
         methods = {
-            'PEM': cls.load_pkcs1_pem,
-            'DER': cls.load_pkcs1_der,
+            'PEM': cls._load_pkcs1_pem,
+            'DER': cls._load_pkcs1_der,
         }
 
         if format not in methods:
@@ -63,13 +65,14 @@ class AbstractKey(object):
     def save_pkcs1(self, format='PEM'):
         '''Saves the public key in PKCS#1 DER or PEM format.
 
-        @param format: the format to save; 'PEM' or 'DER'
-        @returns: the DER- or PEM-encoded public key.
+        :param format: the format to save; 'PEM' or 'DER'
+        :returns: the DER- or PEM-encoded public key.
+
         '''
 
         methods = {
-            'PEM': self.save_pkcs1_pem,
-            'DER': self.save_pkcs1_der,
+            'PEM': self._save_pkcs1_pem,
+            'DER': self._save_pkcs1_der,
         }
 
         if format not in methods:
@@ -86,7 +89,8 @@ class PublicKey(AbstractKey):
     This key is also known as the 'encryption key'. It contains the 'n' and 'e'
     values.
 
-    Supports attributes as well as dictionary-like access.
+    Supports attributes as well as dictionary-like access. Attribute accesss is
+    faster, though.
 
     >>> PublicKey(5, 3)
     PublicKey(5, 3)
@@ -128,7 +132,7 @@ class PublicKey(AbstractKey):
         return not (self == other)
 
     @classmethod
-    def load_pkcs1_der(cls, keyfile):
+    def _load_pkcs1_der(cls, keyfile):
         r'''Loads a key in PKCS#1 DER format.
 
         @param keyfile: contents of a DER-encoded file that contains the public
@@ -160,7 +164,7 @@ class PublicKey(AbstractKey):
         as_ints = tuple(int(x) for x in priv)
         return cls(*as_ints)
 
-    def save_pkcs1_der(self):
+    def _save_pkcs1_der(self):
         '''Saves the public key in PKCS#1 DER format.
 
         @returns: the DER-encoded public key.
@@ -183,7 +187,7 @@ class PublicKey(AbstractKey):
         return encoder.encode(asn_key)
 
     @classmethod
-    def load_pkcs1_pem(cls, keyfile):
+    def _load_pkcs1_pem(cls, keyfile):
         '''Loads a PKCS#1 PEM-encoded public key file.
 
         The contents of the file before the "-----BEGIN RSA PUBLIC KEY-----" and
@@ -197,7 +201,7 @@ class PublicKey(AbstractKey):
         der = rsa.pem.load_pem(keyfile, 'RSA PUBLIC KEY')
         return cls.load_pkcs1_der(der)
 
-    def save_pkcs1_pem(self):
+    def _save_pkcs1_pem(self):
         '''Saves a PKCS#1 PEM-encoded public key file.
 
         @return: contents of a PEM-encoded file that contains the public key.
@@ -212,7 +216,8 @@ class PrivateKey(AbstractKey):
     This key is also known as the 'decryption key'. It contains the 'n', 'e',
     'd', 'p', 'q' and other values.
 
-    Supports attributes as well as dictionary-like access.
+    Supports attributes as well as dictionary-like access. Attribute accesss is
+    faster, though.
 
     >>> PrivateKey(3247, 65537, 833, 191, 17)
     PrivateKey(3247, 65537, 833, 191, 17)
@@ -290,7 +295,7 @@ class PrivateKey(AbstractKey):
         return not (self == other)
 
     @classmethod
-    def load_pkcs1_der(cls, keyfile):
+    def _load_pkcs1_der(cls, keyfile):
         r'''Loads a key in PKCS#1 DER format.
 
         @param keyfile: contents of a DER-encoded file that contains the private
@@ -334,7 +339,7 @@ class PrivateKey(AbstractKey):
         as_ints = tuple(int(x) for x in priv[1:9])
         return cls(*as_ints)
 
-    def save_pkcs1_der(self):
+    def _save_pkcs1_der(self):
         '''Saves the private key in PKCS#1 DER format.
 
         @returns: the DER-encoded private key.
@@ -371,7 +376,7 @@ class PrivateKey(AbstractKey):
         return encoder.encode(asn_key)
 
     @classmethod
-    def load_pkcs1_pem(cls, keyfile):
+    def _load_pkcs1_pem(cls, keyfile):
         '''Loads a PKCS#1 PEM-encoded private key file.
 
         The contents of the file before the "-----BEGIN RSA PRIVATE KEY-----" and
@@ -385,7 +390,7 @@ class PrivateKey(AbstractKey):
         der = rsa.pem.load_pem(keyfile, 'RSA PRIVATE KEY')
         return cls.load_pkcs1_der(der)
 
-    def save_pkcs1_pem(self):
+    def _save_pkcs1_pem(self):
         '''Saves a PKCS#1 PEM-encoded private key file.
 
         @return: contents of a PEM-encoded file that contains the private key.
@@ -535,15 +540,16 @@ def gen_keys(nbits, accurate=True):
 def newkeys(nbits, accurate=True):
     """Generates public and private keys, and returns them as (pub, priv).
 
-    The public key is also known as the 'encryption key', and is a PublicKey
-    object. The private key is also known as the 'decryption key' and is a
-    PrivateKey object.
-    
-    @param nbits: the number of bits required to store ``n = p*q``.
-    @param accurate: when True, ``n`` will have exactly the number of bits you
-        asked for. However, this makes key generation much slower.
+    The public key is also known as the 'encryption key', and is a
+    :py:class:`PublicKey` object. The private key is also known as the
+    'decryption key' and is a :py:class:`PrivateKey` object.
 
-    @return: a tuple (PublicKey, PrivateKey)
+    :param nbits: the number of bits required to store ``n = p*q``.
+    :param accurate: when True, ``n`` will have exactly the number of bits you
+        asked for. However, this makes key generation much slower. When False,
+        `n`` may have slightly less bits.
+
+    :returns: a tuple (:py:class:`rsa.PublicKey`, :py:class:`rsa.PrivateKey`)
     
     """
 

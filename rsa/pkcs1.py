@@ -14,9 +14,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Functions for PKCS1 version 1.5 encryption and signing
+'''Functions for PKCS#1 version 1.5 encryption and signing
 
-This module implements certain functionality from PKCS1 version 1.5. For a
+This module implements certain functionality from PKCS#1 version 1.5. For a
 very clear example, read http://www.di-mgt.com.au/rsa_alg.html#pkcs1schemes
 
 At least 8 bytes of random padding is used when encrypting a message. This makes
@@ -62,7 +62,7 @@ class VerificationError(CryptoError):
 def _pad_for_encryption(message, target_length):
     r'''Pads the message for encryption, returning the padded message.
     
-    @return: 00 02 RANDOM_DATA 00 MESSAGE
+    :return: 00 02 RANDOM_DATA 00 MESSAGE
     
     >>> block = _pad_for_encryption('hello', 16)
     >>> len(block)
@@ -110,7 +110,7 @@ def _pad_for_signing(message, target_length):
     
     The padding is always a repetition of FF bytes.
     
-    @return: 00 01 PADDING 00 MESSAGE
+    :return: 00 01 PADDING 00 MESSAGE
     
     >>> block = _pad_for_signing('hello', 16)
     >>> len(block)
@@ -140,14 +140,13 @@ def _pad_for_signing(message, target_length):
     
     
 def encrypt(message, pub_key):
-    '''Encrypts the given message using PKCS1 v1.5
+    '''Encrypts the given message using PKCS#1 v1.5
     
-    @param message: the message to encrypt. Must be a byte string no longer than
+    :param message: the message to encrypt. Must be a byte string no longer than
         ``k-11`` bytes, where ``k`` is the number of bytes needed to encode
         the ``n`` component of the public key.
-    @param pub_key: the public key to encrypt with.
-    
-    @raise OverflowError: when the message is too large to fit in the padded
+    :param pub_key: the :py:class:`rsa.PublicKey` to encrypt with.
+    :raise OverflowError: when the message is too large to fit in the padded
         block.
         
     >>> from rsa import key, common
@@ -156,6 +155,7 @@ def encrypt(message, pub_key):
     >>> crypto = encrypt(message, pub_key)
     
     The crypto text should be just as long as the public key 'n' component:
+
     >>> len(crypto) == common.byte_size(pub_key.n)
     True
     
@@ -171,28 +171,32 @@ def encrypt(message, pub_key):
     return block
 
 def decrypt(crypto, priv_key):
-    r'''Decrypts the given message using PKCS1 v1.5
+    r'''Decrypts the given message using PKCS#1 v1.5
     
     The decryption is considered 'failed' when the resulting cleartext doesn't
     start with the bytes 00 02, or when the 00 byte between the padding and
     the message cannot be found.
     
-    @param crypto: the crypto text as returned by ``encrypt(message, pub_key)``
-    @param priv_key: the private key to decrypt with.
-    
-    @raise DecryptionError: when the decryption fails. No details are given as
+    :param crypto: the crypto text as returned by :py:func:`rsa.encrypt`
+    :param priv_key: the :py:class:`rsa.PrivateKey` to decrypt with.
+    :raise DecryptionError: when the decryption fails. No details are given as
         to why the code thinks the decryption fails, as this would leak
         information about the private key.
 
-    >>> from rsa import key, common
-    >>> (pub_key, priv_key) = key.newkeys(256)
+
+    >>> import rsa
+    >>> (pub_key, priv_key) = rsa.newkeys(256)
 
     It works with strings:
-    >>> decrypt(encrypt('hello', pub_key), priv_key)
+
+    >>> crypto = encrypt('hello', pub_key)
+    >>> decrypt(crypto, priv_key)
     'hello'
     
     And with binary data:
-    >>> decrypt(encrypt('\x00\x00\x00\x00\x01', pub_key), priv_key)
+
+    >>> crypto = encrypt('\x00\x00\x00\x00\x01', pub_key)
+    >>> decrypt(crypto, priv_key)
     '\x00\x00\x00\x00\x01'
     
     '''
@@ -218,16 +222,14 @@ def sign(message, priv_key, hash):
     '''Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
-    as a "detached signature", because the message itself isn't signed.
+    as a "detached signature", because the message itself isn't altered.
     
-    @param message: the message to sign
-    @param priv_key: the private key to sign with
-    @param hash: the hash method used on the message. Use 'MD5', 'SHA-1',
+    :param message: the message to sign
+    :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
+    :param hash: the hash method used on the message. Use 'MD5', 'SHA-1',
         'SHA-256', 'SHA-384' or 'SHA-512'.
-    
-    @return: a message signature block.
-    
-    @raise OverflowError: if the private key is too small to contain the
+    :return: a message signature block.
+    :raise OverflowError: if the private key is too small to contain the
         requested hash.
 
     '''
@@ -256,11 +258,11 @@ def verify(message, signature, pub_key):
     
     The hash method is detected automatically from the signature.
     
-    @param message: the signed message
-    @param signature: the signature block, as created with ``sign(...)``.
-    @param pub_key: the public key of the person signing the message.
-    
-    @raise VerificationError: when the signature doesn't match the message.
+    :param message: the signed message
+    :param signature: the signature block, as created with ``sign(...)``.
+    :param pub_key: the :py:class:`rsa.PublicKey` of the person signing the message.
+    :raise VerificationError: when the signature doesn't match the message.
+
     '''
     
     blocksize = common.byte_size(pub_key.n)
@@ -301,13 +303,14 @@ def _hash(message, method_name):
 def _find_method_hash(method_hash):
     '''Finds the hash method and the hash itself.
     
-    @param method_hash: ASN1 code for the hash method concatenated with the
+    :param method_hash: ASN1 code for the hash method concatenated with the
         hash itself.
     
-    @return: tuple (method, hash) where ``method`` is the used hash method, and
+    :return: tuple (method, hash) where ``method`` is the used hash method, and
         ``hash`` is the hash itself.
     
-    @raise VerificationFailed: when the hash method cannot be found
+    :raise VerificationFailed: when the hash method cannot be found
+
     '''
 
     for (hashname, asn1code) in HASH_ASN1.iteritems():
