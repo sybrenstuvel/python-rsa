@@ -65,4 +65,11 @@ class VarblockTest(unittest.TestCase):
         varblocks = list(blocks.yield_varblocks(infile))
         self.assertEqual(['12345', 'Sybren'], varblocks)
 
+class FixedblockTest(unittest.TestCase):
 
+    def test_yield_fixedblock(self):
+
+        infile = StringIO('123456Sybren')
+
+        fixedblocks = list(blocks.yield_fixedblocks(infile, 6))
+        self.assertEqual(['123456', 'Sybren'], fixedblocks)
