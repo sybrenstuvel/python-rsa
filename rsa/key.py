@@ -147,7 +147,7 @@ class PublicKey(AbstractKey):
 
         This loads the file:
 
-        >>> PublicKey.load_pkcs1_der(der)
+        >>> PublicKey._load_pkcs1_der(der)
         PublicKey(2367317549, 65537)
 
         '''
@@ -199,7 +199,7 @@ class PublicKey(AbstractKey):
         '''
 
         der = rsa.pem.load_pem(keyfile, 'RSA PUBLIC KEY')
-        return cls.load_pkcs1_der(der)
+        return cls._load_pkcs1_der(der)
 
     def _save_pkcs1_pem(self):
         '''Saves a PKCS#1 PEM-encoded public key file.
@@ -207,7 +207,7 @@ class PublicKey(AbstractKey):
         @return: contents of a PEM-encoded file that contains the public key.
         '''
 
-        der = self.save_pkcs1_der()
+        der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, 'RSA PUBLIC KEY')
 
 class PrivateKey(AbstractKey):
@@ -310,7 +310,7 @@ class PrivateKey(AbstractKey):
 
         This loads the file:
 
-        >>> PrivateKey.load_pkcs1_der(der)
+        >>> PrivateKey._load_pkcs1_der(der)
         PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         '''
@@ -388,7 +388,7 @@ class PrivateKey(AbstractKey):
         '''
 
         der = rsa.pem.load_pem(keyfile, 'RSA PRIVATE KEY')
-        return cls.load_pkcs1_der(der)
+        return cls._load_pkcs1_der(der)
 
     def _save_pkcs1_pem(self):
         '''Saves a PKCS#1 PEM-encoded private key file.
@@ -396,7 +396,7 @@ class PrivateKey(AbstractKey):
         @return: contents of a PEM-encoded file that contains the private key.
         '''
 
-        der = self.save_pkcs1_der()
+        der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, 'RSA PRIVATE KEY')
 
 
