@@ -81,3 +81,5 @@ def decrypt_bigfile(infile, outfile, priv_key):
         cleartext = pkcs1.decrypt(block, priv_key)
         outfile.write(cleartext)
 
+__all__ = ['encrypt_bigfile', 'decrypt_bigfile']
+
