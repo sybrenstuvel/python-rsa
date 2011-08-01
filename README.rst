@@ -1,11 +1,11 @@
 Pure Python RSA implementation
 ==============================
 
-Python-RSA is a pure-Python RSA implementation. It supports encryption
-and decryption, signing and verifying signatures, and key generation
-according to PKCS#1 version 1.5. It can be used as a Python library as
-well as on the commandline. The code was mostly written by Sybren A.
-Stüvel. The Python-RSA homepage is at http://stuvel.eu/rsa
+`Python-RSA`_ is a pure-Python RSA implementation. It supports
+encryption and decryption, signing and verifying signatures, and key
+generation according to PKCS#1 version 1.5. It can be used as a Python
+library as well as on the commandline. The code was mostly written by
+Sybren A.  Stüvel. The Python-RSA homepage is at http://stuvel.eu/rsa
 
 Download and install using::
 
@@ -21,6 +21,7 @@ The source code is maintained in a `Mercurial repository`_ and is
 licensed under the `Apache License, version 2.0`_
 
 
+.. _`Python-RSA`: http://stuvel.eu/rsa
 .. _`Mercurial repository`: https://bitbucket.org/sybren/python-rsa
 .. _`Python Package Index`: http://pypi.python.org/pypi/rsa
 .. _`Apache License, version 2.0`: http://www.apache.org/licenses/LICENSE-2.0
