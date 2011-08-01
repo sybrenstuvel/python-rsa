@@ -39,6 +39,8 @@ setup(name='rsa',
         'pyrsa-decrypt = rsa.cli:decrypt',
         'pyrsa-sign = rsa.cli:sign',
         'pyrsa-verify = rsa.cli:verify',
+        'pyrsa-encrypt-bigfile = rsa.cli:encrypt_bigfile',
+        'pyrsa-decrypt-bigfile = rsa.cli:decrypt_bigfile',
     ]},
 
 )

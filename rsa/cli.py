@@ -280,8 +280,98 @@ class VerifyOperation(CryptoOperation):
         print >>sys.stderr, 'Verification OK'
 
 
+class BigfileOperation(CryptoOperation):
+    '''CryptoOperation that doesn't read the entire file into memory.'''
+
+    def __init__(self):
+        CryptoOperation.__init__(self)
+
+        self.file_objects = []
+
+    def __del__(self):
+        '''Closes any open file handles.'''
+
+        for fobj in self.file_objects:
+            fobj.close()
+
+    def __call__(self):
+        '''Runs the program.'''
+
+        (cli, cli_args) = self.parse_cli()
+
+        key = self.read_key(cli_args[0], cli.keyform)
+
+        # Get the file handles
+        infile = self.get_infile(cli.input)
+        outfile = self.get_outfile(cli.output)
+
+        # Call the operation
+        print >>sys.stderr, self.operation_progressive.title()
+        self.perform_operation(infile, outfile, key, cli_args)
+
+    def get_infile(self, inname):
+        '''Returns the input file object'''
+
+        if inname:
+            print >>sys.stderr, 'Reading input from %s' % inname
+            fobj = open(inname, 'rb')
+            self.file_objects.append(fobj)
+        else:
+            print >>sys.stderr, 'Reading input from stdin'
+            fobj = sys.stdin
+
+        return fobj
+
+    def get_outfile(self, outname):
+        '''Returns the output file object'''
+
+        if outname:
+            print >>sys.stderr, 'Will write output to %s' % outname
+            fobj = open(outname, 'wb')
+            self.file_objects.append(fobj)
+        else:
+            print >>sys.stderr, 'Will write output to stdout'
+            fobj = sys.stdout
+
+        return fobj
+
+class EncryptBigfileOperation(BigfileOperation):
+    '''Encrypts a file to VARBLOCK format.'''
+
+    keyname = 'public'
+    description = ('Encrypts a file to an encrypted VARBLOCK file. The file '
+            'can be larger than the key length, but the output file is only '
+            'compatible with Python-RSA.')
+    operation = 'encrypt'
+    operation_past = 'encrypted'
+    operation_progressive = 'encrypting'
+
+    def perform_operation(self, infile, outfile, pub_key, cli_args=None):
+        '''Encrypts files to VARBLOCK.'''
+
+        return rsa.bigfile.encrypt_bigfile(infile, outfile, pub_key)
+
+class DecryptBigfileOperation(BigfileOperation):
+    '''Decrypts a file in VARBLOCK format.'''
+
+    keyname = 'private'
+    description = ('Decrypts an encrypted VARBLOCK file that was encrypted '
+            'with pyrsa-encrypt-bigfile')
+    operation = 'decrypt'
+    operation_past = 'decrypted'
+    operation_progressive = 'decrypting'
+    key_class = rsa.PrivateKey
+
+    def perform_operation(self, infile, outfile, priv_key, cli_args=None):
+        '''Decrypts a VARBLOCK file.'''
+
+        return rsa.bigfile.decrypt_bigfile(infile, outfile, priv_key)
+
+
 encrypt = EncryptOperation()
 decrypt = DecryptOperation()
 sign = SignOperation()
 verify = VerifyOperation()
+encrypt_bigfile = EncryptBigfileOperation()
+decrypt_bigfile = DecryptBigfileOperation()
 
