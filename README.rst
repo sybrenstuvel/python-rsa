@@ -10,12 +10,13 @@ Download and install using:
 
     pip install rsa
 
-or download it from [PyPI][pypi-rsa].
+or download it from the `Python Package Index`_.
 
-The source code is maintained in a [Mercurial repository] and is licensed under
-the [Apache License, version 2.0][APLv2].
+The source code is maintained in a `Mercurial repository`_ and is licensed under
+the `Apache License, version 2.0`_
 
 
-[Mercurial repository]: http://hg.stuvel.eu/python-rsa
-[pypi-rsa]: http://pypi.python.org/pypi/rsa
-[APLv2]: http://www.apache.org/licenses/LICENSE-2.0
+.. _`Mercurial repository`: http://hg.stuvel.eu/python-rsa
+.. _`Python Package Index`: http://pypi.python.org/pypi/rsa
+.. _`Apache License, version 2.0`: http://www.apache.org/licenses/LICENSE-2.0
+
