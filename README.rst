@@ -16,7 +16,7 @@ The source code is maintained in a `Mercurial repository`_ and is licensed under
 the `Apache License, version 2.0`_
 
 
-.. _`Mercurial repository`: http://hg.stuvel.eu/python-rsa
+.. _`Mercurial repository`: https://bitbucket.org/sybren/python-rsa
 .. _`Python Package Index`: http://pypi.python.org/pypi/rsa
 .. _`Apache License, version 2.0`: http://www.apache.org/licenses/LICENSE-2.0
 
