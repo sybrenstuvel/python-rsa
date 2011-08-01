@@ -1,19 +1,23 @@
 Pure Python RSA implementation
 ==============================
 
-As an assignment for the University of Amsterdam we wrote a pure Python RSA
-implementation. It's a module for calculating large primes, and RSA encryption,
-decryption, signing and verification. It also includes generating public and
-private keys.
+Python-RSA is a pure-Python RSA implementation. It supports encryption
+and decryption, signing and verifying signatures, and key generation
+according to PKCS#1 version 1.5. It can be used as a Python library as
+well as on the commandline.
 
-Download and install using:
+Download and install using::
 
     pip install rsa
 
+or::
+
+    easy_install rsa
+
 or download it from the `Python Package Index`_.
 
-The source code is maintained in a `Mercurial repository`_ and is licensed under
-the `Apache License, version 2.0`_
+The source code is maintained in a `Mercurial repository`_ and is
+licensed under the `Apache License, version 2.0`_
 
 
 .. _`Mercurial repository`: https://bitbucket.org/sybren/python-rsa
