@@ -105,6 +105,15 @@ the only one who can read the message.
     message, since she didn't sign it.
 
 
+RSA can only encrypt messages that are smaller than the key. A couple
+of bytes are lost on random padding, and the rest is available for the
+message itself. For example, a 512-bit key can encode a 53-byte
+message (512 bit = 64 bytes, 11 bytes are used for random padding and
+other stuff).
+
+See `Working with big files`_ for information on how to work with
+larger files.
+
 Low-level operations
 ++++++++++++++++++++++++++++++
 
@@ -152,9 +161,95 @@ Modify the message, and the signature is no longer valid and a
     about the key. It's only a tiny bit of information, but every bit
     makes cracking the keys easier.
 
+Instead of a message you can also call :py:func:`rsa.sign` and
+:py:func:`rsa.verify` with a :py:class:`file`-like object. If the
+message object has a ``read(int)`` method it is assumed to be a file.
+In that case the file is hashed in 1024-byte blocks at the time.
+
+    >>> with open('somefile', 'rb') as msgfile:
+    ...     signature = rsa.sign(msgfile, privkey, 'SHA-1')
+
+    >>> with open('somefile', 'rb') as msgfile:
+    ...     rsa.verify(msgfile, signature, pubkey)
+
 
 Working with big files
 --------------------------------------------------
 
+RSA can only encrypt messages that are smaller than the key. A couple
+of bytes are lost on random padding, and the rest is available for the
+message itself. For example, a 512-bit key can encode a 53-byte
+message (512 bit = 64 bytes, 11 bytes are used for random padding and
+other stuff).
 
+How it usually works
+++++++++++++++++++++++++++++++++++++++++
+
+The most common way to use RSA with larger files uses a block cypher
+like AES or DES3 to encrypt the file with a random key, then encrypt
+the random key with RSA. You would send the encrypted file along with
+the encrypted key to the recipient. The complete flow is:
+
+#. Generate a random key
+
+    >>> import rsa.randnum
+    >>> aes_key = rsa.randnum.read_random_bits(128)
+
+#. Use that key to encrypt the file with AES.
+#. Encrypt the AES key with RSA
+
+    >>> encrypted_aes_key = rsa.encrypt(aes_key, public_key)
+
+#. Send the encrypted file together with ``encrypted_aes_key``
+#. The recipient now reverses this process to obtain the encrypted
+   file.
+
+
+Only using Python-RSA
+++++++++++++++++++++++++++++++++++++++++
+
+As far as we know, there is no pure-Python AES encryption. Previous
+versions of Python-RSA included functionality to encrypt large files,
+with just RSA, and so does this version. The format has been improved,
+though.
+
+Encrypting works as follows: the input file is split into blocks that
+are just large enough to encrypt with your RSA key. Every block is
+then encrypted using RSA, and the encrypted blocks are assembled into
+the output file.
+
+Decrypting works in reverse. The encrypted file is separated into
+encrypted blocks. Those are decrypted, and assembled into the original
+file.
+
+.. note::
+    The file will get larger after encryption, as each encrypted block
+    has 8 bytes of random padding and 3 more bytes of overhead.
+
+Since these encryption/decryption functions are potentially called on
+very large files, they use another approach. Where the regular
+functions store the message in memory in its entirety, these functions
+work on one block at the time. As a result, you should call them with
+:py:class:`file`-like objects as the parameters.
+
+Before using we of course need a keypair:
+
+>>> import rsa
+>>> (pub_key, priv_key) = rsa.newkeys(512)
+
+Encryption works on file handles:
+
+>>> from rsa.bigfile import *
+>>> with open('inputfile', 'rb') as infile, open('outputfile', 'wb') as outfile:
+...     encrypt_bigfile(infile, outfile, pub_key)
+
+As does decryption:
+
+>>> from rsa.bigfile import *
+>>> with open('inputfile', 'rb') as infile, open('outputfile', 'wb') as outfile:
+...     decrypt_bigfile(infile, outfile, priv_key)
+
+.. note::
+    :py:func:`rsa.sign` and :py:func:`rsa.verify` work on arbitrarily
+    long files, so they do not have a "bigfile" equivalent.
 
