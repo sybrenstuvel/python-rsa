@@ -20,9 +20,12 @@ or if that doesn't work::
     sudo python setup.py install
 
 
-.. todo::
+The sources are tracked in our `Mercurial repository`_ at
+bitbucket.org. It also hosts the `issue tracker`_.
 
-    Add a source link here
+.. _`Mercurial repository`: https://bitbucket.org/sybren/python-rsa
+.. _`issue tracker`:
+    https://bitbucket.org/sybren/python-rsa/issues?status=new&status=open
 
 
 Dependencies
@@ -32,6 +35,7 @@ Python-RSA has very few dependencies. As a matter of fact, to use it
 you only need Python itself. Loading and saving keys does require an
 extra module, though: pyasn1. If you used pip or easy_install like
 described above, you should be ready to go.
+
 
 Development dependencies
 --------------------------------------------------
@@ -46,7 +50,7 @@ pip or easy_install to install the following packages:
 
 Once these are installed, use Mercurial_ to get a copy of the source::
 
-    hg clone http://hg.stuvel.eu/python-rsa
+    hg clone https://sybren@bitbucket.org/sybren/python-rsa
     sudo python setup.py develop
 
 

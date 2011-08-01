@@ -18,10 +18,13 @@ This RSA implementation has seen the eyes of a security expert, and it
 uses an industry standard random padding method. However, there are
 still possible vectors of attack. Just to name one example, it doesn't
 compress the input stream to remove repetitions, and if you display
-the stack trace of a ``Decryptionerror`` exception you'll leak
-information about the reason why decryption failed. And I'm sure that
-those aren't the only insecurities. Use your own judgement to decide
-whether this module is secure enough for your application.
+the stack trace of a :py:class:`rsa.pkcs1.CryptoError` exception
+you'll leak information about the reason why decryption or
+verification failed.
+
+I'm sure that those aren't the only insecurities. Use your own
+judgement to decide whether this module is secure enough for your
+application.
 
 If you have the time and skill to improve the implementation, by all
 means be my guest. The best way is to clone the Mercurial repository
@@ -43,10 +46,4 @@ Contents
     reference
 
 
-Indices and tables
-==================
-
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

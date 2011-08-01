@@ -217,3 +217,6 @@ man_pages = [
     ('index', 'python-rsa', u'Python-RSA Documentation',
      [u'Sybren A. Stüvel'], 1)
 ]
+
+todo_include_todos = True
+

@@ -1,6 +1,9 @@
 Compatibility with standards and other software
 ==================================================
 
+.. index:: OpenSSL
+.. index:: compatibility
+
 Python-RSA implements encryption and signatures according to PKCS#1
 version 1.5. This makes it compatible with the OpenSSL RSA module.
 
@@ -21,6 +24,8 @@ public keys, which are not supported.
 :Public keys:
     PKCS#1 v1.5 in PEM and DER format, ASN.1 type RSAPublicKey
 
+:VARBLOCK encryption:
+    Python-RSA only, not compatible with any other known application.
 
 
 Public keys from OpenSSL

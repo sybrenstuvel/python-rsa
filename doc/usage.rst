@@ -216,7 +216,7 @@ though.
 Encrypting works as follows: the input file is split into blocks that
 are just large enough to encrypt with your RSA key. Every block is
 then encrypted using RSA, and the encrypted blocks are assembled into
-the output file.
+the output file. This file format is called the VARBLOCK format.
 
 Decrypting works in reverse. The encrypted file is separated into
 encrypted blocks. Those are decrypted, and assembled into the original
@@ -252,4 +252,5 @@ As does decryption:
 .. note::
     :py:func:`rsa.sign` and :py:func:`rsa.verify` work on arbitrarily
     long files, so they do not have a "bigfile" equivalent.
+
 
