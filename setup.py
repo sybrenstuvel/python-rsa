@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# Ensure that 'distribute' is installed.
+# Ensure that a reasonably recent version of 'distribute' is installed.
 from distribute_setup import use_setuptools
-use_setuptools()
+use_setuptools('0.6.10')
 
 from setuptools import setup
 
