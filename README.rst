@@ -5,7 +5,10 @@ Pure Python RSA implementation
 encryption and decryption, signing and verifying signatures, and key
 generation according to PKCS#1 version 1.5. It can be used as a Python
 library as well as on the commandline. The code was mostly written by
-Sybren A.  Stüvel. The Python-RSA homepage is at http://stuvel.eu/rsa
+Sybren A.  Stüvel.
+
+Documentation can be found at the Python-RSA homepage:
+http://stuvel.eu/rsa
 
 Download and install using::
 
