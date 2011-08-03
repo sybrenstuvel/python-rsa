@@ -27,24 +27,25 @@ Public keys:
 :ref:`VARBLOCK <bigfiles>` encryption:
     Python-RSA only, not compatible with any other known application.
 
+.. _openssl:
 
-Public keys from OpenSSL
+Interoperability with OpenSSL
 --------------------------------------------------
 
-To get a Python-RSA-compatible public key from OpenSSL, you need the
-private key. Get the private key in PEM or DER format and run it
-through the ``pyrsa-priv2pub`` command::
+You can create a 512-bit RSA key in OpenSSL as follows::
 
- 
- Usage: pyrsa-priv2pub [options]
- 
- Reads a private key and outputs the corresponding public key. Both
- private and public keys use the format described in PKCS#1 v1.5
- 
- Options:
-   -h, --help         show this help message and exit
-   --in=INFILENAME    Input filename. Reads from stdin if not specified
-   --out=OUTFILENAME  Output filename. Writes to stdout of not specified
-   --inform=INFORM    key format of input - default PEM
-   --outform=OUTFORM  key format of output - default PEM
+    openssl genrsa -out myprivatekey.pem 512
+
+To get a Python-RSA-compatible public key from OpenSSL, you need the
+private key first, then run it through the ``pyrsa-priv2pub``
+command::
+
+    pyrsa-priv2pub -i myprivatekey.pem -o mypublickey.pem
+
+Encryption and decryption is also compatible::
+
+    $ echo hello there > testfile.txt
+    $ pyrsa-encrypt -i testfile.txt -o testfile.rsa publickey.pem
+    $ openssl rsautl -in testfile.rsa -inkey privatekey.pem -decrypt
+    hello there
 

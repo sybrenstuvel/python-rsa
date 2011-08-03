@@ -30,9 +30,9 @@ def private_to_public():
             'corresponding public key. Both private and public keys use '
             'the format described in PKCS#1 v1.5')
 
-    parser.add_option('--in', dest='infilename', type='string',
+    parser.add_option('-i', '--input', dest='infilename', type='string',
             help='Input filename. Reads from stdin if not specified')
-    parser.add_option('--out', dest='outfilename', type='string',
+    parser.add_option('-o', '--output', dest='outfilename', type='string',
             help='Output filename. Writes to stdout of not specified')
 
     parser.add_option('--inform', dest='inform',

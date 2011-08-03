@@ -44,8 +44,9 @@ encrypt. If you don't mind having a slightly smaller key than you
 requested, you can pass ``accurate=False`` to speed up the key
 generation process.
 
-These are some timings from my netbook (Linux 2.6, 1.6 GHz Intel Atom
-N270 CPU, 2 GB RAM):
+These are some average timings from my netbook (Linux 2.6, 1.6 GHz
+Intel Atom N270 CPU, 2 GB RAM). Since key generation is a random
+process, times may differ.
 
 +----------------+------------------+
 | Keysize (bits) | Time to generate |
@@ -68,6 +69,36 @@ N270 CPU, 2 GB RAM):
 +----------------+------------------+
 | 2048           | 132.97 sec.      |
 +----------------+------------------+
+
+If key generation is too slow for you, you could use OpenSSL to
+generate them for you, then load them in your Python code. See
+:ref:`openssl` for more information.
+
+Key size requirements
+--------------------------------------------------
+
+Python-RSA version 3.0 introduced PKCS#1-style random padding. This
+means that 11 bytes (88 bits) of your key are no longer usable for
+encryption, so keys smaller than this are unusable. The larger the
+key, the higher the security.
+
+Creating signatures also requires a key of a certain size, depending
+on the used hash method:
+
++-------------+-----------------------------------+
+| Hash method | Suggested minimum key size (bits) |
++=============+===================================+
+| MD5         | 360                               |
++-------------+-----------------------------------+
+| SHA-1       | 368                               |
++-------------+-----------------------------------+
+| SHA-256     | 496                               |
++-------------+-----------------------------------+
+| SHA-384     | 624                               |
++-------------+-----------------------------------+
+| SHA-512     | 752                               |
++-------------+-----------------------------------+
+
 
 
 Encryption and decryption

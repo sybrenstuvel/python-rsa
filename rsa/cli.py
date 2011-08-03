@@ -41,7 +41,7 @@ def keygen():
             'not saved if this option is not present. You can use '
             'pyrsa-priv2pub to create the public key file later.')
     
-    parser.add_option('--out', type='string',
+    parser.add_option('-o', '--out', type='string',
             help='Output filename for the private key. The key is '
             'written to stdout if this option is not present.')
 
@@ -142,10 +142,10 @@ class CryptoOperation(object):
 
         parser = OptionParser(usage=self.usage, description=self.description)
         
-        parser.add_option('--input', type='string', help=self.input_help)
+        parser.add_option('-i', '--input', type='string', help=self.input_help)
 
         if self.has_output:
-            parser.add_option('--output', type='string', help=self.output_help)
+            parser.add_option('-o', '--output', type='string', help=self.output_help)
 
         parser.add_option('--keyform',
                 help='Key format of the %s key - default PEM' % self.keyname,
