@@ -29,7 +29,7 @@ on how to use them. Here is a short overview:
 |                       | the console as well as returned in the exit      |                                         |
 |                       | status code.                                     |                                         |
 +-----------------------+--------------------------------------------------+-----------------------------------------+
-| pyrsa-priv2pub        | Reads a private key and outputs the              |                                         |
+| pyrsa-priv2pub        | Reads a private key and outputs the              | \-                                      |
 |                       | corresponding public key.                        |                                         |
 +-----------------------+--------------------------------------------------+-----------------------------------------+
 | pyrsa-encrypt-bigfile | Encrypts a file to an encrypted VARBLOCK file.   | :py:func:`rsa.bigfile.encrypt_bigfile`  |

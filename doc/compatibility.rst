@@ -1,4 +1,4 @@
-Compatibility with standards and other software
+Compatibility with standards
 ==================================================
 
 .. index:: OpenSSL
