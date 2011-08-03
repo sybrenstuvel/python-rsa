@@ -217,7 +217,7 @@ def decrypt(crypto, priv_key):
     >>> decrypt(crypto, priv_key)
     Traceback (most recent call last):
     ...
-    rsa.pkcs1.DecryptionError: Decryption failed
+    DecryptionError: Decryption failed
 
     '''
     
