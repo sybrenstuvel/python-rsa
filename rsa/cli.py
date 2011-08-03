@@ -41,7 +41,7 @@ def keygen():
             'not saved if this option is not present. You can use '
             'pyrsa-priv2pub to create the public key file later.')
     
-    parser.add_option('--privout', type='string',
+    parser.add_option('--out', type='string',
             help='Output filename for the private key. The key is '
             'written to stdout if this option is not present.')
 
@@ -76,9 +76,9 @@ def keygen():
     # Save private key
     data = priv_key.save_pkcs1(format=cli.form)
     
-    if cli.privout:
-        print >>sys.stderr, 'Writing private key to %s' % cli.privout
-        with open(cli.privout, 'w') as outfile:
+    if cli.out:
+        print >>sys.stderr, 'Writing private key to %s' % cli.out
+        with open(cli.out, 'w') as outfile:
             outfile.write(data)
     else:
         print >>sys.stderr, 'Writing private key to stdout'
