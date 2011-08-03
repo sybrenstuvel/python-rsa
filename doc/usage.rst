@@ -1,3 +1,5 @@
+.. _usage:
+
 Usage
 ==================================================
 
@@ -6,7 +8,7 @@ This section describes the usage of the Python-RSA module.
 Before you can use RSA you need keys. You will receive a private key
 and a public key.
 
-.. note::
+.. important::
 
     The private key is called *private* for a reason. Never share this
     key with anyone.
@@ -97,22 +99,36 @@ that only Bob can read.
     hello Bob!
 
 Since Bob kept his private key *private*, Alice can be sure that he is
-the only one who can read the message.
-
-.. note::
-
-    Bob does *not* know for sure that it was Alice that sent the
-    message, since she didn't sign it.
+the only one who can read the message. Bob does *not* know for sure
+that it was Alice that sent the message, since she didn't sign it.
 
 
 RSA can only encrypt messages that are smaller than the key. A couple
 of bytes are lost on random padding, and the rest is available for the
 message itself. For example, a 512-bit key can encode a 53-byte
 message (512 bit = 64 bytes, 11 bytes are used for random padding and
-other stuff).
-
-See `Working with big files`_ for information on how to work with
+other stuff). See :ref:`bigfiles` for information on how to work with
 larger files.
+
+Altering the encrypted information will *likely* cause a
+:py:class:`rsa.pkcs1.DecryptionError`. If you want to be *sure*, use
+:py:func:`rsa.sign`.
+
+    >>> crypto = encrypt('hello', pub_key)
+    >>> crypto = 'X' + crypto[1:] # change the first byte
+    >>> decrypt(crypto, priv_key)
+    Traceback (most recent call last):
+    ...
+    rsa.pkcs1.DecryptionError: Decryption failed
+
+
+.. warning::
+
+    Never display the stack trace of a
+    :py:class:`rsa.pkcs1.DecryptionError` exception. It shows where
+    in the code the exception occurred, and thus leaks information
+    about the key. It’s only a tiny bit of information, but every bit
+    makes cracking the keys easier.
 
 Low-level operations
 ++++++++++++++++++++++++++++++
@@ -153,7 +169,7 @@ Modify the message, and the signature is no longer valid and a
         raise VerificationError('Verification failed')
     rsa.pkcs1.VerificationError: Verification failed
 
-.. note::
+.. warning::
 
     Never display the stack trace of a
     :py:class:`rsa.pkcs1.VerificationError` exception. It shows where
@@ -172,6 +188,8 @@ In that case the file is hashed in 1024-byte blocks at the time.
     >>> with open('somefile', 'rb') as msgfile:
     ...     rsa.verify(msgfile, signature, pubkey)
 
+
+.. _bigfiles:
 
 Working with big files
 --------------------------------------------------
@@ -196,33 +214,39 @@ the encrypted key to the recipient. The complete flow is:
     >>> aes_key = rsa.randnum.read_random_bits(128)
 
 #. Use that key to encrypt the file with AES.
-#. Encrypt the AES key with RSA
+#. :py:func:`Encrypt <rsa.encrypt>` the AES key with RSA
 
-    >>> encrypted_aes_key = rsa.encrypt(aes_key, public_key)
+    >>> encrypted_aes_key = rsa.encrypt(aes_key, public_rsa_key)
 
 #. Send the encrypted file together with ``encrypted_aes_key``
 #. The recipient now reverses this process to obtain the encrypted
    file.
 
+.. note::
 
-Only using Python-RSA
-++++++++++++++++++++++++++++++++++++++++
+    The Python-RSA module does not contain functionality to do the AES
+    encryption for you.
+
+Only using Python-RSA: the VARBLOCK format
++++++++++++++++++++++++++++++++++++++++++++
 
 As far as we know, there is no pure-Python AES encryption. Previous
-versions of Python-RSA included functionality to encrypt large files,
+versions of Python-RSA included functionality to encrypt large files
 with just RSA, and so does this version. The format has been improved,
 though.
 
 Encrypting works as follows: the input file is split into blocks that
 are just large enough to encrypt with your RSA key. Every block is
 then encrypted using RSA, and the encrypted blocks are assembled into
-the output file. This file format is called the VARBLOCK format.
+the output file. This file format is called the :ref:`VARBLOCK
+<VARBLOCK>` format.
 
 Decrypting works in reverse. The encrypted file is separated into
 encrypted blocks. Those are decrypted, and assembled into the original
 file.
 
 .. note::
+
     The file will get larger after encryption, as each encrypted block
     has 8 bytes of random padding and 3 more bytes of overhead.
 
@@ -237,19 +261,22 @@ Before using we of course need a keypair:
 >>> import rsa
 >>> (pub_key, priv_key) = rsa.newkeys(512)
 
-Encryption works on file handles:
+Encryption works on file handles using the
+:py:func:`rsa.bigfile.encrypt_bigfile` function:
 
 >>> from rsa.bigfile import *
 >>> with open('inputfile', 'rb') as infile, open('outputfile', 'wb') as outfile:
 ...     encrypt_bigfile(infile, outfile, pub_key)
 
-As does decryption:
+As does decryption using the :py:func:`rsa.bigfile.decrypt_bigfile`
+function:
 
 >>> from rsa.bigfile import *
 >>> with open('inputfile', 'rb') as infile, open('outputfile', 'wb') as outfile:
 ...     decrypt_bigfile(infile, outfile, priv_key)
 
 .. note::
+
     :py:func:`rsa.sign` and :py:func:`rsa.verify` work on arbitrarily
     long files, so they do not have a "bigfile" equivalent.
 

@@ -36,9 +36,11 @@ Contents
 
 .. toctree::
     :maxdepth: 2
+    :numbered:
 
     intro
     installation
+    upgrading
     licence
     usage
     cli

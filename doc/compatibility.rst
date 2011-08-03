@@ -11,20 +11,20 @@ Keys are stored in PEM or DER format according to PKCS#1 v1.5. Private
 keys are compatible with OpenSSL. However, OpenSSL uses X.509 for its
 public keys, which are not supported.
 
-:Encryption:
+Encryption:
     PKCS#1 v1.5 with at least 8 bytes of random padding
 
-:Signatures:
+Signatures:
     PKCS#1 v1.5 using the following hash methods:
     MD5, SHA-1, SHA-256, SHA-384, SHA-512
 
-:Private keys:
+Private keys:
     PKCS#1 v1.5 in PEM and DER format, ASN.1 type RSAPrivateKey
 
-:Public keys:
+Public keys:
     PKCS#1 v1.5 in PEM and DER format, ASN.1 type RSAPublicKey
 
-:VARBLOCK encryption:
+:ref:`VARBLOCK <bigfiles>` encryption:
     Python-RSA only, not compatible with any other known application.
 
 

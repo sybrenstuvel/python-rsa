@@ -198,7 +198,27 @@ def decrypt(crypto, priv_key):
     >>> crypto = encrypt('\x00\x00\x00\x00\x01', pub_key)
     >>> decrypt(crypto, priv_key)
     '\x00\x00\x00\x00\x01'
-    
+
+    Altering the encrypted information will *likely* cause a
+    :py:class:`rsa.pkcs1.DecryptionError`. If you want to be *sure*, use
+    :py:func:`rsa.sign`.
+
+
+    .. warning::
+
+        Never display the stack trace of a
+        :py:class:`rsa.pkcs1.DecryptionError` exception. It shows where in the
+        code the exception occurred, and thus leaks information about the key.
+        It's only a tiny bit of information, but every bit makes cracking the
+        keys easier.
+
+    >>> crypto = encrypt('hello', pub_key)
+    >>> crypto = 'X' + crypto[1:] # change the first byte
+    >>> decrypt(crypto, priv_key)
+    Traceback (most recent call last):
+    ...
+    rsa.pkcs1.DecryptionError: Decryption failed
+
     '''
     
     blocksize = common.byte_size(priv_key.n)
@@ -263,9 +283,17 @@ def verify(message, signature, pub_key):
     :param message: the signed message. Can be an 8-bit string or a file-like
         object. If ``message`` has a ``read()`` method, it is assumed to be a
         file-like object.
-    :param signature: the signature block, as created with ``sign(...)``.
+    :param signature: the signature block, as created with :py:func:`rsa.sign`.
     :param pub_key: the :py:class:`rsa.PublicKey` of the person signing the message.
     :raise VerificationError: when the signature doesn't match the message.
+
+    .. warning::
+
+        Never display the stack trace of a
+        :py:class:`rsa.pkcs1.VerificationError` exception. It shows where in
+        the code the exception occurred, and thus leaks information about the
+        key. It's only a tiny bit of information, but every bit makes cracking
+        the keys easier.
 
     '''
     
