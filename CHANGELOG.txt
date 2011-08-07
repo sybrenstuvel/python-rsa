@@ -1,7 +1,13 @@
 Python-RSA changelog
 ========================================
 
-Version 3.0 - in development
+Version 3.0.1 - released 2011-08-07
+----------------------------------------
+
+- Removed unused import of abc module
+
+
+Version 3.0 - released 2011-08-05
 ----------------------------------------
 
 - Changed the meaning of the keysize to mean the size of ``n`` rather than

@@ -25,7 +25,6 @@ of pyasn1.
 
 '''
 
-import abc
 import logging
 
 import rsa.prime
