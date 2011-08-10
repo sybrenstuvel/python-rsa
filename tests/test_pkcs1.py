@@ -30,12 +30,6 @@ class BinaryTest(unittest2.TestCase):
         message = struct.pack('>IIII', 0, 0, 0, 1)
         encrypted = pkcs1.encrypt(message, self.pub)
 
-        def _ord(a):
-            if is_integer(a):
-                return a
-            else:
-                return ord(a)
-
         # Alter the encrypted stream
         a = encrypted[5]
         if is_bytes(a):
