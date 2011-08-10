@@ -29,7 +29,7 @@ If you want to have a more secure implementation, use the functions from the
 
 __author__ = "Sybren Stuvel, Marloes de Boer, Ivo Tamboer, and Barry Mead"
 __date__ = "2011-08-07"
-__version__ = '3.0.1'
+__version__ = '3.1-beta0'
 
 from rsa.key import newkeys, PrivateKey, PublicKey
 from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
