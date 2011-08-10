@@ -421,15 +421,20 @@ def extended_gcd(a, b):
     if (ly < 0): ly += oa              #If neg wrap modulo orignal a
     return (a, lx, ly)                 #Return only positive values
 
-def find_p_q(nbits, accurate=True):
+def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     ''''Returns a tuple of two different primes of nbits bits each.
     
     The resulting p * q has exacty 2 * nbits bits, and the returned p and q
     will not be equal.
 
-    @param nbits: the number of bits in each of p and q.
-    @param accurate: whether to enable accurate mode or not.
-    @returns (p, q), where p > q
+    :param nbits: the number of bits in each of p and q.
+    :param getprime_func: the getprime function, defaults to
+        :py:func:`rsa.prime.getprime`.
+
+        *Introduced in Python-RSA 3.1*
+
+    :param accurate: whether to enable accurate mode or not.
+    :returns: (p, q), where p > q
 
     >>> (p, q) = find_p_q(128)
     >>> from rsa import common
@@ -457,9 +462,9 @@ def find_p_q(nbits, accurate=True):
     
     # Choose the two initial primes
     log.debug('find_p_q(%i): Finding p', nbits)
-    p = rsa.prime.getprime(pbits)
+    p = getprime_func(pbits)
     log.debug('find_p_q(%i): Finding q', nbits)
-    q = rsa.prime.getprime(qbits)
+    q = getprime_func(qbits)
 
     def is_acceptable(p, q):
         '''Returns True iff p and q are acceptable:
@@ -480,16 +485,12 @@ def find_p_q(nbits, accurate=True):
 
     # Keep choosing other primes until they match our requirements.
     change_p = False
-    tries = 0
     while not is_acceptable(p, q):
-        tries += 1
         # Change p on one iteration and q on the other
         if change_p:
-            log.debug('   find another p')
-            p = rsa.prime.getprime(pbits)
+            p = getprime_func(pbits)
         else:
-            log.debug('   find another q')
-            q = rsa.prime.getprime(qbits)
+            q = getprime_func(qbits)
 
         change_p = not change_p
 
@@ -522,41 +523,62 @@ def calculate_keys(p, q, nbits):
 
     return (e, d)
 
-def gen_keys(nbits, accurate=True):
+def gen_keys(nbits, getprime_func, accurate=True):
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
     
-    @param nbits: the total number of bits in ``p`` and ``q``. Both ``p`` and
+    :param nbits: the total number of bits in ``p`` and ``q``. Both ``p`` and
         ``q`` will use ``nbits/2`` bits.
+    :param getprime_func: either :py:func:`rsa.prime.getprime` or a function
+        with similar signature.
     """
 
-    (p, q) = find_p_q(nbits // 2, accurate)
+    (p, q) = find_p_q(nbits // 2, getprime_func, accurate)
     (e, d) = calculate_keys(p, q, nbits // 2)
 
     return (p, q, e, d)
 
-def newkeys(nbits, accurate=True):
+def newkeys(nbits, accurate=True, poolsize=1):
     """Generates public and private keys, and returns them as (pub, priv).
 
     The public key is also known as the 'encryption key', and is a
-    :py:class:`PublicKey` object. The private key is also known as the
-    'decryption key' and is a :py:class:`PrivateKey` object.
+    :py:class:`rsa.PublicKey` object. The private key is also known as the
+    'decryption key' and is a :py:class:`rsa.PrivateKey` object.
 
     :param nbits: the number of bits required to store ``n = p*q``.
     :param accurate: when True, ``n`` will have exactly the number of bits you
         asked for. However, this makes key generation much slower. When False,
         `n`` may have slightly less bits.
+    :param poolsize: the number of processes to use to generate the prime
+        numbers. If set to a number > 1, a parallel algorithm will be used.
+        This requires Python 2.6 or newer.
 
     :returns: a tuple (:py:class:`rsa.PublicKey`, :py:class:`rsa.PrivateKey`)
+
+    The ``poolsize`` parameter was added in *Python-RSA 3.1* and requires
+    Python 2.6 or newer.
     
     """
 
     if nbits < 16:
         raise ValueError('Key too small')
 
-    (p, q, e, d) = gen_keys(nbits)
+    if poolsize < 1:
+        raise ValueError('Pool size (%i) should be >= 1' % poolsize)
+
+    # Determine which getprime function to use
+    if poolsize > 1:
+        from rsa import parallel
+        import functools
+
+        getprime_func = functools.partial(parallel.getprime, poolsize=poolsize)
+    else: getprime_func = rsa.prime.getprime
+
+    # Generate the key components
+    (p, q, e, d) = gen_keys(nbits, getprime_func)
     
+    # Create the key objects
     n = p * q
 
     return (

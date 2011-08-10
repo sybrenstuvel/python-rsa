@@ -37,6 +37,10 @@ Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
     ...     keydata = privatefile.read()
     >>> pubkey = rsa.PrivateKey.load_pkcs1(keydata)
 
+
+Time to generate a key
+++++++++++++++++++++++++++++++++++++++++
+
 Generating a keypair may take a long time, depending on the number of
 bits required. The number of bits determines the cryptographic
 strength of the key, as well as the size of the message you can
@@ -44,35 +48,44 @@ encrypt. If you don't mind having a slightly smaller key than you
 requested, you can pass ``accurate=False`` to speed up the key
 generation process.
 
-These are some average timings from my netbook (Linux 2.6, 1.6 GHz
-Intel Atom N270 CPU, 2 GB RAM). Since key generation is a random
-process, times may differ.
+Another way to speed up the key generation process is to use multiple
+processes in parallel to speed up the key generation. Use no more than
+the number of processes that your machine can run in parallel; a
+dual-core machine should use ``poolsize=2``; a quad-core
+hyperthreading machine can run two threads on each core, and thus can
+use ``poolsize=8``.
 
-+----------------+------------------+
-| Keysize (bits) | Time to generate |
-+================+==================+
-| 32             | 0.01 sec.        |
-+----------------+------------------+
-| 64             | 0.03 sec.        |
-+----------------+------------------+
-| 96             | 0.04 sec.        |
-+----------------+------------------+
-| 128            | 0.08 sec.        |
-+----------------+------------------+
-| 256            | 0.27 sec.        |
-+----------------+------------------+
-| 384            | 0.93 sec.        |
-+----------------+------------------+
-| 512            | 1.21 sec.        |
-+----------------+------------------+
-| 1024           | 7.93 sec.        |
-+----------------+------------------+
-| 2048           | 132.97 sec.      |
-+----------------+------------------+
+    >>> (pubkey, privkey) = rsa.newkeys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default ``accurate=True``.
+
++----------------+------------------+------------------+
+| Keysize (bits) | single process   | eight processes  |
++================+==================+==================+
+| 128            | 0.01 sec.        | 0.01 sec.        |
++----------------+------------------+------------------+
+| 256            | 0.03 sec.        | 0.02 sec.        |
++----------------+------------------+------------------+
+| 384            | 0.09 sec.        | 0.04 sec.        |
++----------------+------------------+------------------+
+| 512            | 0.11 sec.        | 0.07 sec.        |
++----------------+------------------+------------------+
+| 1024           | 0.79 sec.        | 0.30 sec.        |
++----------------+------------------+------------------+
+| 2048           | 6.55 sec.        | 1.60 sec.        |
++----------------+------------------+------------------+
+| 3072           | 23.4 sec.        | 7.14 sec.        |
++----------------+------------------+------------------+
+| 4096           | 72.0 sec.        | 24.4 sec.        |
++----------------+------------------+------------------+
 
 If key generation is too slow for you, you could use OpenSSL to
-generate them for you, then load them in your Python code. See
-:ref:`openssl` for more information.
+generate them for you, then load them in your Python code. OpenSSL
+generates a 4096-bit key in 3.5 seconds on the same machine as used
+above. See :ref:`openssl` for more information.
 
 Key size requirements
 --------------------------------------------------

@@ -14,7 +14,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Numerical functions related to primes.'''
+'''Numerical functions related to primes.
+
+Implementation based on the book Algorithm Design by Michael T. Goodrich and
+Roberto Tamassia, 2002.
+'''
 
 __all__ = [ 'getprime', 'are_relatively_prime']
 
@@ -36,7 +40,12 @@ def gcd(p, q):
 def jacobi(a, b):
     """Calculates the value of the Jacobi symbol (a/b) where both a and b are
     positive integers, and b is odd
+
+    :returns: -1, 0 or 1
     """
+
+    assert a > 0
+    assert b > 0
 
     if a == 0: return 0
     result = 1
@@ -58,7 +67,8 @@ def jacobi_witness(x, n):
     """
 
     j = jacobi(x, n) % n
-    f = pow(x, (n - 1) // 2, n)
+
+    f = pow(x, n >> 1, n)
 
     if j == f: return False
     return True
@@ -72,6 +82,14 @@ def randomized_primality_testing(n, k):
     """
 
     # 50% of Jacobi-witnesses can report compositness of non-prime numbers
+
+    # The implemented algorithm using the Jacobi witness function has error
+    # probability q <= 0.5, according to Goodrich et. al
+    #
+    # q = 0.5
+    # t = int(math.ceil(k / log(1 / q, 2)))
+    # So t = k / log(2, 2) = k / 1 = k
+    # this means we can use range(k) rather than range(t)
 
     for _ in range(k):
         x = rsa.randnum.randint(n-1)
@@ -102,7 +120,7 @@ def getprime(nbits):
     False
     
     >>> from rsa import common
-    >>> common.bit_size(p) <= 128
+    >>> common.bit_size(p) == 128
     True
     
     """
