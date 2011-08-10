@@ -17,7 +17,6 @@
 '''Common functionality shared by several modules.'''
 
 
-import math
 
 def bit_size(number):
     '''Returns the number of bits required to hold a specific long number.
@@ -67,7 +66,13 @@ def byte_size(number):
     129
     """
 
-    return int(math.ceil(bit_size(number) / 8.0))
+    # Does not perform floating-point division and uses built-in divmod
+    # operator.
+    quanta, mod = divmod(bit_size(number), 8)
+    if mod:
+        quanta += 1
+    return quanta
+    #return int(math.ceil(bit_size(number) / 8.0))
 
 
 def extended_gcd(a, b):
