@@ -19,10 +19,12 @@
 From bytes to a number, number to bytes, etc.
 '''
 
-import binascii
+from __future__ import absolute_import
 
+import binascii
+from struct import pack
 from rsa import common
-from rsa._compat import byte, is_integer, b
+from rsa._compat import is_integer, b
 
 
 def bytes2int(raw_bytes):
@@ -85,18 +87,17 @@ def int2bytes(number, block_size=None):
                 'is %i' % (needed_bytes, block_size))
     
     # Convert the number to bytes.
-    raw_bytes = []
+    raw_bytes = b('')
     while number > 0:
-        raw_bytes.insert(0, byte(number & 0xFF))
-        number >>= 8
+        raw_bytes = pack(">I", number & 0xffffffff) + raw_bytes
+        number >>= 32
 
     # Pad with zeroes to fill the block
-    if block_size is not None:
-        padding = (block_size - needed_bytes) * b('\x00')
-    else:
-        padding = b('')
-
-    return padding + b('').join(raw_bytes)
+    if block_size is not None and block_size > 0:
+        remainder = len(raw_bytes) % block_size
+        if remainder:
+            raw_bytes = ((block_size - remainder) * b('\x00')) + raw_bytes
+    return raw_bytes
 
 
 if __name__ == '__main__':
