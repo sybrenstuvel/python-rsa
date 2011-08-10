@@ -21,6 +21,7 @@
 import os
 
 from rsa import common, transform
+from rsa._compat import byte
 
 def read_random_bits(nbits):
     '''Reads 'nbits' random bits.
@@ -38,7 +39,7 @@ def read_random_bits(nbits):
     if rbits > 0:
         randomvalue = ord(os.urandom(1))
         randomvalue >>= (8 - rbits)
-        randomdata = chr(randomvalue) + randomdata
+        randomdata = byte(randomvalue) + randomdata
 
     return randomdata
 

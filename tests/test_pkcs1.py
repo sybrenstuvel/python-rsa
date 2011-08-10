@@ -5,6 +5,7 @@ import unittest2
 
 import rsa
 from rsa import pkcs1
+from rsa._compat import byte, is_integer, b, is_bytes
 
 class BinaryTest(unittest2.TestCase):
 
@@ -29,8 +30,17 @@ class BinaryTest(unittest2.TestCase):
         message = struct.pack('>IIII', 0, 0, 0, 1)
         encrypted = pkcs1.encrypt(message, self.pub)
 
+        def _ord(a):
+            if is_integer(a):
+                return a
+            else:
+                return ord(a)
+
         # Alter the encrypted stream
-        encrypted = encrypted[:5] + chr(ord(encrypted[5]) + 1) + encrypted[6:]
+        a = encrypted[5]
+        if is_bytes(a):
+            a = ord(a)
+        encrypted = encrypted[:5] + byte(a + 1) + encrypted[6:]
         
         self.assertRaises(pkcs1.DecryptionError, pkcs1.decrypt, encrypted,
                           self.priv)
@@ -54,7 +64,7 @@ class SignatureTest(unittest2.TestCase):
     def test_sign_verify(self):
         '''Test happy flow of sign and verify'''
         
-        message = 'je moeder'
+        message = b('je moeder')
         print("\tMessage:   %r" % message)
 
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
@@ -65,16 +75,16 @@ class SignatureTest(unittest2.TestCase):
     def test_alter_message(self):
         '''Altering the message should let the verification fail.'''
         
-        signature = pkcs1.sign('je moeder', self.priv, 'SHA-256')
+        signature = pkcs1.sign(b('je moeder'), self.priv, 'SHA-256')
         self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
-                          'mijn moeder', signature, self.pub)
+                          b('mijn moeder'), signature, self.pub)
 
     def test_sign_different_key(self):
         '''Signing with another key should let the verification fail.'''
         
         (otherpub, _) = rsa.newkeys(512)
         
-        message = 'je moeder'
+        message = b('je moeder')
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
         self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
                           message, signature, otherpub)

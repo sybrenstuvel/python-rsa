@@ -1,9 +1,10 @@
 '''Tests block operations.'''
+from rsa._compat import b
 
 try:
-    from StringIO import StringIO
+    from StringIO import StringIO as BytesIO
 except ImportError:
-    from io import StringIO
+    from io import BytesIO
 import unittest2
 
 import rsa
@@ -17,17 +18,17 @@ class BigfileTest(unittest2.TestCase):
         pub_key, priv_key = rsa.newkeys((6 + 11) * 8)
 
         # Encrypt the file
-        message = '123456Sybren'
-        infile = StringIO(message)
-        outfile = StringIO()
+        message = b('123456Sybren')
+        infile = BytesIO(message)
+        outfile = BytesIO()
 
         bigfile.encrypt_bigfile(infile, outfile, pub_key)
 
         # Test
         crypto = outfile.getvalue()
 
-        cryptfile = StringIO(crypto)
-        clearfile = StringIO()
+        cryptfile = BytesIO(crypto)
+        clearfile = BytesIO()
 
         bigfile.decrypt_bigfile(cryptfile, clearfile, priv_key)
         self.assertEquals(clearfile.getvalue(), message)
@@ -45,7 +46,7 @@ class BigfileTest(unittest2.TestCase):
         pub_key, priv_key = rsa.newkeys((34 + 11) * 8)
 
         # Sign the file
-        msgfile = StringIO('123456Sybren')
+        msgfile = BytesIO(b('123456Sybren'))
         signature = pkcs1.sign(msgfile, priv_key, 'MD5')
 
         # Check the signature
@@ -53,7 +54,7 @@ class BigfileTest(unittest2.TestCase):
         pkcs1.verify(msgfile, signature, pub_key)
 
         # Alter the message, re-check
-        msgfile = StringIO('123456sybren')
+        msgfile = BytesIO(b('123456sybren'))
         self.assertRaises(pkcs1.VerificationError,
             pkcs1.verify, msgfile, signature, pub_key)
 

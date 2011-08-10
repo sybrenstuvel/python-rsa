@@ -17,6 +17,7 @@
 '''Functions that load and write PEM-encoded files.'''
 
 import base64
+from rsa._compat import b, is_bytes
 
 def _markers(pem_marker):
     '''Returns the start and end PEM markers
@@ -26,8 +27,11 @@ def _markers(pem_marker):
 
     '''
 
-    return ('-----BEGIN %s-----' % pem_marker,
-            '-----END %s-----' % pem_marker)
+    if is_bytes(pem_marker):
+        pem_marker = pem_marker.decode('utf-8')
+
+    return (b('-----BEGIN %s-----' % pem_marker),
+            b('-----END %s-----' % pem_marker))
 
 def load_pem(contents, pem_marker):
     '''Loads a PEM file.
@@ -49,7 +53,7 @@ def load_pem(contents, pem_marker):
     pem_lines = []
     in_pem_part = False
 
-    for line in contents.split('\n'):
+    for line in contents.splitlines():
         line = line.strip()
 
         # Skip empty lines
@@ -74,7 +78,7 @@ def load_pem(contents, pem_marker):
             break
 
         # Load fields
-        if ':' in line:
+        if b(':') in line:
             continue
 
         pem_lines.append(line)
@@ -87,8 +91,9 @@ def load_pem(contents, pem_marker):
         raise ValueError('No PEM end marker "%s" found' % pem_end)
 
     # Base64-decode the contents
-    pem = ''.join(pem_lines)
+    pem = b('').join(pem_lines)
     return base64.decodestring(pem)
+
 
 def save_pem(contents, pem_marker):
     '''Saves a PEM file.
@@ -104,7 +109,7 @@ def save_pem(contents, pem_marker):
 
     (pem_start, pem_end) = _markers(pem_marker)
 
-    b64 = base64.encodestring(contents).replace('\n', '')
+    b64 = base64.encodestring(contents).replace(b('\n'), b(''))
     pem_lines = [pem_start]
     
     for block_start in range(0, len(b64), 64):
@@ -112,7 +117,7 @@ def save_pem(contents, pem_marker):
         pem_lines.append(block)
 
     pem_lines.append(pem_end)
-    pem_lines.append('')
+    pem_lines.append(b(''))
 
-    return '\n'.join(pem_lines)
+    return b('\n').join(pem_lines)
     

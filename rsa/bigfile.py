@@ -39,6 +39,7 @@ used to denote the block sizes.
 '''
 
 from rsa import key, common, pkcs1, varblock
+from rsa._compat import byte
 
 def encrypt_bigfile(infile, outfile, pub_key):
     '''Encrypts a file, writing it to 'outfile' in VARBLOCK format.
@@ -56,7 +57,7 @@ def encrypt_bigfile(infile, outfile, pub_key):
     blocksize = key_bytes - 11 # keep space for PKCS#1 padding
 
     # Write the version number to the VARBLOCK file
-    outfile.write(chr(varblock.VARBLOCK_VERSION))
+    outfile.write(byte(varblock.VARBLOCK_VERSION))
 
     # Encrypt and write each block
     for block in varblock.yield_fixedblocks(infile, blocksize):

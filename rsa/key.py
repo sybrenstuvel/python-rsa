@@ -26,6 +26,7 @@ of pyasn1.
 '''
 
 import logging
+from rsa._compat import b
 
 import rsa.prime
 import rsa.pem
@@ -386,7 +387,7 @@ class PrivateKey(AbstractKey):
         @return: a PrivateKey object
         '''
 
-        der = rsa.pem.load_pem(keyfile, 'RSA PRIVATE KEY')
+        der = rsa.pem.load_pem(keyfile, b('RSA PRIVATE KEY'))
         return cls._load_pkcs1_der(der)
 
     def _save_pkcs1_pem(self):
@@ -396,7 +397,7 @@ class PrivateKey(AbstractKey):
         '''
 
         der = self._save_pkcs1_der()
-        return rsa.pem.save_pem(der, 'RSA PRIVATE KEY')
+        return rsa.pem.save_pem(der, b('RSA PRIVATE KEY'))
 
 def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     ''''Returns a tuple of two different primes of nbits bits each.

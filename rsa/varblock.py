@@ -31,6 +31,7 @@ This file format is called the VARBLOCK format, in line with the varint format
 used to denote the block sizes.
 
 '''
+from rsa._compat import byte
 
 VARBLOCK_VERSION = 1
 
@@ -88,7 +89,7 @@ def write_varint(outfile, value):
         if value > 0:
             to_write |= 0x80
 
-        outfile.write(chr(to_write))
+        outfile.write(byte(to_write))
         written_bytes += 1
 
     return written_bytes

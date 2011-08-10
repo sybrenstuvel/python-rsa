@@ -27,6 +27,8 @@ import sys
 import types
 import zlib
 
+from rsa._compat import byte
+
 # Display a warning that this insecure version is imported.
 import warnings
 warnings.warn('Insecure version of the RSA module is imported as %s, be careful'
@@ -78,7 +80,7 @@ def int2bytes(number):
     string = ""
 
     while number > 0:
-        string = "%s%s" % (chr(number & 0xFF), string)
+        string = "%s%s" % (byte(number & 0xFF), string)
         number /= 256
     
     return string

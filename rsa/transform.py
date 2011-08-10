@@ -19,12 +19,13 @@
 From bytes to a number, number to bytes, etc.
 '''
 
-import types
 import binascii
 
 from rsa import common
+from rsa._compat import byte, is_integer, b
 
-def bytes2int(bytes):
+
+def bytes2int(raw_bytes):
     r"""Converts a list of bytes or an 8-bit string to an integer.
 
     When using unicode strings, encode it to some encoding like UTF8 first.
@@ -36,7 +37,8 @@ def bytes2int(bytes):
 
     """
 
-    return int(binascii.hexlify(bytes), 16)
+    return int(binascii.hexlify(raw_bytes), 16)
+
 
 def int2bytes(number, block_size=None):
     r'''Converts a number to a string of bytes.
@@ -68,9 +70,9 @@ def int2bytes(number, block_size=None):
     '''
 
     # Type checking
-    if type(number) not in (types.LongType, types.IntType):
+    if not is_integer(number):
         raise TypeError("You must pass an integer for 'number', not %s" %
-            number.__class__)
+            type(number).__name__)
 
     if number < 0:
         raise ValueError('Negative numbers cannot be used: %i' % number)
@@ -83,18 +85,18 @@ def int2bytes(number, block_size=None):
                 'is %i' % (needed_bytes, block_size))
     
     # Convert the number to bytes.
-    bytes = []
+    raw_bytes = []
     while number > 0:
-        bytes.insert(0, chr(number & 0xFF))
+        raw_bytes.insert(0, byte(number & 0xFF))
         number >>= 8
 
     # Pad with zeroes to fill the block
     if block_size is not None:
-        padding = (block_size - needed_bytes) * '\x00'
+        padding = (block_size - needed_bytes) * b('\x00')
     else:
-        padding = ''
+        padding = b('')
 
-    return padding + ''.join(bytes)
+    return padding + b('').join(raw_bytes)
 
 
 if __name__ == '__main__':

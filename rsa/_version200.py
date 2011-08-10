@@ -18,6 +18,7 @@ import os
 import random
 import sys
 import types
+from rsa._compat import byte
 
 # Display a warning that this insecure version is imported.
 import warnings
@@ -78,7 +79,7 @@ def int2bytes(number):
     string = ""
 
     while number > 0:
-        string = "%s%s" % (chr(number & 0xFF), string)
+        string = "%s%s" % (byte(number & 0xFF), string)
         number /= 256
     
     return string
@@ -95,19 +96,19 @@ def to64(number):
         raise TypeError("You must pass a long or an int")
 
     if 0 <= number <= 9:            #00-09 translates to '0' - '9'
-        return chr(number + 48)
+        return byte(number + 48)
 
     if 10 <= number <= 35:
-        return chr(number + 55)     #10-35 translates to 'A' - 'Z'
+        return byte(number + 55)     #10-35 translates to 'A' - 'Z'
 
     if 36 <= number <= 61:
-        return chr(number + 61)     #36-61 translates to 'a' - 'z'
+        return byte(number + 61)     #36-61 translates to 'a' - 'z'
 
     if number == 62:                # 62   translates to '-' (minus)
-        return chr(45)
+        return byte(45)
 
     if number == 63:                # 63   translates to '_' (underscore)
-        return chr(95)
+        return byte(95)
 
     raise ValueError(u'Invalid Base64 value: %i' % number)
 

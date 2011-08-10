@@ -19,11 +19,12 @@ This is the actual core RSA implementation, which is only defined
 mathematically on integers.
 '''
 
-import types
+
+from rsa._compat import is_integer
 
 def assert_int(var, name):
 
-    if type(var) in (types.IntType, types.LongType):
+    if is_integer(var):
         return
 
     raise TypeError('%s should be an integer, not %s' % (name, var.__class__))

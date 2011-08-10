@@ -24,13 +24,13 @@ Comment: something blah
 
 Stuff after the key
 -----END CONFUSING STUFF-----
-''' % B64PRIV_DER)
+''' % B64PRIV_DER.decode("utf-8"))
 
 CLEAN_PRIVATE_PEM = b('''\
 -----BEGIN RSA PRIVATE KEY-----
 %s
 -----END RSA PRIVATE KEY-----
-''' % B64PRIV_DER)
+''' % B64PRIV_DER.decode("utf-8"))
 
 PUBLIC_PEM = b('''
 -----BEGIN CONFUSING STUFF-----
@@ -44,13 +44,13 @@ Comment: something blah
 
 Stuff after the key
 -----END CONFUSING STUFF-----
-''' % B64PUB_DER)
+''' % B64PUB_DER.decode("utf-8"))
 
 CLEAN_PUBLIC_PEM = b('''\
 -----BEGIN RSA PUBLIC KEY-----
 %s
 -----END RSA PUBLIC KEY-----
-''' % B64PUB_DER)
+''' % B64PUB_DER.decode("utf-8"))
 
 
 class DerTest(unittest2.TestCase):
