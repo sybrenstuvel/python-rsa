@@ -68,7 +68,7 @@ def int2bytes(number, block_size=None):
     >>> int2bytes(123456789, 3)
     Traceback (most recent call last):
     ...
-    OverflowError: Needed 4 bytes for number, but block size is 3
+    OverflowError: Need 4 bytes for number, but block size is 3
 
     '''
 
@@ -78,32 +78,39 @@ def int2bytes(number, block_size=None):
             type(number).__name__)
 
     if number < 0:
-        raise ValueError('Negative numbers cannot be used: %i' % number)
+        raise ValueError('Number must be unsigned integer: %d' % number)
 
-    # Convert the number to bytes.
     raw_bytes = b('')
-    while number > 0:
-        raw_bytes = pack(">I", number & 0xffffffff) + raw_bytes
-        number >>= 32
+    if not number:
+        raw_bytes = ZERO_BYTE
 
-    # Pad with zeroes to fill the block
-    if block_size is not None and block_size > 0:
-        # Best-case is where you wouldn't specify a block size that
-        # causes an overflow. So doing a bounds check here is better than
-        # doing it up-front.
+    num = number
+    while num > 0:
+        raw_bytes = pack('>I', num & 0xffffffff) + raw_bytes
+        num >>= 32
+
+    # Count the number of zero prefix bytes.
+    zero_leading = 0
+    for zero_leading, x in enumerate(raw_bytes):
+        if x != ZERO_BYTE[0]:
+            break
+
+    if block_size > 0:
+        # Bounds checking. We're not doing this up-front because the
+        # most common use case is not specifying a chunk size. In the worst
+        # case, the number will already have been converted to bytes above.
         length = len(raw_bytes)
-        zero_leading = 0
-        for zero_leading, x in enumerate(raw_bytes):
-            if x != ZERO_BYTE[0]:
-                break
-        needed_bytes = length - zero_leading
-        if needed_bytes > block_size:
-            raise OverflowError('Needed %i bytes for number, but block size '
-                'is %i' % (needed_bytes, block_size))
-
+        bytes_needed = length - zero_leading
+        if bytes_needed > block_size:
+            raise OverflowError(
+                "Need %d bytes for number, but block size is %d" %
+                (bytes_needed, block_size)
+            )
         remainder = length % block_size
         if remainder:
-            raw_bytes = ((block_size - remainder) * ZERO_BYTE) + raw_bytes
+            raw_bytes = (block_size - remainder) * ZERO_BYTE + raw_bytes
+    else:
+        raw_bytes = raw_bytes[zero_leading:]
     return raw_bytes
 
 
