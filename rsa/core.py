@@ -47,10 +47,6 @@ def decrypt_int(cyphertext, dkey, n):
     """Decrypts a cypher text using the decryption key 'dkey', working
     modulo n"""
 
-    if type(cyphertext) not in (types.IntType, types.LongType):
-        raise TypeError('cyphertext should be an integer, not %s' %
-                cyphertext.__type__)
-
     assert_int(cyphertext, 'cyphertext')
     assert_int(dkey, 'dkey')
     assert_int(n, 'n')
