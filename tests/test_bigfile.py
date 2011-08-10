@@ -4,12 +4,12 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-import unittest
+import unittest2
 
 import rsa
 from rsa import bigfile, varblock, pkcs1
 
-class BigfileTest(unittest.TestCase):
+class BigfileTest(unittest2.TestCase):
 
     def test_encrypt_decrypt_bigfile(self):
 

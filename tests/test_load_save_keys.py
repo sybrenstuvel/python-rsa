@@ -1,7 +1,7 @@
 '''Unittest for saving and loading keys.'''
 
 import base64
-import unittest
+import unittest2
 from rsa._compat import b
 
 import rsa.key
@@ -53,7 +53,7 @@ CLEAN_PUBLIC_PEM = b('''\
 ''' % B64PUB_DER)
 
 
-class DerTest(unittest.TestCase):
+class DerTest(unittest2.TestCase):
     '''Test saving and loading DER keys.'''
 
     def test_load_private_key(self):
@@ -88,7 +88,7 @@ class DerTest(unittest.TestCase):
 
         self.assertEqual(PUBLIC_DER, der)
 
-class PemTest(unittest.TestCase):
+class PemTest(unittest2.TestCase):
     '''Test saving and loading PEM keys.'''
 
 

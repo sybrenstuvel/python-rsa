@@ -1,12 +1,12 @@
 '''Tests string operations.'''
 
 import struct
-import unittest
+import unittest2
 
 import rsa
 from rsa import pkcs1
 
-class BinaryTest(unittest.TestCase):
+class BinaryTest(unittest2.TestCase):
 
     def setUp(self):
         (self.pub, self.priv) = rsa.newkeys(256)
@@ -46,7 +46,7 @@ class BinaryTest(unittest.TestCase):
         
         self.assertNotEqual(encrypted1, encrypted2)
 
-class SignatureTest(unittest.TestCase):
+class SignatureTest(unittest2.TestCase):
 
     def setUp(self):
         (self.pub, self.priv) = rsa.newkeys(512)

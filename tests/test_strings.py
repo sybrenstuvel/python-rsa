@@ -2,13 +2,13 @@
 
 from __future__ import absolute_import
 
-import unittest
+import unittest2
 
 import rsa
 
 from tests.constants import unicode_string
 
-class StringTest(unittest.TestCase):
+class StringTest(unittest2.TestCase):
 
     def setUp(self):
         (self.pub, self.priv) = rsa.newkeys(384)

@@ -1,20 +1,22 @@
 '''Tests varblock operations.'''
 
+
 try:
-    from StringIO import StringIO
+    from StringIO import StringIO as BytesIO
 except ImportError:
-    from io import StringIO
+    from io import BytesIO
 import unittest
 
 import rsa
+from rsa._compat import b
 from rsa import varblock
 
 class VarintTest(unittest.TestCase):
 
     def test_read_varint(self):
         
-        encoded = '\xac\x02crummy'
-        infile = StringIO(encoded)
+        encoded = b('\xac\x02crummy')
+        infile = BytesIO(encoded)
 
         (decoded, read) = varblock.read_varint(infile)
 
@@ -23,12 +25,12 @@ class VarintTest(unittest.TestCase):
         self.assertEqual(2, read)
 
         # The rest of the file should be untouched
-        self.assertEqual('crummy', infile.read())
+        self.assertEqual(b('crummy'), infile.read())
 
     def test_read_zero(self):
         
-        encoded = '\x00crummy'
-        infile = StringIO(encoded)
+        encoded = b('\x00crummy')
+        infile = BytesIO(encoded)
 
         (decoded, read) = varblock.read_varint(infile)
 
@@ -37,12 +39,12 @@ class VarintTest(unittest.TestCase):
         self.assertEqual(1, read)
 
         # The rest of the file should be untouched
-        self.assertEqual('crummy', infile.read())
+        self.assertEqual(b('crummy'), infile.read())
 
     def test_write_varint(self):
         
-        expected = '\xac\x02'
-        outfile = StringIO()
+        expected = b('\xac\x02')
+        outfile = BytesIO()
 
         written = varblock.write_varint(outfile, 300)
 
@@ -53,28 +55,28 @@ class VarintTest(unittest.TestCase):
 
     def test_write_zero(self):
         
-        outfile = StringIO()
+        outfile = BytesIO()
         written = varblock.write_varint(outfile, 0)
 
         # Test the returned values
-        self.assertEqual('\x00', outfile.getvalue())
+        self.assertEqual(b('\x00'), outfile.getvalue())
         self.assertEqual(1, written)
 
 
 class VarblockTest(unittest.TestCase):
 
     def test_yield_varblock(self):
-        infile = StringIO('\x01\x0512345\x06Sybren')
+        infile = BytesIO(b('\x01\x0512345\x06Sybren'))
 
         varblocks = list(varblock.yield_varblocks(infile))
-        self.assertEqual(['12345', 'Sybren'], varblocks)
+        self.assertEqual([b('12345'), b('Sybren')], varblocks)
 
 class FixedblockTest(unittest.TestCase):
 
     def test_yield_fixedblock(self):
 
-        infile = StringIO('123456Sybren')
+        infile = BytesIO(b('123456Sybren'))
 
         fixedblocks = list(varblock.yield_fixedblocks(infile, 6))
-        self.assertEqual(['123456', 'Sybren'], fixedblocks)
+        self.assertEqual([b('123456'), b('Sybren')], fixedblocks)
 
