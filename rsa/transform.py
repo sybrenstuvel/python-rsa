@@ -23,8 +23,9 @@ from __future__ import absolute_import
 
 import binascii
 from struct import pack
-from rsa import common
 from rsa._compat import is_integer, b
+
+ZERO_BYTE = b('\x00')
 
 
 def bytes2int(raw_bytes):
@@ -79,13 +80,6 @@ def int2bytes(number, block_size=None):
     if number < 0:
         raise ValueError('Negative numbers cannot be used: %i' % number)
 
-    # Do some bounds checking
-    if block_size is not None:
-        needed_bytes = common.byte_size(number)
-        if needed_bytes > block_size:
-            raise OverflowError('Needed %i bytes for number, but block size '
-                'is %i' % (needed_bytes, block_size))
-    
     # Convert the number to bytes.
     raw_bytes = b('')
     while number > 0:
@@ -94,9 +88,22 @@ def int2bytes(number, block_size=None):
 
     # Pad with zeroes to fill the block
     if block_size is not None and block_size > 0:
-        remainder = len(raw_bytes) % block_size
+        # Best-case is where you wouldn't specify a block size that
+        # causes an overflow. So doing a bounds check here is better than
+        # doing it up-front.
+        length = len(raw_bytes)
+        zero_leading = 0
+        for zero_leading, x in enumerate(raw_bytes):
+            if x != ZERO_BYTE[0]:
+                break
+        needed_bytes = length - zero_leading
+        if needed_bytes > block_size:
+            raise OverflowError('Needed %i bytes for number, but block size '
+                'is %i' % (needed_bytes, block_size))
+
+        remainder = length % block_size
         if remainder:
-            raw_bytes = ((block_size - remainder) * b('\x00')) + raw_bytes
+            raw_bytes = ((block_size - remainder) * ZERO_BYTE) + raw_bytes
     return raw_bytes
 
 
