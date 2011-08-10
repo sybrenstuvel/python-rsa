@@ -2,16 +2,17 @@
 
 import base64
 import unittest
+from rsa._compat import b
 
 import rsa.key
 
-B64PRIV_DER = 'MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt'
+B64PRIV_DER = b('MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt')
 PRIVATE_DER = base64.decodestring(B64PRIV_DER)
 
-B64PUB_DER = 'MAwCBQDeKYlRAgMBAAE='
+B64PUB_DER = b('MAwCBQDeKYlRAgMBAAE=')
 PUBLIC_DER = base64.decodestring(B64PUB_DER)
 
-PRIVATE_PEM = '''
+PRIVATE_PEM = b('''
 -----BEGIN CONFUSING STUFF-----
 Cruft before the key
 
@@ -23,15 +24,15 @@ Comment: something blah
 
 Stuff after the key
 -----END CONFUSING STUFF-----
-''' % B64PRIV_DER
+''' % B64PRIV_DER)
 
-CLEAN_PRIVATE_PEM = '''\
+CLEAN_PRIVATE_PEM = b('''\
 -----BEGIN RSA PRIVATE KEY-----
 %s
 -----END RSA PRIVATE KEY-----
-''' % B64PRIV_DER
+''' % B64PRIV_DER)
 
-PUBLIC_PEM = '''
+PUBLIC_PEM = b('''
 -----BEGIN CONFUSING STUFF-----
 Cruft before the key
 
@@ -43,13 +44,13 @@ Comment: something blah
 
 Stuff after the key
 -----END CONFUSING STUFF-----
-''' % B64PUB_DER
+''' % B64PUB_DER)
 
-CLEAN_PUBLIC_PEM = '''\
+CLEAN_PUBLIC_PEM = b('''\
 -----BEGIN RSA PUBLIC KEY-----
 %s
 -----END RSA PUBLIC KEY-----
-''' % B64PUB_DER
+''' % B64PUB_DER)
 
 
 class DerTest(unittest.TestCase):

@@ -116,7 +116,7 @@ class PublicKey(AbstractKey):
         return getattr(self, key)
 
     def __repr__(self):
-        return u'PublicKey(%i, %i)' % (self.n, self.e)
+        return 'PublicKey(%i, %i)' % (self.n, self.e)
 
     def __eq__(self, other):
         if other is None:
@@ -272,7 +272,7 @@ class PrivateKey(AbstractKey):
         return getattr(self, key)
 
     def __repr__(self):
-        return u'PrivateKey(%(n)i, %(e)i, %(d)i, %(p)i, %(q)i)' % self
+        return 'PrivateKey(%(n)i, %(e)i, %(d)i, %(p)i, %(q)i)' % self
 
     def __eq__(self, other):
         if other is None:
@@ -573,8 +573,8 @@ if __name__ == '__main__':
                 break
 
             if (count and count % 10 == 0) or count == 1:
-                print '%i times' % count
+                print('%i times' % count)
     except KeyboardInterrupt:
-        print 'Aborted'
+        print('Aborted')
     else:
-        print 'Doctests done'
+        print('Doctests done')

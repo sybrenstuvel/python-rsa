@@ -1,8 +1,12 @@
 '''Tests string operations.'''
 
+from __future__ import absolute_import
+
 import unittest
 
 import rsa
+
+from tests.constants import unicode_string
 
 class StringTest(unittest.TestCase):
 
@@ -11,14 +15,14 @@ class StringTest(unittest.TestCase):
 
     def test_enc_dec(self):
 
-        message = u"Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ".encode('utf-8')
-        print "\tMessage:   %s" % message
+        message = unicode_string.encode('utf-8')
+        print("\tMessage:   %s" % message)
 
         encrypted = rsa.encrypt(message, self.pub)
-        print "\tEncrypted: %s" % encrypted
+        print("\tEncrypted: %s" % encrypted)
 
         decrypted = rsa.decrypt(encrypted, self.priv)
-        print "\tDecrypted: %s" % decrypted
+        print("\tDecrypted: %s" % decrypted)
 
         self.assertEqual(message, decrypted)
 

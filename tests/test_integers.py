@@ -12,13 +12,13 @@ class IntegerTest(unittest.TestCase):
     def test_enc_dec(self):
 
         message = 42
-        print "\tMessage:   %d" % message
+        print("\tMessage:   %d" % message)
 
         encrypted = rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
-        print "\tEncrypted: %d" % encrypted
+        print("\tEncrypted: %d" % encrypted)
 
         decrypted = rsa.core.decrypt_int(encrypted, self.priv.d, self.pub.n)
-        print "\tDecrypted: %d" % decrypted
+        print("\tDecrypted: %d" % decrypted)
 
         self.assertEqual(message, decrypted)
 
@@ -27,10 +27,10 @@ class IntegerTest(unittest.TestCase):
         message = 42
 
         signed = rsa.core.encrypt_int(message,self.priv.d, self.pub.n)
-        print "\tSigned:    %d" % signed
+        print("\tSigned:    %d" % signed)
 
         verified = rsa.core.decrypt_int(signed, self.pub.e,self.pub.n)
-        print "\tVerified:  %d" % verified
+        print("\tVerified:  %d" % verified)
 
         self.assertEqual(message, verified)
 
