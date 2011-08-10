@@ -264,7 +264,7 @@ class PrivateKey(AbstractKey):
             self.exp2 = exp2
 
         if coef is None:
-            (_, self.coef, _) = extended_gcd(q, p)
+            self.coef = rsa.common.inverse(q, p)
         else:
             self.coef = coef
 
@@ -398,29 +398,6 @@ class PrivateKey(AbstractKey):
         der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, 'RSA PRIVATE KEY')
 
-
-def extended_gcd(a, b):
-    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
-    """
-    # r = gcd(a,b) i = multiplicitive inverse of a mod b
-    #      or      j = multiplicitive inverse of b mod a
-    # Neg return values for i or j are made positive mod b or a respectively
-    # Iterateive Version is faster and uses much less stack space
-    x = 0
-    y = 1
-    lx = 1
-    ly = 0
-    oa = a                             #Remember original a/b to remove 
-    ob = b                             #negative values from return results
-    while b != 0:
-        q = a // b
-        (a, b)  = (b, a % b)
-        (x, lx) = ((lx - (q * x)),x)
-        (y, ly) = ((ly - (q * y)),y)
-    if (lx < 0): lx += ob              #If neg wrap modulo orignal b
-    if (ly < 0): ly += oa              #If neg wrap modulo orignal a
-    return (a, lx, ly)                 #Return only positive values
-
 def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     ''''Returns a tuple of two different primes of nbits bits each.
     
@@ -509,14 +486,12 @@ def calculate_keys(p, q, nbits):
     # A very common choice for e is 65537
     e = 65537
 
-    (divider, d, _) = extended_gcd(e, phi_n)
-
-    if divider != 1:
+    try:
+        d = rsa.common.inverse(e, phi_n)
+    except ValueError:
         raise ValueError("e (%d) and phi_n (%d) are not relatively prime" %
                 (e, phi_n))
-    if (d < 0):
-        raise ValueError("extended_gcd shouldn't return negative values, "
-                "please file a bug")
+
     if (e * d) % phi_n != 1:
         raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "
                 "phi_n (%d)" % (e, d, phi_n))
