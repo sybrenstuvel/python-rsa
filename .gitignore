@@ -6,3 +6,6 @@
 dist/
 distribute*.tar.gz
 distribute*.egg
+
+.tox/
+.coverage

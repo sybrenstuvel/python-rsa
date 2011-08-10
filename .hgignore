@@ -6,3 +6,6 @@ dist/
 rsa.egg-info/
 distribute-0.6.*
 doc/_build/
+.tox/
+.coverage
+.idea/
