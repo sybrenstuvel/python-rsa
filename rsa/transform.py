@@ -21,9 +21,11 @@ From bytes to a number, number to bytes, etc.
 
 from __future__ import absolute_import
 
+import types
 import binascii
 from struct import pack
-from rsa._compat import is_integer, b
+from rsa import common
+from rsa._compat import is_integer, b, byte
 
 ZERO_BYTE = b('\x00')
 
@@ -43,8 +45,67 @@ def bytes2int(raw_bytes):
     return int(binascii.hexlify(raw_bytes), 16)
 
 
-def int2bytes(number, block_size=None):
+def old_int2bytes(number, block_size=0):
     r'''Converts a number to a string of bytes.
+
+    @param number: the number to convert
+    @param block_size: the number of bytes to output. If the number encoded to
+        bytes is less than this, the block will be zero-padded. When not given,
+        the returned block is not padded.
+
+    @throws OverflowError when block_size is given and the number takes up more
+        bytes than fit into the block.
+
+
+    >>> old_int2bytes(123456789)
+    b'\x07[\xcd\x15'
+    >>> bytes2int(int2bytes(123456789))
+    123456789
+
+    >>> old_int2bytes(123456789, 6)
+    b'\x00\x00\x07[\xcd\x15'
+    >>> bytes2int(int2bytes(123456789, 128))
+    123456789
+
+    >>> old_int2bytes(123456789, 3)
+    Traceback (most recent call last):
+    ...
+    OverflowError: Needed 4 bytes for number, but block size is 3
+
+    '''
+
+    # Type checking
+    if not is_integer(number):
+        raise TypeError("You must pass an integer for 'number', not %s" %
+            number.__class__)
+
+    if number < 0:
+        raise ValueError('Negative numbers cannot be used: %i' % number)
+
+    # Do some bounds checking
+    needed_bytes = common.byte_size(number)
+    if block_size > 0:
+        if needed_bytes > block_size:
+            raise OverflowError('Needed %i bytes for number, but block size '
+                'is %i' % (needed_bytes, block_size))
+
+    # Convert the number to bytes.
+    raw_bytes = []
+    while number > 0:
+        raw_bytes.insert(0, byte(number & 0xFF))
+        number >>= 8
+
+    # Pad with zeroes to fill the block
+    if block_size > 0:
+        padding = (block_size - needed_bytes) * ZERO_BYTE
+    else:
+        padding = b('')
+
+    return padding + b('').join(raw_bytes)
+
+
+def int2bytes(number, block_size=None):
+    """Converts a number to a string of bytes.
 
     @param number: the number to convert
     @param block_size: the number of bytes to output. If the number encoded to
@@ -69,9 +130,7 @@ def int2bytes(number, block_size=None):
     Traceback (most recent call last):
     ...
     OverflowError: Need 4 bytes for number, but block size is 3
-
-    '''
-
+    """
     # Type checking
     if not is_integer(number):
         raise TypeError("You must pass an integer for 'number', not %s" %
@@ -95,7 +154,7 @@ def int2bytes(number, block_size=None):
         if x != ZERO_BYTE[0]:
             break
 
-    if block_size > 0:
+    if block_size is not None and block_size > 0:
         # Bounds checking. We're not doing this up-front because the
         # most common use case is not specifying a chunk size. In the worst
         # case, the number will already have been converted to bytes above.
