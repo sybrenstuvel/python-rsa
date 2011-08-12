@@ -13,4 +13,7 @@ python2.7 -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2b
 echo "python3.2"
 python3 -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
 python3 -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
+echo "pypy"
+pypy -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
+pypy -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
 
