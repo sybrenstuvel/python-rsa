@@ -17,8 +17,50 @@
 '''Common functionality shared by several modules.'''
 
 
+def bit_size(num):
+    """
+    Number of bits needed to represent a integer excluding any prefix
+    0 bits.
 
-def bit_size(number):
+    >>> bit_size(1023)
+    10
+    >>> bit_size(1024)
+    11
+    >>> bit_size(1025)
+    11
+
+    >>> bit_size(1 << 1024)
+    1025
+    >>> bit_size((1 << 1024) + 1)
+    1025
+    >>> bit_size((1 << 1024) - 1)
+    1024
+
+    :param num:
+        Integer value. If num is 0, returns 0. Only the absolute value of the
+        number is considered. Therefore, signed integers will be abs(num)
+        before the number's bit length is determined.
+    :returns:
+        Returns the number of bits in the integer.
+    """
+    if num == 0:
+        return 0
+    if num < 0:
+        num = -num
+
+    # Make sure this is an int and not a float.
+    num & 1
+
+    hex_num = "%x" % num
+    return ((len(hex_num) - 1) * 4) + {
+        '0':0, '1':1, '2':2, '3':2,
+        '4':3, '5':3, '6':3, '7':3,
+        '8':4, '9':4, 'a':4, 'b':4,
+        'c':4, 'd':4, 'e':4, 'f':4,
+     }[hex_num[0]]
+
+
+def _bit_size(number):
     '''Returns the number of bits required to hold a specific long number.
 
     >>> bit_size(1023)
