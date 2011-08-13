@@ -138,7 +138,7 @@ def int2bytes(number, chunk_size=0,
         >>> int2bytes(123456789, 3)
         Traceback (most recent call last):
         ...
-        OverflowError: Need 4 bytes for number, but block size is 3
+        OverflowError: Need 4 bytes for number, but chunk size is 3
 
     :param number:
         Integer value
