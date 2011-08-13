@@ -153,14 +153,6 @@ def int2bytes(number, chunk_size=0,
         ``OverflowError`` when block_size is given and the number takes up more
         bytes than fit into the block.
     """
-    # Machine word-aligned implementation.
-    # ~19x faster than naive implementation on 32-bit processors.
-    # ~33x faster than naive implementation on 64-bit processors.
-    # ~50x faster on 64-bit pypy 1.5
-
-    # Don't need to raise TypeError ourselves. The code does that already
-    # if a bad type is passed in as argument.
-
     if number < 0:
         raise ValueError('Number must be unsigned integer: %d' % number)
 
@@ -182,24 +174,21 @@ def int2bytes(number, chunk_size=0,
     for zero_leading, x in enumerate(raw_bytes):
         if x != _zero_byte[0]:
             break
+    raw_bytes = raw_bytes[zero_leading:]
 
     if chunk_size > 0:
         # Bounds checking. We're not doing this up-front because the
         # most common use case is not specifying a chunk size. In the worst
         # case, the number will already have been converted to bytes above.
-        #length = count * word_bytes
         length = len(raw_bytes)
-        bytes_needed = length - zero_leading
-        if bytes_needed > chunk_size:
+        if length > chunk_size:
             raise OverflowError(
                 "Need %d bytes for number, but chunk size is %d" %
-                (bytes_needed, chunk_size)
+                (length, chunk_size)
             )
         remainder = length % chunk_size
         if remainder:
             raw_bytes = (chunk_size - remainder) * _zero_byte + raw_bytes
-    else:
-        raw_bytes = raw_bytes[zero_leading:]
     return raw_bytes
 
 
