@@ -174,13 +174,12 @@ def int2bytes(number, chunk_size=0,
     for zero_leading, x in enumerate(raw_bytes):
         if x != _zero_byte[0]:
             break
-    raw_bytes = raw_bytes[zero_leading:]
 
     if chunk_size > 0:
         # Bounds checking. We're not doing this up-front because the
         # most common use case is not specifying a chunk size. In the worst
         # case, the number will already have been converted to bytes above.
-        length = len(raw_bytes)
+        length = len(raw_bytes) - zero_leading
         if length > chunk_size:
             raise OverflowError(
                 "Need %d bytes for number, but chunk size is %d" %
@@ -188,7 +187,13 @@ def int2bytes(number, chunk_size=0,
             )
         remainder = length % chunk_size
         if remainder:
-            raw_bytes = (chunk_size - remainder) * _zero_byte + raw_bytes
+            padding_size = (chunk_size - remainder)
+            if zero_leading > 0:
+                raw_bytes = raw_bytes[zero_leading-padding_size:]
+            else:
+                raw_bytes = (padding_size * _zero_byte) + raw_bytes
+    else:
+        raw_bytes = raw_bytes[zero_leading:]
     return raw_bytes
 
 
