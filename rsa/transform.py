@@ -33,10 +33,7 @@ except ImportError:
 import binascii
 from struct import pack
 from rsa import common
-from rsa._compat import is_integer, b, byte, get_word_alignment
-
-
-ZERO_BYTE = b('\x00')
+from rsa._compat import is_integer, b, byte, get_word_alignment, ZERO_BYTE, EMPTY_BYTE
 
 
 def bytes2int(raw_bytes):
@@ -74,14 +71,19 @@ def _int2bytes(number, block_size=0):
         raise ValueError('Negative numbers cannot be used: %i' % number)
 
     # Do some bounds checking
-    needed_bytes = common.byte_size(number)
+    if number == 0:
+        needed_bytes = 1
+        raw_bytes = [ZERO_BYTE]
+    else:
+        needed_bytes = common.byte_size(number)
+        raw_bytes = []
+        
     if block_size > 0:
         if needed_bytes > block_size:
             raise OverflowError('Needed %i bytes for number, but block size '
                 'is %i' % (needed_bytes, block_size))
 
     # Convert the number to bytes.
-    raw_bytes = []
     while number > 0:
         raw_bytes.insert(0, byte(number & 0xFF))
         number >>= 8
@@ -90,9 +92,9 @@ def _int2bytes(number, block_size=0):
     if block_size > 0:
         padding = (block_size - needed_bytes) * ZERO_BYTE
     else:
-        padding = b('')
+        padding = EMPTY_BYTE
 
-    return padding + b('').join(raw_bytes)
+    return padding + EMPTY_BYTE.join(raw_bytes)
 
 
 def bytes_leading(raw_bytes, needle=ZERO_BYTE):
