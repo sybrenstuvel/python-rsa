@@ -21,9 +21,6 @@ class Test_byte_size(unittest2.TestCase):
         self.assertEqual(byte_size(1 << 1023), 128)
         self.assertEqual(byte_size((1 << 1024) - 1), 128)
         self.assertEqual(byte_size(1 << 1024), 129)
-
-    def test_zero(self):
-        self.assertEqual(byte_size(0), 1)
         self.assertEqual(byte_size(255), 1)
         self.assertEqual(byte_size(256), 2)
         self.assertEqual(byte_size(0xffff), 2)
@@ -33,7 +30,9 @@ class Test_byte_size(unittest2.TestCase):
         self.assertEqual(byte_size(0xffffffffffff), 6)
         self.assertEqual(byte_size(0xffffffffffffff), 7)
         self.assertEqual(byte_size(0xffffffffffffffff), 8)
-        
+
+    def test_zero(self):
+        self.assertEqual(byte_size(0), 1)
 
     def test_bad_type(self):
         self.assertRaises(TypeError, byte_size, [])
