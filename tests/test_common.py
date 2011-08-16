@@ -16,7 +16,6 @@ class Test_byte(unittest2.TestCase):
         self.assertRaises(struct.error, byte, 256)
         self.assertRaises(struct.error, byte, -1)
 
-
 class Test_byte_size(unittest2.TestCase):
     def test_values(self):
         self.assertEqual(byte_size(1 << 1023), 128)
@@ -24,7 +23,17 @@ class Test_byte_size(unittest2.TestCase):
         self.assertEqual(byte_size(1 << 1024), 129)
 
     def test_zero(self):
-        self.assertEqual(byte_size(0), 0)
+        self.assertEqual(byte_size(0), 1)
+        self.assertEqual(byte_size(255), 1)
+        self.assertEqual(byte_size(256), 2)
+        self.assertEqual(byte_size(0xffff), 2)
+        self.assertEqual(byte_size(0xffffff), 3)
+        self.assertEqual(byte_size(0xffffffff), 4)
+        self.assertEqual(byte_size(0xffffffffff), 5)
+        self.assertEqual(byte_size(0xffffffffffff), 6)
+        self.assertEqual(byte_size(0xffffffffffffff), 7)
+        self.assertEqual(byte_size(0xffffffffffffffff), 8)
+        
 
     def test_bad_type(self):
         self.assertRaises(TypeError, byte_size, [])
