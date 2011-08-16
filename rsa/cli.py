@@ -14,10 +14,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Commandline scripts.
+"""Commandline scripts.
 
 These scripts are called by the executables defined in setup.py.
-'''
+"""
+
+from __future__ import with_statement
 
 import abc
 import sys
@@ -30,7 +32,7 @@ import rsa.pkcs1
 HASH_METHODS = sorted(rsa.pkcs1.HASH_METHODS.keys())
 
 def keygen():
-    '''Key generator.'''
+    """Key generator."""
 
     # Parse the CLI options
     parser = OptionParser(usage='usage: %prog [options] keysize',
@@ -86,7 +88,7 @@ def keygen():
 
 
 class CryptoOperation(object):
-    '''CLI callable that operates with input, output, and a key.'''
+    """CLI callable that operates with input, output, and a key."""
 
     __metaclass__ = abc.ABCMeta
 
@@ -112,15 +114,15 @@ class CryptoOperation(object):
 
     @abc.abstractmethod
     def perform_operation(self, indata, key, cli_args=None):
-        '''Performs the program's operation.
+        """Performs the program's operation.
 
         Implement in a subclass.
 
         :returns: the data to write to the output.
-        '''
+        """
 
     def __call__(self):
-        '''Runs the program.'''
+        """Runs the program."""
 
         (cli, cli_args) = self.parse_cli()
 
@@ -135,10 +137,10 @@ class CryptoOperation(object):
             self.write_outfile(outdata, cli.output)
 
     def parse_cli(self):
-        '''Parse the CLI options
+        """Parse the CLI options
         
         :returns: (cli_opts, cli_args)
-        '''
+        """
 
         parser = OptionParser(usage=self.usage, description=self.description)
         
@@ -160,7 +162,7 @@ class CryptoOperation(object):
         return (cli, cli_args)
 
     def read_key(self, filename, keyform):
-        '''Reads a public or private key.'''
+        """Reads a public or private key."""
 
         print >>sys.stderr, 'Reading %s key from %s' % (self.keyname, filename)
         with open(filename) as keyfile:
@@ -169,7 +171,7 @@ class CryptoOperation(object):
         return self.key_class.load_pkcs1(keydata, keyform)
     
     def read_infile(self, inname):
-        '''Read the input file'''
+        """Read the input file"""
 
         if inname:
             print >>sys.stderr, 'Reading input from %s' % inname
@@ -180,7 +182,7 @@ class CryptoOperation(object):
         return sys.stdin.read()
 
     def write_outfile(self, outdata, outname):
-        '''Write the output file'''
+        """Write the output file"""
 
         if outname:
             print >>sys.stderr, 'Writing output to %s' % outname
@@ -191,7 +193,7 @@ class CryptoOperation(object):
             sys.stdout.write(outdata)
 
 class EncryptOperation(CryptoOperation):
-    '''Encrypts a file.'''
+    """Encrypts a file."""
 
     keyname = 'public'
     description = ('Encrypts a file. The file must be shorter than the key '
@@ -203,12 +205,12 @@ class EncryptOperation(CryptoOperation):
 
 
     def perform_operation(self, indata, pub_key, cli_args=None):
-        '''Encrypts files.'''
+        """Encrypts files."""
 
         return rsa.encrypt(indata, pub_key)
 
 class DecryptOperation(CryptoOperation):
-    '''Decrypts a file.'''
+    """Decrypts a file."""
 
     keyname = 'private'
     description = ('Decrypts a file. The original file must be shorter than '
@@ -220,12 +222,12 @@ class DecryptOperation(CryptoOperation):
     key_class = rsa.PrivateKey
 
     def perform_operation(self, indata, priv_key, cli_args=None):
-        '''Decrypts files.'''
+        """Decrypts files."""
 
         return rsa.decrypt(indata, priv_key)
 
 class SignOperation(CryptoOperation):
-    '''Signs a file.'''
+    """Signs a file."""
 
     keyname = 'private'
     usage = 'usage: %%prog [options] private_key hash_method'
@@ -241,7 +243,7 @@ class SignOperation(CryptoOperation):
             'to stdout if this option is not present.')
 
     def perform_operation(self, indata, priv_key, cli_args):
-        '''Decrypts files.'''
+        """Decrypts files."""
 
         hash_method = cli_args[1]
         if hash_method not in HASH_METHODS:
@@ -251,7 +253,7 @@ class SignOperation(CryptoOperation):
         return rsa.sign(indata, priv_key, hash_method)
 
 class VerifyOperation(CryptoOperation):
-    '''Verify a signature.'''
+    """Verify a signature."""
 
     keyname = 'public'
     usage = 'usage: %%prog [options] private_key signature_file'
@@ -265,7 +267,7 @@ class VerifyOperation(CryptoOperation):
     has_output = False
 
     def perform_operation(self, indata, pub_key, cli_args):
-        '''Decrypts files.'''
+        """Decrypts files."""
 
         signature_file = cli_args[1]
         
@@ -281,7 +283,7 @@ class VerifyOperation(CryptoOperation):
 
 
 class BigfileOperation(CryptoOperation):
-    '''CryptoOperation that doesn't read the entire file into memory.'''
+    """CryptoOperation that doesn't read the entire file into memory."""
 
     def __init__(self):
         CryptoOperation.__init__(self)
@@ -289,13 +291,13 @@ class BigfileOperation(CryptoOperation):
         self.file_objects = []
 
     def __del__(self):
-        '''Closes any open file handles.'''
+        """Closes any open file handles."""
 
         for fobj in self.file_objects:
             fobj.close()
 
     def __call__(self):
-        '''Runs the program.'''
+        """Runs the program."""
 
         (cli, cli_args) = self.parse_cli()
 
@@ -310,7 +312,7 @@ class BigfileOperation(CryptoOperation):
         self.perform_operation(infile, outfile, key, cli_args)
 
     def get_infile(self, inname):
-        '''Returns the input file object'''
+        """Returns the input file object"""
 
         if inname:
             print >>sys.stderr, 'Reading input from %s' % inname
@@ -323,7 +325,7 @@ class BigfileOperation(CryptoOperation):
         return fobj
 
     def get_outfile(self, outname):
-        '''Returns the output file object'''
+        """Returns the output file object"""
 
         if outname:
             print >>sys.stderr, 'Will write output to %s' % outname
@@ -336,7 +338,7 @@ class BigfileOperation(CryptoOperation):
         return fobj
 
 class EncryptBigfileOperation(BigfileOperation):
-    '''Encrypts a file to VARBLOCK format.'''
+    """Encrypts a file to VARBLOCK format."""
 
     keyname = 'public'
     description = ('Encrypts a file to an encrypted VARBLOCK file. The file '
@@ -347,12 +349,12 @@ class EncryptBigfileOperation(BigfileOperation):
     operation_progressive = 'encrypting'
 
     def perform_operation(self, infile, outfile, pub_key, cli_args=None):
-        '''Encrypts files to VARBLOCK.'''
+        """Encrypts files to VARBLOCK."""
 
         return rsa.bigfile.encrypt_bigfile(infile, outfile, pub_key)
 
 class DecryptBigfileOperation(BigfileOperation):
-    '''Decrypts a file in VARBLOCK format.'''
+    """Decrypts a file in VARBLOCK format."""
 
     keyname = 'private'
     description = ('Decrypts an encrypted VARBLOCK file that was encrypted '
@@ -363,7 +365,7 @@ class DecryptBigfileOperation(BigfileOperation):
     key_class = rsa.PrivateKey
 
     def perform_operation(self, infile, outfile, priv_key, cli_args=None):
-        '''Decrypts a VARBLOCK file.'''
+        """Decrypts a VARBLOCK file."""
 
         return rsa.bigfile.decrypt_bigfile(infile, outfile, priv_key)
 

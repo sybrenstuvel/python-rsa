@@ -14,10 +14,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Data transformation functions.
+"""Data transformation functions.
 
 From bytes to a number, number to bytes, etc.
-'''
+"""
 
 from __future__ import absolute_import
 
@@ -64,22 +64,6 @@ def _int2bytes(number, block_size=0):
 
     @throws OverflowError when block_size is given and the number takes up more
         bytes than fit into the block.
-
-    >>> _int2bytes(123456789)
-    b'\x07[\xcd\x15'
-    >>> bytes2int(int2bytes(123456789))
-    123456789
-
-    >>> _int2bytes(123456789, 6)
-    b'\x00\x00\x07[\xcd\x15'
-    >>> bytes2int(int2bytes(123456789, 128))
-    123456789
-
-    >>> _int2bytes(123456789, 3)
-    Traceback (most recent call last):
-    ...
-    OverflowError: Needed 4 bytes for number, but block size is 3
-
     """
     # Type checking
     if not is_integer(number):

@@ -13,11 +13,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-'''Core mathematical operations.
+"""Core mathematical operations.
 
 This is the actual core RSA implementation, which is only defined
 mathematically on integers.
-'''
+"""
 
 
 from rsa._compat import is_integer

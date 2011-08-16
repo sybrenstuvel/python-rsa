@@ -1,4 +1,4 @@
-'''Tests integer operations.'''
+"""Tests integer operations."""
 
 import unittest2
 

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Python compatibility wrappers.'''
+"""Python compatibility wrappers."""
 
 
 from __future__ import absolute_import
@@ -107,11 +107,6 @@ def byte(num):
 
     Use it as a replacement for ``chr`` where you are expecting a byte
     because this will work on all current versions of Python::
-
-        >>> byte(0)
-        '\x00'
-        >>> byte(255)
-        '\xff'
 
     :param num:
         An unsigned integer between 0 and 255 (both inclusive).

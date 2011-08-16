@@ -14,11 +14,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Numerical functions related to primes.
+"""Numerical functions related to primes.
 
 Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
-'''
+"""
 
 __all__ = [ 'getprime', 'are_relatively_prime']
 

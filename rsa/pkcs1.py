@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Functions for PKCS#1 version 1.5 encryption and signing
+"""Functions for PKCS#1 version 1.5 encryption and signing
 
 This module implements certain functionality from PKCS#1 version 1.5. For a
 very clear example, read http://www.di-mgt.com.au/rsa_alg.html#pkcs1schemes
@@ -26,7 +26,7 @@ WARNING: this module leaks information when decryption or verification fails.
 The exceptions that are raised contain the Python traceback information, which
 can be used to deduce where in the process the failure occurred. DO NOT PASS
 SUCH INFORMATION to your users.
-'''
+"""
 
 import hashlib
 import os
@@ -52,16 +52,16 @@ HASH_METHODS = {
 }
 
 class CryptoError(Exception):
-    '''Base class for all exceptions in this module.'''
+    """Base class for all exceptions in this module."""
 
 class DecryptionError(CryptoError):
-    '''Raised when decryption fails.'''
+    """Raised when decryption fails."""
 
 class VerificationError(CryptoError):
-    '''Raised when verification fails.'''
+    """Raised when verification fails."""
  
 def _pad_for_encryption(message, target_length):
-    r'''Pads the message for encryption, returning the padded message.
+    r"""Pads the message for encryption, returning the padded message.
     
     :return: 00 02 RANDOM_DATA 00 MESSAGE
     
@@ -73,7 +73,7 @@ def _pad_for_encryption(message, target_length):
     >>> block[-6:]
     '\x00hello'
 
-    '''
+    """
 
     max_msglength = target_length - 11
     msglength = len(message)
@@ -107,7 +107,7 @@ def _pad_for_encryption(message, target_length):
     
 
 def _pad_for_signing(message, target_length):
-    r'''Pads the message for signing, returning the padded message.
+    r"""Pads the message for signing, returning the padded message.
     
     The padding is always a repetition of FF bytes.
     
@@ -123,7 +123,7 @@ def _pad_for_signing(message, target_length):
     >>> block[2:-6]
     '\xff\xff\xff\xff\xff\xff\xff\xff'
     
-    '''
+    """
 
     max_msglength = target_length - 11
     msglength = len(message)
@@ -141,7 +141,7 @@ def _pad_for_signing(message, target_length):
     
     
 def encrypt(message, pub_key):
-    '''Encrypts the given message using PKCS#1 v1.5
+    """Encrypts the given message using PKCS#1 v1.5
     
     :param message: the message to encrypt. Must be a byte string no longer than
         ``k-11`` bytes, where ``k`` is the number of bytes needed to encode
@@ -160,7 +160,7 @@ def encrypt(message, pub_key):
     >>> len(crypto) == common.byte_size(pub_key.n)
     True
     
-    '''
+    """
     
     keylength = common.byte_size(pub_key.n)
     padded = _pad_for_encryption(message, keylength)
@@ -172,7 +172,7 @@ def encrypt(message, pub_key):
     return block
 
 def decrypt(crypto, priv_key):
-    r'''Decrypts the given message using PKCS#1 v1.5
+    r"""Decrypts the given message using PKCS#1 v1.5
     
     The decryption is considered 'failed' when the resulting cleartext doesn't
     start with the bytes 00 02, or when the 00 byte between the padding and
@@ -220,7 +220,7 @@ def decrypt(crypto, priv_key):
     ...
     DecryptionError: Decryption failed
 
-    '''
+    """
     
     blocksize = common.byte_size(priv_key.n)
     encrypted = transform.bytes2int(crypto)
@@ -240,7 +240,7 @@ def decrypt(crypto, priv_key):
     return cleartext[sep_idx+1:]
     
 def sign(message, priv_key, hash):
-    '''Signs the message with the private key.
+    """Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
     as a "detached signature", because the message itself isn't altered.
@@ -255,7 +255,7 @@ def sign(message, priv_key, hash):
     :raise OverflowError: if the private key is too small to contain the
         requested hash.
 
-    '''
+    """
 
     # Get the ASN1 code for this hash method
     if hash not in HASH_ASN1:
@@ -277,7 +277,7 @@ def sign(message, priv_key, hash):
     return block
 
 def verify(message, signature, pub_key):
-    '''Verifies that the signature matches the message.
+    """Verifies that the signature matches the message.
     
     The hash method is detected automatically from the signature.
     
@@ -296,7 +296,7 @@ def verify(message, signature, pub_key):
         key. It's only a tiny bit of information, but every bit makes cracking
         the keys easier.
 
-    '''
+    """
     
     blocksize = common.byte_size(pub_key.n)
     encrypted = transform.bytes2int(signature)
@@ -322,7 +322,7 @@ def verify(message, signature, pub_key):
         raise VerificationError('Verification failed')
 
 def _hash(message, method_name):
-    '''Returns the message digest.
+    """Returns the message digest.
     
     :param message: the signed message. Can be an 8-bit string or a file-like
         object. If ``message`` has a ``read()`` method, it is assumed to be a
@@ -330,7 +330,7 @@ def _hash(message, method_name):
     :param method_name: the hash method, must be a key of
         :py:const:`HASH_METHODS`.
     
-    '''
+    """
 
     if method_name not in HASH_METHODS:
         raise ValueError('Invalid hash method: %s' % method_name)
@@ -350,7 +350,7 @@ def _hash(message, method_name):
 
 
 def _find_method_hash(method_hash):
-    '''Finds the hash method and the hash itself.
+    """Finds the hash method and the hash itself.
     
     :param method_hash: ASN1 code for the hash method concatenated with the
         hash itself.
@@ -360,7 +360,7 @@ def _find_method_hash(method_hash):
     
     :raise VerificationFailed: when the hash method cannot be found
 
-    '''
+    """
 
     for (hashname, asn1code) in HASH_ASN1.items():
         if not method_hash.startswith(asn1code):

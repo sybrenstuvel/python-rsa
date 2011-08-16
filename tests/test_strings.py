@@ -1,4 +1,4 @@
-'''Tests string operations.'''
+"""Tests string operations."""
 
 from __future__ import absolute_import
 

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Common functionality shared by several modules.'''
+"""Common functionality shared by several modules."""
 
 
 def bit_size(num):
@@ -61,29 +61,14 @@ def bit_size(num):
 
 
 def _bit_size(number):
-    '''Returns the number of bits required to hold a specific long number.
-
-    >>> bit_size(1023)
-    10
-    >>> bit_size(1024)
-    11
-    >>> bit_size(1025)
-    11
-
-    >>> bit_size(1 << 1024)
-    1025
-    >>> bit_size((1 << 1024) + 1)
-    1025
-    >>> bit_size((1 << 1024) - 1)
-    1024
-
-    '''
-
+    """
+    Returns the number of bits required to hold a specific long number.
+    """
     if number < 0:
         raise ValueError('Only nonnegative numbers possible: %s' % number)
 
     if number == 0:
-        return 1
+        return 0
     
     # This works, even with very large numbers. When using math.log(number, 2),
     # you'll get rounding errors and it'll fail.
@@ -99,15 +84,9 @@ def byte_size(number):
     """Returns the number of bytes required to hold a specific long number.
     
     The number of bytes is rounded up.
-
-    >>> byte_size(1 << 1023)
-    128
-    >>> byte_size((1 << 1024) - 1)
-    128
-    >>> byte_size(1 << 1024)
-    129
     """
-
+    if number == 0:
+        return 0
     # Does not perform floating-point division and uses built-in divmod
     # operator.
     quanta, mod = divmod(bit_size(number), 8)
@@ -140,13 +119,13 @@ def extended_gcd(a, b):
     return (a, lx, ly)                 #Return only positive values
 
 def inverse(x, n):
-    '''Returns x^-1 (mod n)
+    """Returns x^-1 (mod n)
     
     >>> inverse(7, 4)
     3
     >>> (inverse(143, 4) * 143) % 4
     1
-    '''
+    """
 
     (divider, inv, _) = extended_gcd(x, n)
 
@@ -157,7 +136,7 @@ def inverse(x, n):
 
 
 def crt(a_values, modulo_values):
-    '''Chinese Remainder Theorem.
+    """Chinese Remainder Theorem.
 
     Calculates x such that x = a[i] (mod m[i]) for each i.
 
@@ -174,7 +153,7 @@ def crt(a_values, modulo_values):
 
     >>> crt([2, 3, 0], [7, 11, 15])
     135
-    '''
+    """
 
     m = 1
     x = 0 

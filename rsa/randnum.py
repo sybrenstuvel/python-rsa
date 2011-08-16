@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Functions for generating random numbers.'''
+"""Functions for generating random numbers."""
 
 # Source inspired by code by Yesudeep Mangalapilly <yesudeep@gmail.com>
 
@@ -24,11 +24,11 @@ from rsa import common, transform
 from rsa._compat import byte
 
 def read_random_bits(nbits):
-    '''Reads 'nbits' random bits.
+    """Reads 'nbits' random bits.
 
     If nbits isn't a whole number of bytes, an extra byte will be appended with
     only the lower bits set.
-    '''
+    """
 
     nbytes, rbits = divmod(nbits, 8)
 

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Functions for parallel computation on multiple cores.
+"""Functions for parallel computation on multiple cores.
 
 Introduced in Python-RSA 3.1.
 
@@ -22,7 +22,7 @@ Introduced in Python-RSA 3.1.
 
     Requires Python 2.6 or newer.
 
-'''
+"""
 
 import multiprocessing as mp
 
