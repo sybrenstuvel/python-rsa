@@ -20,11 +20,8 @@ import base64
 from rsa._compat import b, is_bytes
 
 def _markers(pem_marker):
-    """Returns the start and end PEM markers
-
-    >>> _markers('RSA PRIVATE KEY')
-    ('-----BEGIN RSA PRIVATE KEY-----', '-----END RSA PRIVATE KEY-----')
-
+    """
+    Returns the start and end PEM markers
     """
 
     if is_bytes(pem_marker):

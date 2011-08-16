@@ -22,20 +22,6 @@ def bit_size(num):
     Number of bits needed to represent a integer excluding any prefix
     0 bits.
 
-    >>> bit_size(1023)
-    10
-    >>> bit_size(1024)
-    11
-    >>> bit_size(1025)
-    11
-
-    >>> bit_size(1 << 1024)
-    1025
-    >>> bit_size((1 << 1024) + 1)
-    1025
-    >>> bit_size((1 << 1024) - 1)
-    1024
-
     :param num:
         Integer value. If num is 0, returns 0. Only the absolute value of the
         number is considered. Therefore, signed integers will be abs(num)
@@ -118,9 +104,10 @@ def extended_gcd(a, b):
     if (ly < 0): ly += oa              #If neg wrap modulo orignal a
     return (a, lx, ly)                 #Return only positive values
 
+
 def inverse(x, n):
     """Returns x^-1 (mod n)
-    
+
     >>> inverse(7, 4)
     3
     >>> (inverse(143, 4) * 143) % 4
