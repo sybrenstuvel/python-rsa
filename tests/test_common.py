@@ -34,6 +34,9 @@ class Test_byte_size(unittest2.TestCase):
         self.assertRaises(TypeError, byte_size, None)
 
 class Test_bit_size(unittest2.TestCase):
+    def test_zero(self):
+        self.assertEqual(bit_size(0), 0)
+
     def test_values(self):
         self.assertEqual(bit_size(1023), 10)
         self.assertEqual(bit_size(1024), 11)

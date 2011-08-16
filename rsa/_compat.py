@@ -76,6 +76,11 @@ except NameError:
     bytes_type = str
 
 
+# To avoid calling b() multiple times in tight loops.
+ZERO_BYTE = b('\x00')
+EMPTY_BYTE = b('')
+
+
 def is_bytes(obj):
     """
     Determines whether the given value is a byte string.
