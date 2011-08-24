@@ -1,4 +1,4 @@
-"""Tests varblock operations."""
+'''Tests varblock operations.'''
 
 
 try:

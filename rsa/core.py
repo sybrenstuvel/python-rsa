@@ -13,11 +13,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Core mathematical operations.
+
+'''Core mathematical operations.
 
 This is the actual core RSA implementation, which is only defined
 mathematically on integers.
-"""
+'''
 
 
 from rsa._compat import is_integer
@@ -30,7 +31,7 @@ def assert_int(var, name):
     raise TypeError('%s should be an integer, not %s' % (name, var.__class__))
 
 def encrypt_int(message, ekey, n):
-    """Encrypts a message using encryption key 'ekey', working modulo n"""
+    '''Encrypts a message using encryption key 'ekey', working modulo n'''
 
     assert_int(message, 'message')
     assert_int(ekey, 'ekey')
@@ -45,8 +46,8 @@ def encrypt_int(message, ekey, n):
     return pow(message, ekey, n)
 
 def decrypt_int(cyphertext, dkey, n):
-    """Decrypts a cypher text using the decryption key 'dkey', working
-    modulo n"""
+    '''Decrypts a cypher text using the decryption key 'dkey', working
+    modulo n'''
 
     assert_int(cyphertext, 'cyphertext')
     assert_int(dkey, 'dkey')

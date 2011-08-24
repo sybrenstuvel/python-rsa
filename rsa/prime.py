@@ -14,22 +14,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Numerical functions related to primes.
+'''Numerical functions related to primes.
 
 Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
-"""
+'''
 
 __all__ = [ 'getprime', 'are_relatively_prime']
 
 import rsa.randnum
 
 def gcd(p, q):
-    """Returns the greatest common divisor of p and q
+    '''Returns the greatest common divisor of p and q
 
     >>> gcd(48, 180)
     12
-    """
+    '''
 
     while q != 0:
         if p < q: (p,q) = (q,p)
@@ -38,11 +38,11 @@ def gcd(p, q):
     
 
 def jacobi(a, b):
-    """Calculates the value of the Jacobi symbol (a/b) where both a and b are
+    '''Calculates the value of the Jacobi symbol (a/b) where both a and b are
     positive integers, and b is odd
 
     :returns: -1, 0 or 1
-    """
+    '''
 
     assert a > 0
     assert b > 0
@@ -62,9 +62,9 @@ def jacobi(a, b):
     return result
 
 def jacobi_witness(x, n):
-    """Returns False if n is an Euler pseudo-prime with base x, and
+    '''Returns False if n is an Euler pseudo-prime with base x, and
     True otherwise.
-    """
+    '''
 
     j = jacobi(x, n) % n
 
@@ -74,12 +74,12 @@ def jacobi_witness(x, n):
     return True
 
 def randomized_primality_testing(n, k):
-    """Calculates whether n is composite (which is always correct) or
+    '''Calculates whether n is composite (which is always correct) or
     prime (which is incorrect with error probability 2**-k)
 
     Returns False if the number is composite, and True if it's
     probably prime.
-    """
+    '''
 
     # 50% of Jacobi-witnesses can report compositness of non-prime numbers
 
@@ -98,18 +98,18 @@ def randomized_primality_testing(n, k):
     return True
 
 def is_prime(number):
-    """Returns True if the number is prime, and False otherwise.
+    '''Returns True if the number is prime, and False otherwise.
 
     >>> is_prime(42)
     False
     >>> is_prime(41)
     True
-    """
+    '''
 
     return randomized_primality_testing(number, 6)
 
 def getprime(nbits):
-    """Returns a prime number that can be stored in 'nbits' bits.
+    '''Returns a prime number that can be stored in 'nbits' bits.
 
     >>> p = getprime(128)
     >>> is_prime(p-1)
@@ -123,7 +123,7 @@ def getprime(nbits):
     >>> common.bit_size(p) == 128
     True
     
-    """
+    '''
 
     while True:
         integer = rsa.randnum.read_random_int(nbits)
@@ -139,14 +139,14 @@ def getprime(nbits):
 
 
 def are_relatively_prime(a, b):
-    """Returns True if a and b are relatively prime, and False if they
+    '''Returns True if a and b are relatively prime, and False if they
     are not.
 
     >>> are_relatively_prime(2, 3)
     1
     >>> are_relatively_prime(2, 4)
     0
-    """
+    '''
 
     d = gcd(a, b)
     return (d == 1)

@@ -14,11 +14,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Common functionality shared by several modules."""
+'''Common functionality shared by several modules.'''
 
 
 def bit_size(num):
-    """
+    '''
     Number of bits needed to represent a integer excluding any prefix
     0 bits.
 
@@ -40,7 +40,7 @@ def bit_size(num):
         before the number's bit length is determined.
     :returns:
         Returns the number of bits in the integer.
-    """
+    '''
     if num == 0:
         return 0
     if num < 0:
@@ -59,9 +59,9 @@ def bit_size(num):
 
 
 def _bit_size(number):
-    """
+    '''
     Returns the number of bits required to hold a specific long number.
-    """
+    '''
     if number < 0:
         raise ValueError('Only nonnegative numbers possible: %s' % number)
 
@@ -79,7 +79,7 @@ def _bit_size(number):
 
 
 def byte_size(number):
-    """
+    '''
     Returns the number of bytes required to hold a specific long number.
     
     The number of bytes is rounded up.
@@ -97,7 +97,7 @@ def byte_size(number):
         An unsigned integer
     :returns:
         The number of bytes required to hold a specific long number.
-    """
+    '''
     quanta, mod = divmod(bit_size(number), 8)
     if mod or number == 0:
         quanta += 1
@@ -106,8 +106,8 @@ def byte_size(number):
 
 
 def extended_gcd(a, b):
-    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
-    """
+    '''Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
+    '''
     # r = gcd(a,b) i = multiplicitive inverse of a mod b
     #      or      j = multiplicitive inverse of b mod a
     # Neg return values for i or j are made positive mod b or a respectively
@@ -129,13 +129,13 @@ def extended_gcd(a, b):
 
 
 def inverse(x, n):
-    """Returns x^-1 (mod n)
+    '''Returns x^-1 (mod n)
 
     >>> inverse(7, 4)
     3
     >>> (inverse(143, 4) * 143) % 4
     1
-    """
+    '''
 
     (divider, inv, _) = extended_gcd(x, n)
 
@@ -146,7 +146,7 @@ def inverse(x, n):
 
 
 def crt(a_values, modulo_values):
-    """Chinese Remainder Theorem.
+    '''Chinese Remainder Theorem.
 
     Calculates x such that x = a[i] (mod m[i]) for each i.
 
@@ -163,7 +163,7 @@ def crt(a_values, modulo_values):
 
     >>> crt([2, 3, 0], [7, 11, 15])
     135
-    """
+    '''
 
     m = 1
     x = 0 

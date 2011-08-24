@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Utility functions."""
+'''Utility functions.'''
 
 from __future__ import with_statement
 
@@ -24,7 +24,7 @@ from optparse import OptionParser
 import rsa.key
 
 def private_to_public():
-    """Reads a private key and outputs the corresponding public key."""
+    '''Reads a private key and outputs the corresponding public key.'''
 
     # Parse the CLI options
     parser = OptionParser(usage='usage: %prog [options]',

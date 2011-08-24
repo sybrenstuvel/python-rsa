@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Functions for parallel computation on multiple cores.
+'''Functions for parallel computation on multiple cores.
 
 Introduced in Python-RSA 3.1.
 
@@ -22,7 +22,7 @@ Introduced in Python-RSA 3.1.
 
     Requires Python 2.6 or newer.
 
-"""
+'''
 
 import multiprocessing as mp
 
@@ -42,7 +42,7 @@ def _find_prime(nbits, pipe):
             return
 
 def getprime(nbits, poolsize):
-    """Returns a prime number that can be stored in 'nbits' bits.
+    '''Returns a prime number that can be stored in 'nbits' bits.
 
     Works in multiple threads at the same time.
 
@@ -58,7 +58,7 @@ def getprime(nbits, poolsize):
     >>> common.bit_size(p) == 128
     True
     
-    """
+    '''
 
     (pipe_recv, pipe_send) = mp.Pipe(duplex=False)
 

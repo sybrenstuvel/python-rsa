@@ -1,4 +1,4 @@
-"""Tests string operations."""
+'''Tests string operations.'''
 
 import struct
 import unittest2
@@ -40,9 +40,9 @@ class BinaryTest(unittest2.TestCase):
                           self.priv)
 
     def test_randomness(self):
-        """Encrypting the same message twice should result in different
+        '''Encrypting the same message twice should result in different
         cryptos.
-        """
+        '''
         
         message = struct.pack('>IIII', 0, 0, 0, 1)
         encrypted1 = pkcs1.encrypt(message, self.pub)
@@ -56,7 +56,7 @@ class SignatureTest(unittest2.TestCase):
         (self.pub, self.priv) = rsa.newkeys(512)
 
     def test_sign_verify(self):
-        """Test happy flow of sign and verify"""
+        '''Test happy flow of sign and verify'''
         
         message = b('je moeder')
         print("\tMessage:   %r" % message)
@@ -67,14 +67,14 @@ class SignatureTest(unittest2.TestCase):
         pkcs1.verify(message, signature, self.pub)
 
     def test_alter_message(self):
-        """Altering the message should let the verification fail."""
+        '''Altering the message should let the verification fail.'''
         
         signature = pkcs1.sign(b('je moeder'), self.priv, 'SHA-256')
         self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
                           b('mijn moeder'), signature, self.pub)
 
     def test_sign_different_key(self):
-        """Signing with another key should let the verification fail."""
+        '''Signing with another key should let the verification fail.'''
         
         (otherpub, _) = rsa.newkeys(512)
         
@@ -84,7 +84,7 @@ class SignatureTest(unittest2.TestCase):
                           message, signature, otherpub)
 
     def test_multiple_signings(self):
-        """Signing the same message twice should return the same signatures."""
+        '''Signing the same message twice should return the same signatures.'''
         
         message = struct.pack('>IIII', 0, 0, 0, 1)
         signature1 = pkcs1.sign(message, self.priv, 'SHA-1')

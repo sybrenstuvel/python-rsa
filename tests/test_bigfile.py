@@ -1,4 +1,4 @@
-"""Tests block operations."""
+'''Tests block operations.'''
 from rsa._compat import b
 
 try:
