@@ -51,7 +51,7 @@ def bytes2int(raw_bytes):
     return int(binascii.hexlify(raw_bytes), 16)
 
 
-def _int2bytes(number, block_size=0):
+def _int2bytes(number, block_size=None):
     """Converts a number to a string of bytes.
 
     @param number: the number to convert
@@ -77,8 +77,9 @@ def _int2bytes(number, block_size=0):
     else:
         needed_bytes = common.byte_size(number)
         raw_bytes = []
-        
-    if block_size > 0:
+
+    # You cannot compare None > 0 in Python 3x. It will fail with a TypeError.
+    if block_size and block_size > 0:
         if needed_bytes > block_size:
             raise OverflowError('Needed %i bytes for number, but block size '
                 'is %i' % (needed_bytes, block_size))
@@ -89,7 +90,7 @@ def _int2bytes(number, block_size=0):
         number >>= 8
 
     # Pad with zeroes to fill the block
-    if block_size > 0:
+    if block_size and block_size > 0:
         padding = (block_size - needed_bytes) * ZERO_BYTE
     else:
         padding = EMPTY_BYTE
