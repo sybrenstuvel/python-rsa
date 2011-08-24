@@ -54,6 +54,23 @@ def bytes2int(raw_bytes):
 def _int2bytes(number, block_size=None):
     """Converts a number to a string of bytes.
 
+    Usage::
+
+        >>> _int2bytes(123456789)
+        '\x07[\xcd\x15'
+        >>> bytes2int(_int2bytes(123456789))
+        123456789
+
+        >>> _int2bytes(123456789, 6)
+        '\x00\x00\x07[\xcd\x15'
+        >>> bytes2int(_int2bytes(123456789, 128))
+        123456789
+
+        >>> _int2bytes(123456789, 3)
+        Traceback (most recent call last):
+        ...
+        OverflowError: Needed 4 bytes for number, but block size is 3
+
     @param number: the number to convert
     @param block_size: the number of bytes to output. If the number encoded to
         bytes is less than this, the block will be zero-padded. When not given,
