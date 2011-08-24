@@ -121,7 +121,7 @@ def bytes_leading(raw_bytes, needle=ZERO_BYTE):
     return leading
 
 
-def int2bytes(number, fill_size=0, chunk_size=0, overflow=False):
+def int2bytes(number, fill_size=None, chunk_size=None, overflow=False):
     """
     Convert an unsigned integer to bytes (base-256 representation)::
 
@@ -162,7 +162,7 @@ def int2bytes(number, fill_size=0, chunk_size=0, overflow=False):
         raise ValueError("You can either fill or pad chunks, but not both")
 
     # Ensure these are integers.
-    number & 1 and chunk_size & 1 and fill_size & 1
+    number & 1
 
     raw_bytes = b('')
 
@@ -181,14 +181,14 @@ def int2bytes(number, fill_size=0, chunk_size=0, overflow=False):
     raw_bytes = raw_bytes[zero_leading:]
 
     length = len(raw_bytes)
-    if fill_size > 0:
+    if fill_size and fill_size > 0:
         if not overflow and length > fill_size:
             raise OverflowError(
                 "Need %d bytes for number, but fill size is %d" %
                 (length, fill_size)
             )
         raw_bytes = raw_bytes.rjust(fill_size, ZERO_BYTE)
-    elif chunk_size > 0:
+    elif chunk_size and chunk_size > 0:
         remainder = length % chunk_size
         if remainder:
             padding_size = chunk_size - remainder
