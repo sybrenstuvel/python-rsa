@@ -25,6 +25,15 @@ def bit_size(num):
     As per definition from http://wiki.python.org/moin/BitManipulation and
     to match the behavior of the Python 3 API.
 
+    Usage::
+    
+        >>> bit_size(1023)
+        10
+        >>> bit_size(1024)
+        11
+        >>> bit_size(1025)
+        11
+
     :param num:
         Integer value. If num is 0, returns 0. Only the absolute value of the
         number is considered. Therefore, signed integers will be abs(num)
@@ -74,6 +83,20 @@ def byte_size(number):
     Returns the number of bytes required to hold a specific long number.
     
     The number of bytes is rounded up.
+
+    Usage::
+
+        >>> byte_size(1 << 1023)
+        128
+        >>> byte_size((1 << 1024) - 1)
+        128
+        >>> byte_size(1 << 1024)
+        129
+
+    :param number:
+        An unsigned integer
+    :returns:
+        The number of bytes required to hold a specific long number.
     """
     quanta, mod = divmod(bit_size(number), 8)
     if mod or number == 0:
