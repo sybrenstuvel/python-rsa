@@ -6,7 +6,7 @@ import unittest2
 
 import rsa
 
-from tests.constants import unicode_string
+from constants import unicode_string
 
 class StringTest(unittest2.TestCase):
 
