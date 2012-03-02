@@ -32,120 +32,125 @@ This file format is called the VARBLOCK format, in line with the varint format
 used to denote the block sizes.
 
 '''
-from rsa._compat import byte
 
+from rsa._compat import byte, b
+
+
+ZERO_BYTE = b('\x00')
 VARBLOCK_VERSION = 1
 
 def read_varint(infile):
-    '''Reads a varint from the file.
+  '''Reads a varint from the file.
 
-    When the first byte to be read indicates EOF, (0, 0) is returned. When an
-    EOF occurs when at least one byte has been read, an EOFError exception is
-    raised.
+  When the first byte to be read indicates EOF, (0, 0) is returned. When an
+  EOF occurs when at least one byte has been read, an EOFError exception is
+  raised.
 
-    @param infile: the file-like object to read from. It should have a read()
-        method.
-    @returns (varint, length), the read varint and the number of read bytes.
-    '''
+  @param infile: the file-like object to read from. It should have a read()
+      method.
+  @returns (varint, length), the read varint and the number of read bytes.
+  '''
 
-    varint = 0
-    read_bytes = 0
+  varint = 0
+  read_bytes = 0
 
-    while True:
-        char = infile.read(1)
-        if len(char) == 0:
-            if read_bytes == 0:
-                return (0, 0)
-            raise EOFError('EOF while reading varint, value is %i so far' %
-                    varint)
+  while True:
+    char = infile.read(1)
+    if len(char) == 0:
+      if read_bytes == 0:
+        return (0, 0)
+      raise EOFError('EOF while reading varint, value is %i so far' %
+                     varint)
 
-        byte = ord(char)
-        varint += (byte & 0x7F) << (7 * read_bytes)
+    byte = ord(char)
+    varint += (byte & 0x7F) << (7 * read_bytes)
 
-        read_bytes += 1
+    read_bytes += 1
 
-        if not byte & 0x80:
-            return (varint, read_bytes)
+    if not byte & 0x80:
+      return (varint, read_bytes)
+
 
 def write_varint(outfile, value):
-    '''Writes a varint to a file.
+  '''Writes a varint to a file.
 
-    @param outfile: the file-like object to write to. It should have a write()
-        method.
-    @returns the number of written bytes.
-    '''
+  @param outfile: the file-like object to write to. It should have a write()
+      method.
+  @returns the number of written bytes.
+  '''
 
-    # there is a big difference between 'write the value 0' (this case) and
-    # 'there is nothing left to write' (the false-case of the while loop)
+  # there is a big difference between 'write the value 0' (this case) and
+  # 'there is nothing left to write' (the false-case of the while loop)
 
-    if value == 0:
-        outfile.write('\x00')
-        return 1
+  if value == 0:
+    outfile.write(ZERO_BYTE)
+    return 1
 
-    written_bytes = 0
-    while value > 0:
-        to_write = value & 0x7f
-        value = value >> 7
+  written_bytes = 0
+  while value > 0:
+    to_write = value & 0x7f
+    value = value >> 7
 
-        if value > 0:
-            to_write |= 0x80
+    if value > 0:
+      to_write |= 0x80
 
-        outfile.write(byte(to_write))
-        written_bytes += 1
+    outfile.write(byte(to_write))
+    written_bytes += 1
 
-    return written_bytes
+  return written_bytes
 
 
 def yield_varblocks(infile):
-    '''Generator, yields each block in the input file.
-    
-    @param infile: file to read, is expected to have the VARBLOCK format as
-        described in the module's docstring.
-    @yields the contents of each block.
-    '''
+  '''Generator, yields each block in the input file.
 
-    # Check the version number
-    first_char = infile.read(1)
-    if len(first_char) == 0:
-        raise EOFError('Unable to read VARBLOCK version number')
+  @param infile: file to read, is expected to have the VARBLOCK format as
+      described in the module's docstring.
+  @yields the contents of each block.
+  '''
 
-    version = ord(first_char)
-    if version != VARBLOCK_VERSION:
-        raise ValueError('VARBLOCK version %i not supported' % version)
+  # Check the version number
+  first_char = infile.read(1)
+  if len(first_char) == 0:
+    raise EOFError('Unable to read VARBLOCK version number')
 
-    while True:
-        (block_size, read_bytes) = read_varint(infile)
+  version = ord(first_char)
+  if version != VARBLOCK_VERSION:
+    raise ValueError('VARBLOCK version %i not supported' % version)
 
-        # EOF at block boundary, that's fine.
-        if read_bytes == 0 and block_size == 0:
-            break
+  while True:
+    (block_size, read_bytes) = read_varint(infile)
 
-        block = infile.read(block_size)
+    # EOF at block boundary, that's fine.
+    if read_bytes == 0 and block_size == 0:
+      break
 
-        read_size = len(block)
-        if read_size != block_size:
-            raise EOFError('Block size is %i, but could read only %i bytes' %
-                    (block_size, read_size))
+    block = infile.read(block_size)
+
+    read_size = len(block)
+    if read_size != block_size:
+      raise EOFError('Block size is %i, but could read only %i bytes' %
+                     (block_size, read_size))
 
 
-        yield block
+    yield block
+
 
 def yield_fixedblocks(infile, blocksize):
-    '''Generator, yields each block of ``blocksize`` bytes in the input file.
+  '''Generator, yields each block of ``blocksize`` bytes in the input file.
 
-    :param infile: file to read and separate in blocks.
-    :returns: a generator that yields the contents of each block
-    '''
+  :param infile: file to read and separate in blocks.
+  :returns: a generator that yields the contents of each block
+  '''
 
-    while True:
-        block = infile.read(blocksize)
+  while True:
+    block = infile.read(blocksize)
 
-        read_bytes = len(block)
-        if read_bytes == 0:
-            break
+    read_bytes = len(block)
+    if read_bytes == 0:
+      break
 
-        yield block
+    yield block
 
-        if read_bytes < blocksize:
-            break
+    if read_bytes < blocksize:
+      break
 
