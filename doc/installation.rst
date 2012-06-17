@@ -47,6 +47,7 @@ pip or easy_install to install the following packages:
     - nose
     - sphinx
     - pyasn1
+    - tox
 
 Once these are installed, use Mercurial_ to get a copy of the source::
 
