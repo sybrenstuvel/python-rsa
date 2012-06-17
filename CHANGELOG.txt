@@ -1,10 +1,18 @@
 Python-RSA changelog
 ========================================
 
-Version 3.1 - in development
+Version 3.1 - released 2012-06-17
 ----------------------------------------
 
+- Big, big credits to Yesudeep Mangalapilly for all the changes listed
+  below!
 - Added ability to generate keys on multiple cores simultaneously.
+- Massive speedup
+- Partial Python 3.2 compatibility (core functionality works, but
+  saving or loading keys doesn't, for that the pyasn1 package needs to
+  be ported to Python 3 first)
+- Lots of bug fixes
+
 
 
 Version 3.0.1 - released 2011-08-07
