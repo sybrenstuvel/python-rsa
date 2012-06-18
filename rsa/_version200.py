@@ -106,7 +106,7 @@ def to64(number):
     if number == 63:                # 63   translates to '_' (underscore)
         return byte(95)
 
-    raise ValueError(u'Invalid Base64 value: %i' % number)
+    raise ValueError('Invalid Base64 value: %i' % number)
 
 
 def from64(number):
@@ -135,7 +135,7 @@ def from64(number):
     if number == 95:               #ord('_') translates to 63
         return(63)
 
-    raise ValueError(u'Invalid Base64 value: %i' % number)
+    raise ValueError('Invalid Base64 value: %i' % number)
 
 
 def int2str64(number):
