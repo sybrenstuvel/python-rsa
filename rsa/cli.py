@@ -19,7 +19,7 @@
 These scripts are called by the executables defined in setup.py.
 '''
 
-from __future__ import with_statement
+from __future__ import with_statement, print_function
 
 import abc
 import sys
@@ -61,29 +61,29 @@ def keygen():
         keysize = int(cli_args[0])
     except ValueError:
         parser.print_help()
-        print >>sys.stderr, 'Not a valid number: %s' % cli_args[0]
+        print('Not a valid number: %s' % cli_args[0], file=sys.stderr)
         raise SystemExit(1)
 
-    print >>sys.stderr, 'Generating %i-bit key' % keysize
+    print('Generating %i-bit key' % keysize, file=sys.stderr)
     (pub_key, priv_key) = rsa.newkeys(keysize)
 
 
     # Save public key
     if cli.pubout:
-        print >>sys.stderr, 'Writing public key to %s' % cli.pubout
+        print('Writing public key to %s' % cli.pubout, file=sys.stderr)
         data = pub_key.save_pkcs1(format=cli.form)
-        with open(cli.pubout, 'w') as outfile:
+        with open(cli.pubout, 'wb') as outfile:
             outfile.write(data)
 
     # Save private key
     data = priv_key.save_pkcs1(format=cli.form)
     
     if cli.out:
-        print >>sys.stderr, 'Writing private key to %s' % cli.out
-        with open(cli.out, 'w') as outfile:
+        print('Writing private key to %s' % cli.out, file=sys.stderr)
+        with open(cli.out, 'wb') as outfile:
             outfile.write(data)
     else:
-        print >>sys.stderr, 'Writing private key to stdout'
+        print('Writing private key to stdout', file=sys.stderr)
         sys.stdout.write(data)
 
 
@@ -130,7 +130,7 @@ class CryptoOperation(object):
 
         indata = self.read_infile(cli.input)
 
-        print >>sys.stderr, self.operation_progressive.title()
+        print(self.operation_progressive.title(), file=sys.stderr)
         outdata = self.perform_operation(indata, key, cli_args)
 
         if self.has_output:
@@ -164,8 +164,8 @@ class CryptoOperation(object):
     def read_key(self, filename, keyform):
         '''Reads a public or private key.'''
 
-        print >>sys.stderr, 'Reading %s key from %s' % (self.keyname, filename)
-        with open(filename) as keyfile:
+        print('Reading %s key from %s' % (self.keyname, filename), file=sys.stderr)
+        with open(filename, 'rb') as keyfile:
             keydata = keyfile.read()
 
         return self.key_class.load_pkcs1(keydata, keyform)
@@ -174,22 +174,22 @@ class CryptoOperation(object):
         '''Read the input file'''
 
         if inname:
-            print >>sys.stderr, 'Reading input from %s' % inname
+            print('Reading input from %s' % inname, file=sys.stderr)
             with open(inname, 'rb') as infile:
                 return infile.read()
 
-        print >>sys.stderr, 'Reading input from stdin'
+        print('Reading input from stdin', file=sys.stderr)
         return sys.stdin.read()
 
     def write_outfile(self, outdata, outname):
         '''Write the output file'''
 
         if outname:
-            print >>sys.stderr, 'Writing output to %s' % outname
+            print('Writing output to %s' % outname, file=sys.stderr)
             with open(outname, 'wb') as outfile:
                 outfile.write(outdata)
         else:
-            print >>sys.stderr, 'Writing output to stdout'
+            print('Writing output to stdout', file=sys.stderr)
             sys.stdout.write(outdata)
 
 class EncryptOperation(CryptoOperation):
@@ -279,7 +279,7 @@ class VerifyOperation(CryptoOperation):
         except rsa.VerificationError:
             raise SystemExit('Verification failed.')
 
-        print >>sys.stderr, 'Verification OK'
+        print('Verification OK', file=sys.stderr)
 
 
 class BigfileOperation(CryptoOperation):
@@ -308,18 +308,18 @@ class BigfileOperation(CryptoOperation):
         outfile = self.get_outfile(cli.output)
 
         # Call the operation
-        print >>sys.stderr, self.operation_progressive.title()
+        print(self.operation_progressive.title(), file=sys.stderr)
         self.perform_operation(infile, outfile, key, cli_args)
 
     def get_infile(self, inname):
         '''Returns the input file object'''
 
         if inname:
-            print >>sys.stderr, 'Reading input from %s' % inname
+            print('Reading input from %s' % inname, file=sys.stderr)
             fobj = open(inname, 'rb')
             self.file_objects.append(fobj)
         else:
-            print >>sys.stderr, 'Reading input from stdin'
+            print('Reading input from stdin', file=sys.stderr)
             fobj = sys.stdin
 
         return fobj
@@ -328,11 +328,11 @@ class BigfileOperation(CryptoOperation):
         '''Returns the output file object'''
 
         if outname:
-            print >>sys.stderr, 'Will write output to %s' % outname
+            print('Will write output to %s' % outname, file=sys.stderr)
             fobj = open(outname, 'wb')
             self.file_objects.append(fobj)
         else:
-            print >>sys.stderr, 'Will write output to stdout'
+            print('Will write output to stdout', file=sys.stderr)
             fobj = sys.stdout
 
         return fobj
