@@ -52,7 +52,7 @@ def bytes2int(raw_bytes):
 
 
 def _int2bytes(number, block_size=None):
-    '''Converts a number to a string of bytes.
+    r'''Converts a number to a string of bytes.
 
     Usage::
 

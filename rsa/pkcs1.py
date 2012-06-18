@@ -214,7 +214,7 @@ def decrypt(crypto, priv_key):
         keys easier.
 
     >>> crypto = encrypt('hello', pub_key)
-    >>> crypto = 'X' + crypto[1:] # change the first byte
+    >>> crypto = crypto[0:5] + 'X' + crypto[6:] # change a byte
     >>> decrypt(crypto, priv_key)
     Traceback (most recent call last):
     ...
