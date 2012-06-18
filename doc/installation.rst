@@ -48,6 +48,7 @@ pip or easy_install to install the following packages:
     - sphinx
     - pyasn1
     - tox
+    - unittest2 (Python 2.x) or unittest2py3k (Python 3.x)
 
 Once these are installed, use Mercurial_ to get a copy of the source::
 
