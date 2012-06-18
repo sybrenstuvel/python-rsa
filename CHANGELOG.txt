@@ -5,6 +5,7 @@ Version 3.1.1 - in development
 ----------------------------------------
 
 - Fixed doctests for Python 2.7
+- Removed obsolete unittest so all tests run fine on Python 3.2
 
 Version 3.1 - released 2012-06-17
 ----------------------------------------
