@@ -29,7 +29,7 @@ setup(name='rsa',
         'Topic :: Security :: Cryptography',
     ],
     install_requires=[
-        'pyasn1 >= 0.0.13',
+        'pyasn1 >= 0.1.3',
     ],
     entry_points={ 'console_scripts': [
         'pyrsa-priv2pub = rsa.util:private_to_public',
