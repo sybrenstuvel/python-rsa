@@ -130,3 +130,10 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+upload: html
+	@echo
+	@echo "UPLOADING to webserver"
+	@echo
+	rsync _build/html/* sybren@stuvel.eu:stuvel.eu/manager/files/python-rsa-doc/ -va
+

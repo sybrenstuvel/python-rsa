@@ -41,19 +41,22 @@ Development dependencies
 --------------------------------------------------
 
 In order to start developing on Python-RSA you need a bit more. Use
-pip or easy_install to install the following packages:
+pip to install the development requirements in a virtual environment
+for Python 2.x::
 
-    - Mercurial
-    - nose
-    - sphinx
-    - pyasn1
-    - tox
-    - unittest2 (Python 2.x) or unittest2py3k (Python 3.x)
+    virtualenv python-rsa-venv-py2x
+    . python-rsa-venv-py2x/bin/activate
+    pip install -r python-rsa/requirements-dev-py2x.txt
+
+or Python 3.x::
+
+    virtualenv python-rsa-venv-py3x
+    . python-rsa-venv-py3x/bin/activate
+    pip install -r python-rsa/requirements-dev-py3x.txt
 
 Once these are installed, use Mercurial_ to get a copy of the source::
 
-    hg clone https://sybren@bitbucket.org/sybren/python-rsa
-    sudo python setup.py develop
-
+    hg clone https://bitbucket.org/sybren/python-rsa
+    python setup.py develop
 
 .. _Mercurial: http://hg-scm.com/
