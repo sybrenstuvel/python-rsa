@@ -7,4 +7,7 @@
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/python-rsa</path>
 </pydev_pathproperty>
+<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
+<path>C:\cygwin\home\Sybren\python-rsa-venv-py27\Lib\site-packages\pyasn1-0.1.3-py2.7.egg</path>
+</pydev_pathproperty>
 </pydev_project>

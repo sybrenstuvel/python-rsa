@@ -26,13 +26,15 @@ of pyasn1.
 '''
 
 import logging
-from rsa._compat import b
+from rsa._compat import b, bytes_type
 
 import rsa.prime
 import rsa.pem
 import rsa.common
 
 log = logging.getLogger(__name__)
+
+
 
 class AbstractKey(object):
     '''Abstract superclass for private and public keys.'''
@@ -153,16 +155,10 @@ class PublicKey(AbstractKey):
         '''
 
         from pyasn1.codec.der import decoder
-        (priv, _) = decoder.decode(keyfile)
-
-        # ASN.1 contents of DER encoded public key:
-        #
-        # RSAPublicKey ::= SEQUENCE {
-        #     modulus           INTEGER,  -- n
-        #     publicExponent    INTEGER,  -- e
-
-        as_ints = tuple(int(x) for x in priv)
-        return cls(*as_ints)
+        from rsa.asn1 import AsnPubKey
+        
+        (priv, _) = decoder.decode(keyfile, asn1Spec=AsnPubKey())
+        return cls(n=priv['modulus'], e=priv['publicExponent'])
 
     def _save_pkcs1_der(self):
         '''Saves the public key in PKCS#1 DER format.
@@ -170,14 +166,8 @@ class PublicKey(AbstractKey):
         @returns: the DER-encoded public key.
         '''
 
-        from pyasn1.type import univ, namedtype
         from pyasn1.codec.der import encoder
-
-        class AsnPubKey(univ.Sequence):
-            componentType = namedtype.NamedTypes(
-                namedtype.NamedType('modulus', univ.Integer()),
-                namedtype.NamedType('publicExponent', univ.Integer()),
-            )
+        from rsa.asn1 import AsnPubKey
 
         # Create the ASN object
         asn_key = AsnPubKey()
@@ -209,6 +199,47 @@ class PublicKey(AbstractKey):
 
         der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, 'RSA PUBLIC KEY')
+
+    @classmethod
+    def load_pkcs1_openssl_pem(cls, keyfile):
+        '''Loads a PKCS#1.5 PEM-encoded public key file from OpenSSL.
+        
+        These files can be recognised in that they start with BEGIN PUBLIC KEY
+        rather than BEGIN RSA PUBLIC KEY.
+        
+        The contents of the file before the "-----BEGIN PUBLIC KEY-----" and
+        after the "-----END PUBLIC KEY-----" lines is ignored.
+
+        @param keyfile: contents of a PEM-encoded file that contains the public
+            key, from OpenSSL.
+        @return: a PublicKey object
+        '''
+
+        der = rsa.pem.load_pem(keyfile, 'PUBLIC KEY')
+        return cls.load_pkcs1_openssl_der(der)
+
+    @classmethod
+    def load_pkcs1_openssl_der(cls, keyfile):
+        '''Loads a PKCS#1 DER-encoded public key file from OpenSSL.
+
+        @param keyfile: contents of a DER-encoded file that contains the public
+            key, from OpenSSL.
+        @return: a PublicKey object
+        '''
+    
+        from rsa.asn1 import OpenSSLPubKey
+        from pyasn1.codec.der import decoder
+        from pyasn1.type import univ
+        
+        (keyinfo, _) = decoder.decode(keyfile, asn1Spec=OpenSSLPubKey())
+        
+        if keyinfo['header']['oid'] != univ.ObjectIdentifier('1.2.840.113549.1.1.1'):
+            raise TypeError("This is not a DER-encoded OpenSSL-compatible public key")
+                
+        return cls._load_pkcs1_der(keyinfo['key'][1:])
+        
+        
+
 
 class PrivateKey(AbstractKey):
     '''Represents a private RSA key.
