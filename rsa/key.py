@@ -158,7 +158,7 @@ class PublicKey(AbstractKey):
         from rsa.asn1 import AsnPubKey
         
         (priv, _) = decoder.decode(keyfile, asn1Spec=AsnPubKey())
-        return cls(n=priv['modulus'], e=priv['publicExponent'])
+        return cls(n=int(priv['modulus']), e=int(priv['publicExponent']))
 
     def _save_pkcs1_der(self):
         '''Saves the public key in PKCS#1 DER format.
