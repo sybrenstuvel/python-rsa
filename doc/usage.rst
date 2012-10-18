@@ -197,10 +197,11 @@ possible, check the :py:func:`rsa.sign` function documentation for
 details. The hash is then signed with the private key.
 
 In order to verify the signature, use the :py:func:`rsa.verify`
-function.
+function. This function returns True if the verification is successful:
 
     >>> message = 'Go left at the blue tree'
     >>> rsa.verify(message, signature, pubkey)
+    True
 
 Modify the message, and the signature is no longer valid and a
 :py:class:`rsa.pkcs1.VerificationError` is thrown:

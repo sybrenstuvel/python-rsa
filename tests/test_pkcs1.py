@@ -64,7 +64,7 @@ class SignatureTest(unittest2.TestCase):
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
         print("\tSignature: %r" % signature)
 
-        pkcs1.verify(message, signature, self.pub)
+        self.assertTrue(pkcs1.verify(message, signature, self.pub))
 
     def test_alter_message(self):
         '''Altering the message should let the verification fail.'''

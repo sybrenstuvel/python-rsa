@@ -51,7 +51,7 @@ class BigfileTest(unittest2.TestCase):
 
         # Check the signature
         msgfile.seek(0)
-        pkcs1.verify(msgfile, signature, pub_key)
+        self.assertTrue(pkcs1.verify(msgfile, signature, pub_key))
 
         # Alter the message, re-check
         msgfile = BytesIO(b('123456sybren'))

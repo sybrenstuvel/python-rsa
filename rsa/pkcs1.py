@@ -321,6 +321,8 @@ def verify(message, signature, pub_key):
     if message_hash != signature_hash:
         raise VerificationError('Verification failed')
 
+    return True
+
 def _hash(message, method_name):
     '''Returns the message digest.
     
