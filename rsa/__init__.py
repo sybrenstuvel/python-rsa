@@ -28,8 +28,8 @@ If you want to have a more secure implementation, use the functions from the
 """
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
-__date__ = "2012-06-17"
-__version__ = '3.1.1'
+__date__ = "2013-09-15"
+__version__ = '3.1.2'
 
 from rsa.key import newkeys, PrivateKey, PublicKey
 from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
