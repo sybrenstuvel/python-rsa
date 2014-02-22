@@ -256,7 +256,7 @@ class VerifyOperation(CryptoOperation):
     '''Verify a signature.'''
 
     keyname = 'public'
-    usage = 'usage: %%prog [options] private_key signature_file'
+    usage = 'usage: %%prog [options] public_key signature_file'
     description = ('Verifies a signature, exits with status 0 upon success, '
         'prints an error message and exits with status 1 upon error.')
     operation = 'verify'
