@@ -23,16 +23,19 @@ the public key, the receiver can verifying that a message was signed
 by the owner of the private key, and that the message was not modified
 after signing.
 
+
 Generating keys
 --------------------------------------------------
 
 You can use the :py:func:`rsa.newkeys` function to create a keypair:
 
+    >>> import rsa
     >>> (pubkey, privkey) = rsa.newkeys(512)
 
 Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
 :py:meth:`rsa.PublicKey.load_pkcs1` to load keys from a file:
 
+    >>> import rsa
     >>> with open('private.pem') as privatefile:
     ...     keydata = privatefile.read()
     >>> pubkey = rsa.PrivateKey.load_pkcs1(keydata)
@@ -125,21 +128,25 @@ that only Bob can read.
    done such that Alice knows for sure that the key is really Bob's
    (for example by handing over a USB stick that contains the key).
 
+    >>> import rsa
     >>> (bob_pub, bob_priv) = rsa.newkeys(512)
 
-#. Alice writes a message
+#. Alice writes a message, and encodes it in UTF-8. The RSA module
+   only operates on bytes, and not on strings, so this step is
+   necessary.
 
-    >>> message = 'hello Bob!'
+    >>> message = 'hello Bob!'.encode('utf8')
 
 #. Alice encrypts the message using Bob's public key, and sends the
    encrypted message.
 
+    >>> import rsa
     >>> crypto = rsa.encrypt(message, bob_pub)
 
 #. Bob receives the message, and decrypts it with his private key.
 
     >>> message = rsa.decrypt(crypto, bob_priv)
-    >>> print message
+    >>> print(message.decode('utf8'))
     hello Bob!
 
 Since Bob kept his private key *private*, Alice can be sure that he is
@@ -158,9 +165,9 @@ Altering the encrypted information will *likely* cause a
 :py:class:`rsa.pkcs1.DecryptionError`. If you want to be *sure*, use
 :py:func:`rsa.sign`.
 
-    >>> crypto = encrypt('hello', pub_key)
-    >>> crypto = 'X' + crypto[1:] # change the first byte
-    >>> decrypt(crypto, priv_key)
+    >>> crypto = rsa.encrypt(b'hello', bob_pub)
+    >>> crypto = crypto[:-1] + b'X' # change the last byte
+    >>> rsa.decrypt(crypto, bob_priv)
     Traceback (most recent call last):
     ...
     rsa.pkcs1.DecryptionError: Decryption failed
