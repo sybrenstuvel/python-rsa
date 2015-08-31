@@ -3,3 +3,4 @@ sphinx
 pyasn1>=0.1.3
 tox
 unittest2py3k
+wheel
