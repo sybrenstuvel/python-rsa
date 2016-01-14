@@ -21,12 +21,12 @@ try:
     from StringIO import StringIO as BytesIO
 except ImportError:
     from io import BytesIO
-import unittest2
+import unittest
 
 import rsa
 from rsa import bigfile, varblock, pkcs1
 
-class BigfileTest(unittest2.TestCase):
+class BigfileTest(unittest.TestCase):
 
     def test_encrypt_decrypt_bigfile(self):
 

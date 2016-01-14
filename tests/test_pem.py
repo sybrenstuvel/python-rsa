@@ -15,12 +15,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import unittest2
+import unittest
 from rsa._compat import b
 from rsa.pem import _markers
 
 
-class Test__markers(unittest2.TestCase):
+class Test__markers(unittest.TestCase):
     def test_values(self):
         self.assertEqual(_markers('RSA PRIVATE KEY'),
             (b('-----BEGIN RSA PRIVATE KEY-----'),

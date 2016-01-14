@@ -16,11 +16,11 @@
 
 '''Tests integer operations.'''
 
-import unittest2
+import unittest
 
 import rsa.core
 
-class IntegerTest(unittest2.TestCase):
+class IntegerTest(unittest.TestCase):
 
     def setUp(self):
         (self.pub, self.priv) = rsa.newkeys(64)

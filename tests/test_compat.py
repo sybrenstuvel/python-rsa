@@ -14,12 +14,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import unittest2
+import unittest
 import struct
 
 from rsa._compat import is_bytes, byte
 
-class Test_byte(unittest2.TestCase):
+class Test_byte(unittest.TestCase):
     def test_byte(self):
         for i in range(256):
             byt = byte(i)
