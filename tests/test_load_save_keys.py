@@ -23,10 +23,10 @@ from rsa._compat import b
 import rsa.key
 
 B64PRIV_DER = b('MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt')
-PRIVATE_DER = base64.decodestring(B64PRIV_DER)
+PRIVATE_DER = base64.standard_b64decode(B64PRIV_DER)
 
 B64PUB_DER = b('MAwCBQDeKYlRAgMBAAE=')
-PUBLIC_DER = base64.decodestring(B64PUB_DER)
+PUBLIC_DER = base64.standard_b64decode(B64PUB_DER)
 
 PRIVATE_PEM = b('''
 -----BEGIN CONFUSING STUFF-----
