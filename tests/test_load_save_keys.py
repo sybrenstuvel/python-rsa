@@ -18,6 +18,8 @@
 
 import base64
 import unittest
+import os.path
+
 from rsa._compat import b
 
 import rsa.key
@@ -141,3 +143,13 @@ class PemTest(unittest.TestCase):
         self.assertEqual(CLEAN_PUBLIC_PEM, pem)
 
 
+    def test_load_from_disk(self):
+        """Test loading a PEM file from disk."""
+
+        fname = os.path.join(os.path.dirname(__file__), 'private.pem')
+        with open(fname, mode='rb') as privatefile:
+            keydata = privatefile.read()
+        privkey = rsa.key.PrivateKey.load_pkcs1(keydata)
+
+        self.assertEqual(15945948582725241569, privkey.p)
+        self.assertEqual(14617195220284816877, privkey.q)

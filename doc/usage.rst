@@ -36,9 +36,9 @@ Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
 :py:meth:`rsa.PublicKey.load_pkcs1` to load keys from a file:
 
     >>> import rsa
-    >>> with open('private.pem') as privatefile:
+    >>> with open('private.pem', mode='rb') as privatefile:
     ...     keydata = privatefile.read()
-    >>> pubkey = rsa.PrivateKey.load_pkcs1(keydata)
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
 
 
 Time to generate a key
