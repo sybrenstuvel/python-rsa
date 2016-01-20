@@ -24,6 +24,7 @@ __all__ = [ 'getprime', 'are_relatively_prime']
 
 import rsa.randnum
 
+
 def gcd(p, q):
     '''Returns the greatest common divisor of p and q
 
@@ -32,10 +33,9 @@ def gcd(p, q):
     '''
 
     while q != 0:
-        if p < q: (p,q) = (q,p)
-        (p,q) = (q, p % q)
+        (p, q) = (q, p % q)
     return p
-    
+
 
 def jacobi(a, b):
     '''Calculates the value of the Jacobi symbol (a/b) where both a and b are
