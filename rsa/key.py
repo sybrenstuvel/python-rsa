@@ -546,6 +546,7 @@ def gen_keys(nbits, getprime_func, accurate=True):
 
     return (p, q, e, d)
 
+
 def newkeys(nbits, accurate=True, poolsize=1):
     '''Generates public and private keys, and returns them as (pub, priv).
 
@@ -580,10 +581,11 @@ def newkeys(nbits, accurate=True, poolsize=1):
         import functools
 
         getprime_func = functools.partial(parallel.getprime, poolsize=poolsize)
-    else: getprime_func = rsa.prime.getprime
+    else:
+        getprime_func = rsa.prime.getprime
 
     # Generate the key components
-    (p, q, e, d) = gen_keys(nbits, getprime_func)
+    (p, q, e, d) = gen_keys(nbits, getprime_func, accurate=accurate)
     
     # Create the key objects
     n = p * q
