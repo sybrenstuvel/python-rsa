@@ -530,19 +530,27 @@ def calculate_keys(p, q, nbits):
 
     return (e, d)
 
+
 def gen_keys(nbits, getprime_func, accurate=True):
     '''Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
-    
+
     :param nbits: the total number of bits in ``p`` and ``q``. Both ``p`` and
         ``q`` will use ``nbits/2`` bits.
     :param getprime_func: either :py:func:`rsa.prime.getprime` or a function
         with similar signature.
     '''
 
-    (p, q) = find_p_q(nbits // 2, getprime_func, accurate)
-    (e, d) = calculate_keys(p, q, nbits // 2)
+    # Regenerate p and q values, until calculate_keys doesn't raise a
+    # ValueError.
+    while True:
+        (p, q) = find_p_q(nbits // 2, getprime_func, accurate)
+        try:
+            (e, d) = calculate_keys(p, q, nbits // 2)
+            break
+        except ValueError:
+            pass
 
     return (p, q, e, d)
 
