@@ -20,7 +20,7 @@ from rsa._compat import b
 from rsa.pem import _markers
 
 
-class Test__markers(unittest.TestCase):
+class TestMarkers(unittest.TestCase):
     def test_values(self):
         self.assertEqual(_markers('RSA PRIVATE KEY'),
             (b('-----BEGIN RSA PRIVATE KEY-----'),

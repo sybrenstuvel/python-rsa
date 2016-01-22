@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Large file support
+"""Large file support
 
     - break a file into smaller blocks, and encrypt them, and store the
       encrypted blocks in another file.
@@ -37,25 +37,26 @@ The encrypted file format is as follows, where || denotes byte concatenation:
 This file format is called the VARBLOCK format, in line with the varint format
 used to denote the block sizes.
 
-'''
+"""
 
 from rsa import key, common, pkcs1, varblock
 from rsa._compat import byte
 
+
 def encrypt_bigfile(infile, outfile, pub_key):
-    '''Encrypts a file, writing it to 'outfile' in VARBLOCK format.
-    
+    """Encrypts a file, writing it to 'outfile' in VARBLOCK format.
+
     :param infile: file-like object to read the cleartext from
     :param outfile: file-like object to write the crypto in VARBLOCK format to
     :param pub_key: :py:class:`rsa.PublicKey` to encrypt with
 
-    '''
+    """
 
     if not isinstance(pub_key, key.PublicKey):
         raise TypeError('Public key required, but got %r' % pub_key)
 
     key_bytes = common.bit_size(pub_key.n) // 8
-    blocksize = key_bytes - 11 # keep space for PKCS#1 padding
+    blocksize = key_bytes - 11  # keep space for PKCS#1 padding
 
     # Write the version number to the VARBLOCK file
     outfile.write(byte(varblock.VARBLOCK_VERSION))
@@ -67,21 +68,22 @@ def encrypt_bigfile(infile, outfile, pub_key):
         varblock.write_varint(outfile, len(crypto))
         outfile.write(crypto)
 
+
 def decrypt_bigfile(infile, outfile, priv_key):
-    '''Decrypts an encrypted VARBLOCK file, writing it to 'outfile'
-    
+    """Decrypts an encrypted VARBLOCK file, writing it to 'outfile'
+
     :param infile: file-like object to read the crypto in VARBLOCK format from
     :param outfile: file-like object to write the cleartext to
     :param priv_key: :py:class:`rsa.PrivateKey` to decrypt with
 
-    '''
+    """
 
     if not isinstance(priv_key, key.PrivateKey):
         raise TypeError('Private key required, but got %r' % priv_key)
-    
+
     for block in varblock.yield_varblocks(infile):
         cleartext = pkcs1.decrypt(block, priv_key)
         outfile.write(cleartext)
 
-__all__ = ['encrypt_bigfile', 'decrypt_bigfile']
 
+__all__ = ['encrypt_bigfile', 'decrypt_bigfile']

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Utility functions.'''
+"""Utility functions."""
 
 from __future__ import with_statement, print_function
 
@@ -23,34 +23,35 @@ from optparse import OptionParser
 
 import rsa.key
 
+
 def private_to_public():
-    '''Reads a private key and outputs the corresponding public key.'''
+    """Reads a private key and outputs the corresponding public key."""
 
     # Parse the CLI options
     parser = OptionParser(usage='usage: %prog [options]',
-            description='Reads a private key and outputs the '
-            'corresponding public key. Both private and public keys use '
-            'the format described in PKCS#1 v1.5')
+                          description='Reads a private key and outputs the '
+                                      'corresponding public key. Both private and public keys use '
+                                      'the format described in PKCS#1 v1.5')
 
     parser.add_option('-i', '--input', dest='infilename', type='string',
-            help='Input filename. Reads from stdin if not specified')
+                      help='Input filename. Reads from stdin if not specified')
     parser.add_option('-o', '--output', dest='outfilename', type='string',
-            help='Output filename. Writes to stdout of not specified')
+                      help='Output filename. Writes to stdout of not specified')
 
     parser.add_option('--inform', dest='inform',
-            help='key format of input - default PEM',
-            choices=('PEM', 'DER'), default='PEM')
+                      help='key format of input - default PEM',
+                      choices=('PEM', 'DER'), default='PEM')
 
     parser.add_option('--outform', dest='outform',
-            help='key format of output - default PEM',
-            choices=('PEM', 'DER'), default='PEM')
+                      help='key format of output - default PEM',
+                      choices=('PEM', 'DER'), default='PEM')
 
     (cli, cli_args) = parser.parse_args(sys.argv)
 
     # Read the input data
     if cli.infilename:
         print('Reading private key from %s in %s format' % \
-            (cli.infilename, cli.inform), file=sys.stderr)
+              (cli.infilename, cli.inform), file=sys.stderr)
         with open(cli.infilename, 'rb') as infile:
             in_data = infile.read()
     else:
@@ -59,7 +60,6 @@ def private_to_public():
         in_data = sys.stdin.read().encode('ascii')
 
     assert type(in_data) == bytes, type(in_data)
-
 
     # Take the public fields and create a public key
     priv_key = rsa.key.PrivateKey.load_pkcs1(in_data, cli.inform)
@@ -70,12 +70,10 @@ def private_to_public():
 
     if cli.outfilename:
         print('Writing public key to %s in %s format' % \
-            (cli.outfilename, cli.outform), file=sys.stderr)
+              (cli.outfilename, cli.outform), file=sys.stderr)
         with open(cli.outfilename, 'wb') as outfile:
             outfile.write(out_data)
     else:
         print('Writing public key to stdout in %s format' % cli.outform,
               file=sys.stderr)
         sys.stdout.write(out_data.decode('ascii'))
-
-    

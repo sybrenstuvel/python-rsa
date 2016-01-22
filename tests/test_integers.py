@@ -14,19 +14,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Tests integer operations.'''
+"""Tests integer operations."""
 
 import unittest
 
+import rsa
 import rsa.core
 
-class IntegerTest(unittest.TestCase):
 
+class IntegerTest(unittest.TestCase):
     def setUp(self):
         (self.pub, self.priv) = rsa.newkeys(64)
 
     def test_enc_dec(self):
-
         message = 42
         print("\tMessage:   %d" % message)
 
@@ -39,14 +39,12 @@ class IntegerTest(unittest.TestCase):
         self.assertEqual(message, decrypted)
 
     def test_sign_verify(self):
-
         message = 42
 
-        signed = rsa.core.encrypt_int(message,self.priv.d, self.pub.n)
+        signed = rsa.core.encrypt_int(message, self.priv.d, self.pub.n)
         print("\tSigned:    %d" % signed)
 
-        verified = rsa.core.decrypt_int(signed, self.pub.e,self.pub.n)
+        verified = rsa.core.decrypt_int(signed, self.pub.e, self.pub.n)
         print("\tVerified:  %d" % verified)
 
         self.assertEqual(message, verified)
-

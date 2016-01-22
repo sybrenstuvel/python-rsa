@@ -16,7 +16,6 @@
 
 """Python compatibility wrappers."""
 
-
 from __future__ import absolute_import
 
 import sys
@@ -41,7 +40,6 @@ elif MAX_INT == MAX_INT32:
 else:
     # Else we just assume 64-bit processor keeping up with modern times.
     MACHINE_WORD_SIZE = 64
-
 
 try:
     # < Python3
@@ -74,7 +72,6 @@ try:
 except NameError:
     # Python 2.5
     bytes_type = str
-
 
 # To avoid calling b() multiple times in tight loops.
 ZERO_BYTE = b('\x00')

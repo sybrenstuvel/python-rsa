@@ -20,4 +20,3 @@ if have_python3:
     from py3kconstants import *
 else:
     from py2kconstants import *
-

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''RSA key generation code.
+"""RSA key generation code.
 
 Create new keys with the newkeys() function. It will give you a PublicKey and a
 PrivateKey object.
@@ -23,7 +23,7 @@ Loading and saving keys requires the pyasn1 module. This module is imported as
 late as possible, such that other functionality will remain working in absence
 of pyasn1.
 
-'''
+"""
 
 import logging
 from rsa._compat import b, bytes_type
@@ -35,21 +35,19 @@ import rsa.common
 log = logging.getLogger(__name__)
 
 
-
 class AbstractKey(object):
-    '''Abstract superclass for private and public keys.'''
+    """Abstract superclass for private and public keys."""
 
     @classmethod
     def load_pkcs1(cls, keyfile, format='PEM'):
-        r'''Loads a key in PKCS#1 DER or PEM format.
+        """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
             the public key.
         :param format: the format of the file to load; 'PEM' or 'DER'
 
         :return: a PublicKey object
-
-        '''
+        """
 
         methods = {
             'PEM': cls._load_pkcs1_pem,
@@ -59,18 +57,17 @@ class AbstractKey(object):
         if format not in methods:
             formats = ', '.join(sorted(methods.keys()))
             raise ValueError('Unsupported format: %r, try one of %s' % (format,
-                formats))
+                                                                        formats))
 
         method = methods[format]
         return method(keyfile)
 
     def save_pkcs1(self, format='PEM'):
-        '''Saves the public key in PKCS#1 DER or PEM format.
+        """Saves the public key in PKCS#1 DER or PEM format.
 
         :param format: the format to save; 'PEM' or 'DER'
         :returns: the DER- or PEM-encoded public key.
-
-        '''
+        """
 
         methods = {
             'PEM': self._save_pkcs1_pem,
@@ -80,13 +77,14 @@ class AbstractKey(object):
         if format not in methods:
             formats = ', '.join(sorted(methods.keys()))
             raise ValueError('Unsupported format: %r, try one of %s' % (format,
-                formats))
+                                                                        formats))
 
         method = methods[format]
         return method()
 
+
 class PublicKey(AbstractKey):
-    '''Represents a public RSA key.
+    """Represents a public RSA key.
 
     This key is also known as the 'encryption key'. It contains the 'n' and 'e'
     values.
@@ -107,7 +105,7 @@ class PublicKey(AbstractKey):
     >>> key['e']
     3
 
-    '''
+    """
 
     __slots__ = ('n', 'e')
 
@@ -135,7 +133,7 @@ class PublicKey(AbstractKey):
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
-        r'''Loads a key in PKCS#1 DER format.
+        """Loads a key in PKCS#1 DER format.
 
         @param keyfile: contents of a DER-encoded file that contains the public
             key.
@@ -152,19 +150,19 @@ class PublicKey(AbstractKey):
         >>> PublicKey._load_pkcs1_der(der)
         PublicKey(2367317549, 65537)
 
-        '''
+        """
 
         from pyasn1.codec.der import decoder
         from rsa.asn1 import AsnPubKey
-        
+
         (priv, _) = decoder.decode(keyfile, asn1Spec=AsnPubKey())
         return cls(n=int(priv['modulus']), e=int(priv['publicExponent']))
 
     def _save_pkcs1_der(self):
-        '''Saves the public key in PKCS#1 DER format.
+        """Saves the public key in PKCS#1 DER format.
 
         @returns: the DER-encoded public key.
-        '''
+        """
 
         from pyasn1.codec.der import encoder
         from rsa.asn1 import AsnPubKey
@@ -178,7 +176,7 @@ class PublicKey(AbstractKey):
 
     @classmethod
     def _load_pkcs1_pem(cls, keyfile):
-        '''Loads a PKCS#1 PEM-encoded public key file.
+        """Loads a PKCS#1 PEM-encoded public key file.
 
         The contents of the file before the "-----BEGIN RSA PUBLIC KEY-----" and
         after the "-----END RSA PUBLIC KEY-----" lines is ignored.
@@ -186,63 +184,61 @@ class PublicKey(AbstractKey):
         @param keyfile: contents of a PEM-encoded file that contains the public
             key.
         @return: a PublicKey object
-        '''
+        """
 
         der = rsa.pem.load_pem(keyfile, 'RSA PUBLIC KEY')
         return cls._load_pkcs1_der(der)
 
     def _save_pkcs1_pem(self):
-        '''Saves a PKCS#1 PEM-encoded public key file.
+        """Saves a PKCS#1 PEM-encoded public key file.
 
         @return: contents of a PEM-encoded file that contains the public key.
-        '''
+        """
 
         der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, 'RSA PUBLIC KEY')
 
     @classmethod
     def load_pkcs1_openssl_pem(cls, keyfile):
-        '''Loads a PKCS#1.5 PEM-encoded public key file from OpenSSL.
-        
+        """Loads a PKCS#1.5 PEM-encoded public key file from OpenSSL.
+
         These files can be recognised in that they start with BEGIN PUBLIC KEY
         rather than BEGIN RSA PUBLIC KEY.
-        
+
         The contents of the file before the "-----BEGIN PUBLIC KEY-----" and
         after the "-----END PUBLIC KEY-----" lines is ignored.
 
         @param keyfile: contents of a PEM-encoded file that contains the public
             key, from OpenSSL.
         @return: a PublicKey object
-        '''
+        """
 
         der = rsa.pem.load_pem(keyfile, 'PUBLIC KEY')
         return cls.load_pkcs1_openssl_der(der)
 
     @classmethod
     def load_pkcs1_openssl_der(cls, keyfile):
-        '''Loads a PKCS#1 DER-encoded public key file from OpenSSL.
+        """Loads a PKCS#1 DER-encoded public key file from OpenSSL.
 
         @param keyfile: contents of a DER-encoded file that contains the public
             key, from OpenSSL.
         @return: a PublicKey object
-        '''
-    
+        """
+
         from rsa.asn1 import OpenSSLPubKey
         from pyasn1.codec.der import decoder
         from pyasn1.type import univ
-        
+
         (keyinfo, _) = decoder.decode(keyfile, asn1Spec=OpenSSLPubKey())
-        
+
         if keyinfo['header']['oid'] != univ.ObjectIdentifier('1.2.840.113549.1.1.1'):
             raise TypeError("This is not a DER-encoded OpenSSL-compatible public key")
-                
+
         return cls._load_pkcs1_der(keyinfo['key'][1:])
-        
-        
 
 
 class PrivateKey(AbstractKey):
-    '''Represents a private RSA key.
+    """Represents a private RSA key.
 
     This key is also known as the 'decryption key'. It contains the 'n', 'e',
     'd', 'p', 'q' and other values.
@@ -273,7 +269,7 @@ class PrivateKey(AbstractKey):
     >>> pk.coef
     8
 
-    '''
+    """
 
     __slots__ = ('n', 'e', 'd', 'p', 'q', 'exp1', 'exp2', 'coef')
 
@@ -314,20 +310,20 @@ class PrivateKey(AbstractKey):
             return False
 
         return (self.n == other.n and
-            self.e == other.e and
-            self.d == other.d and
-            self.p == other.p and
-            self.q == other.q and
-            self.exp1 == other.exp1 and
-            self.exp2 == other.exp2 and
-            self.coef == other.coef)
+                self.e == other.e and
+                self.d == other.d and
+                self.p == other.p and
+                self.q == other.q and
+                self.exp1 == other.exp1 and
+                self.exp2 == other.exp2 and
+                self.coef == other.coef)
 
     def __ne__(self, other):
         return not (self == other)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
-        r'''Loads a key in PKCS#1 DER format.
+        """Loads a key in PKCS#1 DER format.
 
         @param keyfile: contents of a DER-encoded file that contains the private
             key.
@@ -344,7 +340,7 @@ class PrivateKey(AbstractKey):
         >>> PrivateKey._load_pkcs1_der(der)
         PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
-        '''
+        """
 
         from pyasn1.codec.der import decoder
         (priv, _) = decoder.decode(keyfile)
@@ -371,25 +367,25 @@ class PrivateKey(AbstractKey):
         return cls(*as_ints)
 
     def _save_pkcs1_der(self):
-        '''Saves the private key in PKCS#1 DER format.
+        """Saves the private key in PKCS#1 DER format.
 
         @returns: the DER-encoded private key.
-        '''
+        """
 
         from pyasn1.type import univ, namedtype
         from pyasn1.codec.der import encoder
 
         class AsnPrivKey(univ.Sequence):
             componentType = namedtype.NamedTypes(
-                namedtype.NamedType('version', univ.Integer()),
-                namedtype.NamedType('modulus', univ.Integer()),
-                namedtype.NamedType('publicExponent', univ.Integer()),
-                namedtype.NamedType('privateExponent', univ.Integer()),
-                namedtype.NamedType('prime1', univ.Integer()),
-                namedtype.NamedType('prime2', univ.Integer()),
-                namedtype.NamedType('exponent1', univ.Integer()),
-                namedtype.NamedType('exponent2', univ.Integer()),
-                namedtype.NamedType('coefficient', univ.Integer()),
+                    namedtype.NamedType('version', univ.Integer()),
+                    namedtype.NamedType('modulus', univ.Integer()),
+                    namedtype.NamedType('publicExponent', univ.Integer()),
+                    namedtype.NamedType('privateExponent', univ.Integer()),
+                    namedtype.NamedType('prime1', univ.Integer()),
+                    namedtype.NamedType('prime2', univ.Integer()),
+                    namedtype.NamedType('exponent1', univ.Integer()),
+                    namedtype.NamedType('exponent2', univ.Integer()),
+                    namedtype.NamedType('coefficient', univ.Integer()),
             )
 
         # Create the ASN object
@@ -408,7 +404,7 @@ class PrivateKey(AbstractKey):
 
     @classmethod
     def _load_pkcs1_pem(cls, keyfile):
-        '''Loads a PKCS#1 PEM-encoded private key file.
+        """Loads a PKCS#1 PEM-encoded private key file.
 
         The contents of the file before the "-----BEGIN RSA PRIVATE KEY-----" and
         after the "-----END RSA PRIVATE KEY-----" lines is ignored.
@@ -416,23 +412,24 @@ class PrivateKey(AbstractKey):
         @param keyfile: contents of a PEM-encoded file that contains the private
             key.
         @return: a PrivateKey object
-        '''
+        """
 
         der = rsa.pem.load_pem(keyfile, b('RSA PRIVATE KEY'))
         return cls._load_pkcs1_der(der)
 
     def _save_pkcs1_pem(self):
-        '''Saves a PKCS#1 PEM-encoded private key file.
+        """Saves a PKCS#1 PEM-encoded private key file.
 
         @return: contents of a PEM-encoded file that contains the private key.
-        '''
+        """
 
         der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, b('RSA PRIVATE KEY'))
 
+
 def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
-    ''''Returns a tuple of two different primes of nbits bits each.
-    
+    """Returns a tuple of two different primes of nbits bits each.
+
     The resulting p * q has exacty 2 * nbits bits, and the returned p and q
     will not be equal.
 
@@ -458,9 +455,9 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     True
     >>> common.bit_size(p * q) > 240
     True
-    
-    '''
-    
+
+    """
+
     total_bits = nbits * 2
 
     # Make sure that p and q aren't too close or the factoring programs can
@@ -468,7 +465,7 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     shift = nbits // 16
     pbits = nbits + shift
     qbits = nbits - shift
-    
+
     # Choose the two initial primes
     log.debug('find_p_q(%i): Finding p', nbits)
     p = getprime_func(pbits)
@@ -476,11 +473,11 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     q = getprime_func(qbits)
 
     def is_acceptable(p, q):
-        '''Returns True iff p and q are acceptable:
-            
+        """Returns True iff p and q are acceptable:
+
             - p and q differ
             - (p * q) has the right nr of bits (when accurate=True)
-        '''
+        """
 
         if p == q:
             return False
@@ -505,13 +502,14 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
 
     # We want p > q as described on
     # http://www.di-mgt.com.au/rsa_alg.html#crt
-    return (max(p, q), min(p, q))
+    return max(p, q), min(p, q)
+
 
 def calculate_keys(p, q, nbits):
-    '''Calculates an encryption and a decryption key given p and q, and
+    """Calculates an encryption and a decryption key given p and q, and
     returns them as a tuple (e, d)
 
-    '''
+    """
 
     phi_n = (p - 1) * (q - 1)
 
@@ -522,17 +520,17 @@ def calculate_keys(p, q, nbits):
         d = rsa.common.inverse(e, phi_n)
     except ValueError:
         raise ValueError("e (%d) and phi_n (%d) are not relatively prime" %
-                (e, phi_n))
+                         (e, phi_n))
 
     if (e * d) % phi_n != 1:
         raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "
-                "phi_n (%d)" % (e, d, phi_n))
+                         "phi_n (%d)" % (e, d, phi_n))
 
-    return (e, d)
+    return e, d
 
 
 def gen_keys(nbits, getprime_func, accurate=True):
-    '''Generate RSA keys of nbits bits. Returns (p, q, e, d).
+    """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
 
@@ -540,7 +538,7 @@ def gen_keys(nbits, getprime_func, accurate=True):
         ``q`` will use ``nbits/2`` bits.
     :param getprime_func: either :py:func:`rsa.prime.getprime` or a function
         with similar signature.
-    '''
+    """
 
     # Regenerate p and q values, until calculate_keys doesn't raise a
     # ValueError.
@@ -552,11 +550,11 @@ def gen_keys(nbits, getprime_func, accurate=True):
         except ValueError:
             pass
 
-    return (p, q, e, d)
+    return p, q, e, d
 
 
 def newkeys(nbits, accurate=True, poolsize=1):
-    '''Generates public and private keys, and returns them as (pub, priv).
+    """Generates public and private keys, and returns them as (pub, priv).
 
     The public key is also known as the 'encryption key', and is a
     :py:class:`rsa.PublicKey` object. The private key is also known as the
@@ -574,8 +572,8 @@ def newkeys(nbits, accurate=True, poolsize=1):
 
     The ``poolsize`` parameter was added in *Python-RSA 3.1* and requires
     Python 2.6 or newer.
-    
-    '''
+
+    """
 
     if nbits < 16:
         raise ValueError('Key too small')
@@ -594,7 +592,7 @@ def newkeys(nbits, accurate=True, poolsize=1):
 
     # Generate the key components
     (p, q, e, d) = gen_keys(nbits, getprime_func, accurate=accurate)
-    
+
     # Create the key objects
     n = p * q
 
@@ -603,11 +601,12 @@ def newkeys(nbits, accurate=True, poolsize=1):
         PrivateKey(n, e, d, p, q)
     )
 
+
 __all__ = ['PublicKey', 'PrivateKey', 'newkeys']
 
 if __name__ == '__main__':
     import doctest
-    
+
     try:
         for count in range(100):
             (failures, tests) = doctest.testmod()

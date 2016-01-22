@@ -27,19 +27,19 @@ If you want to have a more secure implementation, use the functions from the
 
 """
 
-__author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
-__date__ = "2016-01-13"
-__version__ = '3.3'
-
 from rsa.key import newkeys, PrivateKey, PublicKey
 from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
     VerificationError
 
+__author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
+__date__ = "2016-01-13"
+__version__ = '3.3'
+
 # Do doctest if we're run directly
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
 
 __all__ = ["newkeys", "encrypt", "decrypt", "sign", "verify", 'PublicKey',
-    'PrivateKey', 'DecryptionError', 'VerificationError']
-
+           'PrivateKey', 'DecryptionError', 'VerificationError']
