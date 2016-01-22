@@ -277,7 +277,7 @@ def sign(message, priv_key, hash):
     padded = _pad_for_signing(cleartext, keylength)
 
     payload = transform.bytes2int(padded)
-    encrypted = core.encrypt_int(payload, priv_key.d, priv_key.n)
+    encrypted = priv_key.blinded_encrypt(payload)
     block = transform.int2bytes(encrypted, keylength)
 
     return block
@@ -299,7 +299,7 @@ def verify(message, signature, pub_key):
 
     keylength = common.byte_size(pub_key.n)
     encrypted = transform.bytes2int(signature)
-    decrypted = pub_key.blinded_decrypt(encrypted)
+    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
     clearsig = transform.int2bytes(decrypted, keylength)
 
     # Get the hash method

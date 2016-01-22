@@ -94,8 +94,11 @@ class AbstractKey(object):
         """Performs blinding on the message using random number 'r'.
 
         :param message: the message, as integer, to blind.
+        :type message: int
         :param r: the random number to blind with.
+        :type r: int
         :return: the blinded message.
+        :rtype: int
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
@@ -170,23 +173,6 @@ class PublicKey(AbstractKey):
 
     def __ne__(self, other):
         return not (self == other)
-
-    def blinded_decrypt(self, encrypted):
-        """Decrypts the message using blinding to prevent side-channel attacks.
-
-        :param encrypted: the encrypted message
-        :type encrypted: int
-
-        :returns: the decrypted message
-        :rtype: int
-        """
-
-        # return self._blinded_decrypt(encrypted, self.e)
-        blind_r = rsa.randnum.randint(self.n - 1)
-        blinded = self.unblind(encrypted, blind_r)  # blind before decrypting
-        decrypted = rsa.core.decrypt_int(blinded, self.e, self.n)
-
-        return self.blind(decrypted, blind_r)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
@@ -393,6 +379,21 @@ class PrivateKey(AbstractKey):
         decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
 
         return self.unblind(decrypted, blind_r)
+
+    def blinded_encrypt(self, message):
+        """Encrypts the message using blinding to prevent side-channel attacks.
+
+        :param message: the message to encrypt
+        :type message: int
+
+        :returns: the encrypted message
+        :rtype: int
+        """
+
+        blind_r = rsa.randnum.randint(self.n - 1)
+        blinded = self.blind(message, blind_r)  # blind before encrypting
+        encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
+        return self.unblind(encrypted, blind_r)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
