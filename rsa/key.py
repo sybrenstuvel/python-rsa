@@ -103,14 +103,6 @@ class AbstractKey(object):
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
-
-        >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
-        >>> message = 12345
-        >>> encrypted = rsa.core.encrypt_int(message, pk.e, pk.n)
-        >>> blinded = pk.blind(encrypted, 4134431)  # blind before decrypting
-        >>> decrypted = rsa.core.decrypt_int(blinded, pk.d, pk.n)
-        >>> pk.unblind(decrypted, 4134431)
-        12345
         """
 
         return (message * pow(r, self.e, self.n)) % self.n
