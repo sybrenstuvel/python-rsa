@@ -44,6 +44,12 @@ Exceptions
 Module: rsa.bigfile
 --------------------------------------------------
 
+.. warning::
+
+    The :py:mod:`rsa.bigfile` module is NOT recommended for general use, has been
+    deprecated since Python-RSA 3.4, and will be removed in a future release. It's
+    vulnerable to a number of attacks. See :ref:`bigfiles` for more information.
+
 The :py:mod:`rsa.bigfile` module contains functions for encrypting and
 decrypting files that are larger than the RSA key. See
 :ref:`bigfiles` for more information.
@@ -56,6 +62,12 @@ decrypting files that are larger than the RSA key. See
 
 The VARBLOCK file format
 ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. warning::
+
+    The VARBLOCK format is NOT recommended for general use, has been deprecated since
+    Python-RSA 3.4, and will be removed in a future release. It's vulnerable to a
+    number of attacks. See :ref:`bigfiles` for more information.
 
 The VARBLOCK file format allows us to encrypt files that are larger
 than the RSA key. The format is as follows; || denotes byte string

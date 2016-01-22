@@ -16,6 +16,24 @@
 
 """VARBLOCK file support
 
+.. deprecated:: 3.4
+
+    The VARBLOCK format is NOT recommended for general use, has been deprecated since
+    Python-RSA 3.4, and will be removed in a future release. It's vulnerable to a
+    number of attacks:
+
+    1. decrypt/encrypt_bigfile() does not implement `Authenticated encryption`_ nor
+       uses MACs to verify messages before decrypting public key encrypted messages.
+
+    2. decrypt/encrypt_bigfile() does not use hybrid encryption (it uses plain RSA)
+       and has no method for chaining, so block reordering is possible.
+
+    See `issue #19 on Github`_ for more information.
+
+.. _Authenticated encryption: https://en.wikipedia.org/wiki/Authenticated_encryption
+.. _issue #19 on Github: https://github.com/sybrenstuvel/python-rsa/issues/13
+
+
 The VARBLOCK file format is as follows, where || denotes byte concatenation:
 
     FILE := VERSION || BLOCK || BLOCK ...
@@ -33,10 +51,17 @@ used to denote the block sizes.
 
 """
 
+import warnings
+
 from rsa._compat import byte, b
 
 ZERO_BYTE = b('\x00')
 VARBLOCK_VERSION = 1
+
+warnings.warn("The 'rsa.varblock' module was deprecated in Python-RSA version "
+              "3.4 due to security issues in the VARBLOCK format. See "
+              "https://github.com/sybrenstuvel/python-rsa/issues/13 for more information.",
+              DeprecationWarning)
 
 
 def read_varint(infile):

@@ -16,6 +16,26 @@
 
 """Large file support
 
+.. deprecated:: 3.4
+
+    The VARBLOCK format is NOT recommended for general use, has been deprecated since
+    Python-RSA 3.4, and will be removed in a future release. It's vulnerable to a
+    number of attacks:
+
+    1. decrypt/encrypt_bigfile() does not implement `Authenticated encryption`_ nor
+       uses MACs to verify messages before decrypting public key encrypted messages.
+
+    2. decrypt/encrypt_bigfile() does not use hybrid encryption (it uses plain RSA)
+       and has no method for chaining, so block reordering is possible.
+
+    See `issue #19 on Github`_ for more information.
+
+.. _Authenticated encryption: https://en.wikipedia.org/wiki/Authenticated_encryption
+.. _issue #19 on Github: https://github.com/sybrenstuvel/python-rsa/issues/13
+
+
+This module contains functions to:
+
     - break a file into smaller blocks, and encrypt them, and store the
       encrypted blocks in another file.
 
@@ -39,6 +59,8 @@ used to denote the block sizes.
 
 """
 
+import warnings
+
 from rsa import key, common, pkcs1, varblock
 from rsa._compat import byte
 
@@ -46,11 +68,23 @@ from rsa._compat import byte
 def encrypt_bigfile(infile, outfile, pub_key):
     """Encrypts a file, writing it to 'outfile' in VARBLOCK format.
 
+    .. deprecated:: 3.4
+        This function was deprecated in Python-RSA version 3.4 due to security issues
+        in the VARBLOCK format. See the documentation_ for more information.
+
+    .. _documentation: https://stuvel.eu/python-rsa-doc/usage.html#working-with-big-files
+
     :param infile: file-like object to read the cleartext from
     :param outfile: file-like object to write the crypto in VARBLOCK format to
     :param pub_key: :py:class:`rsa.PublicKey` to encrypt with
 
     """
+
+    warnings.warn("The 'rsa.bigfile.encrypt_bigfile' function was deprecated in Python-RSA version "
+                  "3.4 due to security issues in the VARBLOCK format. See "
+                  "https://stuvel.eu/python-rsa-doc/usage.html#working-with-big-files "
+                  "for more information.",
+                  DeprecationWarning, stacklevel=2)
 
     if not isinstance(pub_key, key.PublicKey):
         raise TypeError('Public key required, but got %r' % pub_key)
@@ -72,11 +106,23 @@ def encrypt_bigfile(infile, outfile, pub_key):
 def decrypt_bigfile(infile, outfile, priv_key):
     """Decrypts an encrypted VARBLOCK file, writing it to 'outfile'
 
+    .. deprecated:: 3.4
+        This function was deprecated in Python-RSA version 3.4 due to security issues
+        in the VARBLOCK format. See the documentation_ for more information.
+
+    .. _documentation: https://stuvel.eu/python-rsa-doc/usage.html#working-with-big-files
+
     :param infile: file-like object to read the crypto in VARBLOCK format from
     :param outfile: file-like object to write the cleartext to
     :param priv_key: :py:class:`rsa.PrivateKey` to decrypt with
 
     """
+
+    warnings.warn("The 'rsa.bigfile.decrypt_bigfile' function was deprecated in Python-RSA version "
+                  "3.4 due to security issues in the VARBLOCK format. See "
+                  "https://stuvel.eu/python-rsa-doc/usage.html#working-with-big-files "
+                  "for more information.",
+                  DeprecationWarning, stacklevel=2)
 
     if not isinstance(priv_key, key.PrivateKey):
         raise TypeError('Private key required, but got %r' % priv_key)

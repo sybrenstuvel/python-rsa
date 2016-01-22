@@ -282,6 +282,24 @@ the encrypted key to the recipient. The complete flow is:
 Only using Python-RSA: the VARBLOCK format
 +++++++++++++++++++++++++++++++++++++++++++
 
+.. warning::
+
+    The VARBLOCK format is NOT recommended for general use, has been deprecated since
+    Python-RSA 3.4, and will be removed in a future release. It's vulnerable to a
+    number of attacks:
+
+    1. decrypt/encrypt_bigfile() does not implement `Authenticated encryption`_ nor
+       uses MACs to verify messages before decrypting public key encrypted messages.
+
+    2. decrypt/encrypt_bigfile() does not use hybrid encryption (it uses plain RSA)
+       and has no method for chaining, so block reordering is possible.
+
+    See `issue #19 on Github`_ for more information.
+
+.. _Authenticated encryption: https://en.wikipedia.org/wiki/Authenticated_encryption
+.. _issue #19 on Github: https://github.com/sybrenstuvel/python-rsa/issues/13
+
+
 As far as we know, there is no pure-Python AES encryption. Previous
 versions of Python-RSA included functionality to encrypt large files
 with just RSA, and so does this version. The format has been improved,

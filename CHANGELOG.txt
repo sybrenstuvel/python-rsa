@@ -5,8 +5,10 @@ Python-RSA changelog
 Version 3.4 - in development
 ----------------------------------------
 
-- Moved development to Github.
+- Moved development to Github: https://github.com/sybrenstuvel/python-rsa
 - Solved side-channel vulnerability by implementing blinding, fixes #19
+- Deprecated the VARBLOCK format and rsa.bigfile module due to security issues, see
+    https://github.com/sybrenstuvel/python-rsa/issues/13
 - Fixed bugs #14, #27, #30
 
 
