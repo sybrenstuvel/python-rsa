@@ -16,10 +16,8 @@
 
 from setuptools import setup
 
-import rsa
-
 setup(name='rsa',
-      version=rsa.__version__,
+      version='3.3',
       description='Pure-Python RSA implementation',
       author='Sybren A. Stuvel',
       author_email='sybren@stuvel.eu',
