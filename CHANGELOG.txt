@@ -2,6 +2,13 @@ Python-RSA changelog
 ========================================
 
 
+Version 3.4 - in development
+----------------------------------------
+
+- Moved development to Github.
+- Fixed bugs #27
+
+
 Version 3.3 - released 2016-01-13
 ----------------------------------------
 
