@@ -69,13 +69,13 @@ def _pad_for_encryption(message, target_length):
 
     :return: 00 02 RANDOM_DATA 00 MESSAGE
 
-    >>> block = _pad_for_encryption('hello', 16)
+    >>> block = _pad_for_encryption(b'hello', 16)
     >>> len(block)
     16
     >>> block[0:2]
-    '\x00\x02'
+    b'\x00\x02'
     >>> block[-6:]
-    '\x00hello'
+    b'\x00hello'
 
     """
 
@@ -117,15 +117,15 @@ def _pad_for_signing(message, target_length):
 
     :return: 00 01 PADDING 00 MESSAGE
 
-    >>> block = _pad_for_signing('hello', 16)
+    >>> block = _pad_for_signing(b'hello', 16)
     >>> len(block)
     16
     >>> block[0:2]
-    '\x00\x01'
+    b'\x00\x01'
     >>> block[-6:]
-    '\x00hello'
+    b'\x00hello'
     >>> block[2:-6]
-    '\xff\xff\xff\xff\xff\xff\xff\xff'
+    b'\xff\xff\xff\xff\xff\xff\xff\xff'
 
     """
 
@@ -156,7 +156,7 @@ def encrypt(message, pub_key):
 
     >>> from rsa import key, common
     >>> (pub_key, priv_key) = key.newkeys(256)
-    >>> message = 'hello'
+    >>> message = b'hello'
     >>> crypto = encrypt(message, pub_key)
 
     The crypto text should be just as long as the public key 'n' component:
@@ -195,15 +195,15 @@ def decrypt(crypto, priv_key):
 
     It works with strings:
 
-    >>> crypto = encrypt('hello', pub_key)
+    >>> crypto = encrypt(b'hello', pub_key)
     >>> decrypt(crypto, priv_key)
-    'hello'
+    b'hello'
 
     And with binary data:
 
-    >>> crypto = encrypt('\x00\x00\x00\x00\x01', pub_key)
+    >>> crypto = encrypt(b'\x00\x00\x00\x00\x01', pub_key)
     >>> decrypt(crypto, priv_key)
-    '\x00\x00\x00\x00\x01'
+    b'\x00\x00\x00\x00\x01'
 
     Altering the encrypted information will *likely* cause a
     :py:class:`rsa.pkcs1.DecryptionError`. If you want to be *sure*, use
@@ -218,12 +218,12 @@ def decrypt(crypto, priv_key):
         It's only a tiny bit of information, but every bit makes cracking the
         keys easier.
 
-    >>> crypto = encrypt('hello', pub_key)
-    >>> crypto = crypto[0:5] + 'X' + crypto[6:] # change a byte
+    >>> crypto = encrypt(b'hello', pub_key)
+    >>> crypto = crypto[0:5] + b'X' + crypto[6:] # change a byte
     >>> decrypt(crypto, priv_key)
     Traceback (most recent call last):
     ...
-    DecryptionError: Decryption failed
+    rsa.pkcs1.DecryptionError: Decryption failed
 
     """
 

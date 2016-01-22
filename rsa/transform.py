@@ -44,7 +44,7 @@ def bytes2int(raw_bytes):
 
     >>> (((128 * 256) + 64) * 256) + 15
     8405007
-    >>> bytes2int('\x80@\x0f')
+    >>> bytes2int(b'\x80@\x0f')
     8405007
 
     """
@@ -58,12 +58,12 @@ def _int2bytes(number, block_size=None):
     Usage::
 
         >>> _int2bytes(123456789)
-        '\x07[\xcd\x15'
+        b'\x07[\xcd\x15'
         >>> bytes2int(_int2bytes(123456789))
         123456789
 
         >>> _int2bytes(123456789, 6)
-        '\x00\x00\x07[\xcd\x15'
+        b'\x00\x00\x07[\xcd\x15'
         >>> bytes2int(_int2bytes(123456789, 128))
         123456789
 

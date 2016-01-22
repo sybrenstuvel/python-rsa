@@ -67,12 +67,6 @@ def gcd(p, q):
 
 def bytes2int(bytes):
     """Converts a list of bytes or a string to an integer
-
-    >>> (128*256 + 64)*256 + + 15
-    8405007
-    >>> l = [128, 64, 15]
-    >>> bytes2int(l)
-    8405007
     """
 
     if not (type(bytes) is types.ListType or type(bytes) is types.StringType):
@@ -89,9 +83,6 @@ def bytes2int(bytes):
 
 def int2bytes(number):
     """Converts a number to a string of bytes
-    
-    >>> bytes2int(int2bytes(123456789))
-    123456789
     """
 
     if not (type(number) is types.LongType or type(number) is types.IntType):
@@ -208,11 +199,6 @@ def randomized_primality_testing(n, k):
 
 def is_prime(number):
     """Returns True if the number is prime, and False otherwise.
-
-    >>> is_prime(42)
-    0
-    >>> is_prime(41)
-    1
     """
 
     """
@@ -232,14 +218,6 @@ def is_prime(number):
 def getprime(nbits):
     """Returns a prime number of max. 'math.ceil(nbits/8)*8' bits. In
     other words: nbits is rounded up to whole bytes.
-
-    >>> p = getprime(8)
-    >>> is_prime(p-1)
-    0
-    >>> is_prime(p)
-    1
-    >>> is_prime(p+1)
-    0
     """
 
     nbytes = int(math.ceil(nbits/8.))
@@ -260,11 +238,6 @@ def getprime(nbits):
 def are_relatively_prime(a, b):
     """Returns True if a and b are relatively prime, and False if they
     are not.
-
-    >>> are_relatively_prime(2, 3)
-    1
-    >>> are_relatively_prime(2, 4)
-    0
     """
 
     d = gcd(a, b)
