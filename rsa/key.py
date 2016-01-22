@@ -31,12 +31,20 @@ from rsa._compat import b, bytes_type
 import rsa.prime
 import rsa.pem
 import rsa.common
+import rsa.randnum
+import rsa.core
 
 log = logging.getLogger(__name__)
 
 
 class AbstractKey(object):
     """Abstract superclass for private and public keys."""
+
+    __slots__ = ('n', 'e')
+
+    def __init__(self, n, e):
+        self.n = n
+        self.e = e
 
     @classmethod
     def load_pkcs1(cls, keyfile, format='PEM'):
@@ -82,6 +90,42 @@ class AbstractKey(object):
         method = methods[format]
         return method()
 
+    def blind(self, message, r):
+        """Performs blinding on the message using random number 'r'.
+
+        :param message: the message, as integer, to blind.
+        :param r: the random number to blind with.
+        :return: the blinded message.
+
+        The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
+
+        See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
+
+        >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+        >>> message = 12345
+        >>> encrypted = rsa.core.encrypt_int(message, pk.e, pk.n)
+        >>> blinded = pk.blind(encrypted, 4134431)  # blind before decrypting
+        >>> decrypted = rsa.core.decrypt_int(blinded, pk.d, pk.n)
+        >>> pk.unblind(decrypted, 4134431)
+        12345
+        """
+
+        return (message * pow(r, self.e, self.n)) % self.n
+
+    def unblind(self, blinded, r):
+        """Performs blinding on the message using random number 'r'.
+
+        :param blinded: the blinded message, as integer, to unblind.
+        :param r: the random number to unblind with.
+        :return: the original message.
+
+        The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
+
+        See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
+        """
+
+        return (rsa.common.inverse(r, self.n) * blinded) % self.n
+
 
 class PublicKey(AbstractKey):
     """Represents a public RSA key.
@@ -109,10 +153,6 @@ class PublicKey(AbstractKey):
 
     __slots__ = ('n', 'e')
 
-    def __init__(self, n, e):
-        self.n = n
-        self.e = e
-
     def __getitem__(self, key):
         return getattr(self, key)
 
@@ -130,6 +170,23 @@ class PublicKey(AbstractKey):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def blinded_decrypt(self, encrypted):
+        """Decrypts the message using blinding to prevent side-channel attacks.
+
+        :param encrypted: the encrypted message
+        :type encrypted: int
+
+        :returns: the decrypted message
+        :rtype: int
+        """
+
+        # return self._blinded_decrypt(encrypted, self.e)
+        blind_r = rsa.randnum.randint(self.n - 1)
+        blinded = self.unblind(encrypted, blind_r)  # blind before decrypting
+        decrypted = rsa.core.decrypt_int(blinded, self.e, self.n)
+
+        return self.blind(decrypted, blind_r)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
@@ -275,8 +332,7 @@ class PrivateKey(AbstractKey):
     __slots__ = ('n', 'e', 'd', 'p', 'q', 'exp1', 'exp2', 'coef')
 
     def __init__(self, n, e, d, p, q, exp1=None, exp2=None, coef=None):
-        self.n = n
-        self.e = e
+        AbstractKey.__init__(self, n, e)
         self.d = d
         self.p = p
         self.q = q
@@ -322,41 +378,21 @@ class PrivateKey(AbstractKey):
     def __ne__(self, other):
         return not (self == other)
 
-    def blind(self, message, r):
-        """Performs blinding on the message using random number 'r'.
+    def blinded_decrypt(self, encrypted):
+        """Decrypts the message using blinding to prevent side-channel attacks.
 
-        @param message: the message, as integer, to blind.
-        @param r: the random number to blind with.
-        @return: the blinded message.
+        :param encrypted: the encrypted message
+        :type encrypted: int
 
-        The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
-
-        See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
-
-        >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
-        >>> message = 12345
-        >>> encrypted = rsa.core.encrypt_int(message, pk.e, pk.n)
-        >>> blinded = pk.blind(encrypted, 4134431)  # blind before decrypting
-        >>> decrypted = rsa.core.decrypt_int(blinded, pk.d, pk.n)
-        >>> pk.unblind(decrypted, 4134431)
-        12345
+        :returns: the decrypted message
+        :rtype: int
         """
 
-        return (message * pow(r, self.e, self.n)) % self.n
+        blind_r = rsa.randnum.randint(self.n - 1)
+        blinded = self.blind(encrypted, blind_r)  # blind before decrypting
+        decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
 
-    def unblind(self, blinded, r):
-        """Performs blinding on the message using random number 'r'.
-
-        @param blinded: the blinded message, as integer, to unblind.
-        @param r: the random number to unblind with.
-        @return: the original message.
-
-        The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
-
-        See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
-        """
-
-        return (rsa.common.inverse(r, self.n) * blinded) % self.n
+        return self.unblind(decrypted, blind_r)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
