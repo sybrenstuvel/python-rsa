@@ -19,6 +19,7 @@
 import base64
 import unittest
 import os.path
+import pickle
 
 from rsa._compat import b
 
@@ -152,3 +153,22 @@ class PemTest(unittest.TestCase):
 
         self.assertEqual(15945948582725241569, privkey.p)
         self.assertEqual(14617195220284816877, privkey.q)
+
+
+class PickleTest(unittest.TestCase):
+    """Test saving and loading keys by pickling."""
+
+    def test_private_key(self):
+        pk = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+
+        pickled = pickle.dumps(pk)
+        unpickled = pickle.loads(pickled)
+        self.assertEqual(pk, unpickled)
+
+    def test_public_key(self):
+        pk = rsa.key.PublicKey(3727264081, 65537)
+
+        pickled = pickle.dumps(pk)
+        unpickled = pickle.loads(pickled)
+
+        self.assertEqual(pk, unpickled)

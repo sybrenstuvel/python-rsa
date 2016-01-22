@@ -21,6 +21,14 @@ Functions
 Classes
 --------------------------------------------------
 
+.. note::
+
+    Storing public and private keys via the `pickle` module is possible.
+    However, it is insecure to load a key from an untrusted source.
+    The pickle module is not secure against erroneous or maliciously
+    constructed data. Never unpickle data received from an untrusted
+    or unauthenticated source.
+
 .. autoclass:: rsa.PublicKey
     :members:
     :inherited-members:

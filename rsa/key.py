@@ -23,6 +23,14 @@ Loading and saving keys requires the pyasn1 module. This module is imported as
 late as possible, such that other functionality will remain working in absence
 of pyasn1.
 
+.. note::
+
+    Storing public and private keys via the `pickle` module is possible.
+    However, it is insecure to load a key from an untrusted source.
+    The pickle module is not secure against erroneous or maliciously
+    constructed data. Never unpickle data received from an untrusted
+    or unauthenticated source.
+
 """
 
 import logging
@@ -153,6 +161,14 @@ class PublicKey(AbstractKey):
 
     def __repr__(self):
         return 'PublicKey(%i, %i)' % (self.n, self.e)
+
+    def __getstate__(self):
+        """Returns the key as tuple for pickling."""
+        return self.n, self.e
+
+    def __setstate__(self, state):
+        """Sets the key from tuple."""
+        self.n, self.e = state
 
     def __eq__(self, other):
         if other is None:
@@ -336,6 +352,14 @@ class PrivateKey(AbstractKey):
 
     def __repr__(self):
         return 'PrivateKey(%(n)i, %(e)i, %(d)i, %(p)i, %(q)i)' % self
+
+    def __getstate__(self):
+        """Returns the key as tuple for pickling."""
+        return self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef
+
+    def __setstate__(self, state):
+        """Sets the key from tuple."""
+        self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
 
     def __eq__(self, other):
         if other is None:
