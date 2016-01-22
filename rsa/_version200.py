@@ -59,7 +59,7 @@ def gcd(p, q):
     
 
 def bytes2int(bytes):
-    """Converts a list of bytes or a string to an integer
+    r"""Converts a list of bytes or a string to an integer
 
     >>> (((128 * 256) + 64) * 256) + 15
     8405007

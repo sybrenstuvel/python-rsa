@@ -38,7 +38,7 @@ from rsa._compat import is_integer, b, byte, get_word_alignment, ZERO_BYTE, EMPT
 
 
 def bytes2int(raw_bytes):
-    """Converts a list of bytes or an 8-bit string to an integer.
+    r"""Converts a list of bytes or an 8-bit string to an integer.
 
     When using unicode strings, encode it to some encoding like UTF8 first.
 
@@ -53,7 +53,7 @@ def bytes2int(raw_bytes):
 
 
 def _int2bytes(number, block_size=None):
-    """Converts a number to a string of bytes.
+    r"""Converts a number to a string of bytes.
 
     Usage::
 

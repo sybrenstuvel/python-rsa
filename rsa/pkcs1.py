@@ -65,7 +65,7 @@ class VerificationError(CryptoError):
 
 
 def _pad_for_encryption(message, target_length):
-    """Pads the message for encryption, returning the padded message.
+    r"""Pads the message for encryption, returning the padded message.
 
     :return: 00 02 RANDOM_DATA 00 MESSAGE
 
@@ -111,7 +111,7 @@ def _pad_for_encryption(message, target_length):
 
 
 def _pad_for_signing(message, target_length):
-    """Pads the message for signing, returning the padded message.
+    r"""Pads the message for signing, returning the padded message.
 
     The padding is always a repetition of FF bytes.
 
@@ -177,7 +177,7 @@ def encrypt(message, pub_key):
 
 
 def decrypt(crypto, priv_key):
-    """Decrypts the given message using PKCS#1 v1.5
+    r"""Decrypts the given message using PKCS#1 v1.5
 
     The decryption is considered 'failed' when the resulting cleartext doesn't
     start with the bytes 00 02, or when the 00 byte between the padding and
