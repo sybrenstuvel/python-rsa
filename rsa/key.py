@@ -143,7 +143,7 @@ class PublicKey(AbstractKey):
 
         >>> import base64
         >>> b64der = 'MAwCBQCNGmYtAgMBAAE='
-        >>> der = base64.decodestring(b64der)
+        >>> der = base64.standard_b64decode(b64der)
 
         This loads the file:
 
@@ -333,7 +333,7 @@ class PrivateKey(AbstractKey):
 
         >>> import base64
         >>> b64der = 'MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt'
-        >>> der = base64.decodestring(b64der)
+        >>> der = base64.standard_b64decode(b64der)
 
         This loads the file:
 
