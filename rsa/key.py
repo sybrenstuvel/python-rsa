@@ -321,6 +321,42 @@ class PrivateKey(AbstractKey):
     def __ne__(self, other):
         return not (self == other)
 
+    def blind(self, message, r):
+        """Performs blinding on the message using random number 'r'.
+
+        @param message: the message, as integer, to blind.
+        @param r: the random number to blind with.
+        @return: the blinded message.
+
+        The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
+
+        See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
+
+        >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+        >>> message = 12345
+        >>> encrypted = rsa.core.encrypt_int(message, pk.e, pk.n)
+        >>> blinded = pk.blind(encrypted, 4134431)  # blind before decrypting
+        >>> decrypted = rsa.core.decrypt_int(blinded, pk.d, pk.n)
+        >>> pk.unblind(decrypted, 4134431)
+        12345
+        """
+
+        return (message * pow(r, self.e, self.n)) % self.n
+
+    def unblind(self, blinded, r):
+        """Performs blinding on the message using random number 'r'.
+
+        @param blinded: the blinded message, as integer, to unblind.
+        @param r: the random number to unblind with.
+        @return: the original message.
+
+        The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
+
+        See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
+        """
+
+        return (rsa.common.inverse(r, self.n) * blinded) % self.n
+
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
         """Loads a key in PKCS#1 DER format.

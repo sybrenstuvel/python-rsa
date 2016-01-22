@@ -229,8 +229,14 @@ def decrypt(crypto, priv_key):
 
     blocksize = common.byte_size(priv_key.n)
     encrypted = transform.bytes2int(crypto)
-    decrypted = core.decrypt_int(encrypted, priv_key.d, priv_key.n)
-    cleartext = transform.int2bytes(decrypted, blocksize)
+
+    # Perform blinded decryption to prevent side-channel attacks.
+    # See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
+    blinded = priv_key.blind(encrypted, 4134431)  # blind before decrypting
+    decrypted = core.decrypt_int(blinded, priv_key.d, priv_key.n)
+    unblinded = priv_key.unblind(decrypted, 4134431)
+
+    cleartext = transform.int2bytes(unblinded, blocksize)
 
     # If we can't find the cleartext marker, decryption failed.
     if cleartext[0:2] != b('\x00\x02'):

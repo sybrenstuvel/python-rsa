@@ -6,6 +6,7 @@ Version 3.4 - in development
 ----------------------------------------
 
 - Moved development to Github.
+- Solved side-channel vulnerability by implementing blinding, fixes #19
 - Fixed bugs #14, #27, #30
 
 
