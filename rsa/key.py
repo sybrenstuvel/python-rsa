@@ -135,9 +135,9 @@ class PublicKey(AbstractKey):
     def _load_pkcs1_der(cls, keyfile):
         """Loads a key in PKCS#1 DER format.
 
-        @param keyfile: contents of a DER-encoded file that contains the public
+        :param keyfile: contents of a DER-encoded file that contains the public
             key.
-        @return: a PublicKey object
+        :return: a PublicKey object
 
         First let's construct a DER encoded key:
 
@@ -181,9 +181,9 @@ class PublicKey(AbstractKey):
         The contents of the file before the "-----BEGIN RSA PUBLIC KEY-----" and
         after the "-----END RSA PUBLIC KEY-----" lines is ignored.
 
-        @param keyfile: contents of a PEM-encoded file that contains the public
+        :param keyfile: contents of a PEM-encoded file that contains the public
             key.
-        @return: a PublicKey object
+        :return: a PublicKey object
         """
 
         der = rsa.pem.load_pem(keyfile, 'RSA PUBLIC KEY')
@@ -192,7 +192,7 @@ class PublicKey(AbstractKey):
     def _save_pkcs1_pem(self):
         """Saves a PKCS#1 PEM-encoded public key file.
 
-        @return: contents of a PEM-encoded file that contains the public key.
+        :return: contents of a PEM-encoded file that contains the public key.
         """
 
         der = self._save_pkcs1_der()
@@ -208,9 +208,9 @@ class PublicKey(AbstractKey):
         The contents of the file before the "-----BEGIN PUBLIC KEY-----" and
         after the "-----END PUBLIC KEY-----" lines is ignored.
 
-        @param keyfile: contents of a PEM-encoded file that contains the public
+        :param keyfile: contents of a PEM-encoded file that contains the public
             key, from OpenSSL.
-        @return: a PublicKey object
+        :return: a PublicKey object
         """
 
         der = rsa.pem.load_pem(keyfile, 'PUBLIC KEY')
@@ -220,9 +220,10 @@ class PublicKey(AbstractKey):
     def load_pkcs1_openssl_der(cls, keyfile):
         """Loads a PKCS#1 DER-encoded public key file from OpenSSL.
 
-        @param keyfile: contents of a DER-encoded file that contains the public
+        :param keyfile: contents of a DER-encoded file that contains the public
             key, from OpenSSL.
-        @return: a PublicKey object
+        :return: a PublicKey object
+
         """
 
         from rsa.asn1 import OpenSSLPubKey
@@ -361,9 +362,9 @@ class PrivateKey(AbstractKey):
     def _load_pkcs1_der(cls, keyfile):
         """Loads a key in PKCS#1 DER format.
 
-        @param keyfile: contents of a DER-encoded file that contains the private
+        :param keyfile: contents of a DER-encoded file that contains the private
             key.
-        @return: a PrivateKey object
+        :return: a PrivateKey object
 
         First let's construct a DER encoded key:
 
@@ -445,9 +446,9 @@ class PrivateKey(AbstractKey):
         The contents of the file before the "-----BEGIN RSA PRIVATE KEY-----" and
         after the "-----END RSA PRIVATE KEY-----" lines is ignored.
 
-        @param keyfile: contents of a PEM-encoded file that contains the private
+        :param keyfile: contents of a PEM-encoded file that contains the private
             key.
-        @return: a PrivateKey object
+        :return: a PrivateKey object
         """
 
         der = rsa.pem.load_pem(keyfile, b('RSA PRIVATE KEY'))
@@ -456,7 +457,7 @@ class PrivateKey(AbstractKey):
     def _save_pkcs1_pem(self):
         """Saves a PKCS#1 PEM-encoded private key file.
 
-        @return: contents of a PEM-encoded file that contains the private key.
+        :return: contents of a PEM-encoded file that contains the private key.
         """
 
         der = self._save_pkcs1_der()

@@ -71,9 +71,9 @@ def read_varint(infile):
     EOF occurs when at least one byte has been read, an EOFError exception is
     raised.
 
-    @param infile: the file-like object to read from. It should have a read()
+    :param infile: the file-like object to read from. It should have a read()
         method.
-    @returns (varint, length), the read varint and the number of read bytes.
+    :returns: (varint, length), the read varint and the number of read bytes.
     """
 
     varint = 0
@@ -99,9 +99,9 @@ def read_varint(infile):
 def write_varint(outfile, value):
     """Writes a varint to a file.
 
-    @param outfile: the file-like object to write to. It should have a write()
+    :param outfile: the file-like object to write to. It should have a write()
         method.
-    @returns the number of written bytes.
+    :returns: the number of written bytes.
     """
 
     # there is a big difference between 'write the value 0' (this case) and
@@ -128,7 +128,7 @@ def write_varint(outfile, value):
 def yield_varblocks(infile):
     """Generator, yields each block in the input file.
 
-    @param infile: file to read, is expected to have the VARBLOCK format as
+    :param infile: file to read, is expected to have the VARBLOCK format as
         described in the module's docstring.
     @yields the contents of each block.
     """
