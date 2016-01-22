@@ -9,7 +9,7 @@ Version 3.4 - in development
 - Solved side-channel vulnerability by implementing blinding, fixes #19
 - Deprecated the VARBLOCK format and rsa.bigfile module due to security issues, see
     https://github.com/sybrenstuvel/python-rsa/issues/13
-- Fixed bugs #14, #27, #30
+- Fixed bugs #12, #14, #27, #30
 
 
 Version 3.3 - released 2016-01-13
