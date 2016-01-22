@@ -6,7 +6,7 @@ Version 3.4 - in development
 ----------------------------------------
 
 - Moved development to Github.
-- Fixed bugs #27
+- Fixed bugs #14, #27, #30
 
 
 Version 3.3 - released 2016-01-13

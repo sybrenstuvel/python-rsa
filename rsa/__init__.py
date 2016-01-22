@@ -22,9 +22,6 @@ WARNING: this implementation does not use random padding, compression of the
 cleartext input to prevent repetitions, or other common security improvements.
 Use with care.
 
-If you want to have a more secure implementation, use the functions from the
-``rsa.pkcs1`` module.
-
 """
 
 from rsa.key import newkeys, PrivateKey, PublicKey
