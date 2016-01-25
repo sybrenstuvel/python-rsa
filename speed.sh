@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
@@ -14,37 +14,43 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# Checks if a command is available on the system.
+check_command() {
+    # Return with error, if not called with just one argument.
+    if [ "$#" != 1 ]; then
+        echo "ERROR: Incorrect usage of function 'check_program'." 1>&2
+        echo "       Correct usage: check_command COMMAND" 1>&2
+        return 1
+    fi
+    # Check command availability.
+    command -v "$1" >/dev/null 2>&1
+}
+
+python_versions="
+    pypy
+    python2.5
+    python2.6
+    python2.7
+    python3.2
+    python3.3
+    python3.4
+    python3.5
+"
+
 echo "int2bytes speed test"
-echo "pypy"
-pypy -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
-pypy -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
-echo "python2.5"
-python2.5 -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
-python2.5 -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
-echo "python2.6"
-python2.6 -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n, 516)'
-python2.6 -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n, 516)'
-echo "python2.7"
-python2.7 -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
-python2.7 -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
-echo "python3.2"
-python3 -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
-python3 -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
+for version in $python_versions; do
+    if check_command "$version"; then
+        echo "$version"
+        "$version" -mtimeit -s'from rsa.transform import int2bytes; n = 1<<4096' 'int2bytes(n)'
+        "$version" -mtimeit -s'from rsa.transform import _int2bytes; n = 1<<4096' '_int2bytes(n)'
+    fi
+done
 
 echo "bit_size speed test"
-echo "python2.5"
-python2.5 -mtimeit -s'from rsa.common import bit_size; n = 1<<4096' 'bit_size(n)'
-python2.5 -mtimeit -s'from rsa.common import _bit_size; n = 1<<4096' '_bit_size(n)'
-echo "python2.6"
-python2.6 -mtimeit -s'from rsa.common import bit_size; n = 1<<4096' 'bit_size(n)'
-python2.6 -mtimeit -s'from rsa.common import _bit_size; n = 1<<4096' '_bit_size(n)'
-echo "python2.7"
-python2.7 -mtimeit -s'from rsa.common import bit_size; n = 1<<4096' 'bit_size(n)'
-python2.7 -mtimeit -s'from rsa.common import _bit_size; n = 1<<4096' '_bit_size(n)'
-echo "python3.2"
-python3 -mtimeit -s'from rsa.common import bit_size; n = 1<<4096' 'bit_size(n)'
-python3 -mtimeit -s'from rsa.common import _bit_size; n = 1<<4096' '_bit_size(n)'
-echo "pypy"
-pypy -mtimeit -s'from rsa.common import bit_size; n = 1<<4096' 'bit_size(n)'
-pypy -mtimeit -s'from rsa.common import _bit_size; n = 1<<4096' '_bit_size(n)'
-
+for version in $python_versions; do
+    if check_command "$version"; then
+        echo "$version"
+        "$version" -mtimeit -s'from rsa.common import bit_size; n = 1<<4096' 'bit_size(n)'
+        "$version" -mtimeit -s'from rsa.common import _bit_size; n = 1<<4096' '_bit_size(n)'
+    fi
+done
