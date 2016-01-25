@@ -32,7 +32,7 @@ import hashlib
 import os
 
 from rsa._compat import b
-from rsa import common, transform, core, varblock
+from rsa import common, transform, core
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
@@ -335,6 +335,9 @@ def _hash(message, method_name):
     hasher = method()
 
     if hasattr(message, 'read') and hasattr(message.read, '__call__'):
+        # Late import to prevent DeprecationWarnings.
+        from . import varblock
+
         # read as 1K blocks
         for block in varblock.yield_fixedblocks(message, 1024):
             hasher.update(block)
