@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
