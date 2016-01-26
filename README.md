@@ -2,6 +2,8 @@ Pure Python RSA implementation
 ==============================
 
 [![PyPI](https://img.shields.io/pypi/v/rsa.svg)](https://pypi.python.org/pypi/rsa)
+[![Code Climate](https://img.shields.io/codeclimate/github/sybrenstuvel/python-rsa.svg)]
+    (https://codeclimate.com/github/sybrenstuvel/python-rsa)
 
 [Python-RSA](https://stuvel.eu/rsa) is a pure-Python RSA implementation. It supports
 encryption and decryption, signing and verifying signatures, and key
