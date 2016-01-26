@@ -595,7 +595,7 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     return max(p, q), min(p, q)
 
 
-def calculate_keys(p, q, nbits):
+def calculate_keys(p, q):
     """Calculates an encryption and a decryption key given p and q, and
     returns them as a tuple (e, d)
 
@@ -635,7 +635,7 @@ def gen_keys(nbits, getprime_func, accurate=True):
     while True:
         (p, q) = find_p_q(nbits // 2, getprime_func, accurate)
         try:
-            (e, d) = calculate_keys(p, q, nbits // 2)
+            (e, d) = calculate_keys(p, q)
             break
         except ValueError:
             pass
