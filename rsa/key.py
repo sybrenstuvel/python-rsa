@@ -34,7 +34,7 @@ of pyasn1.
 """
 
 import logging
-from rsa._compat import b, bytes_type
+from rsa._compat import b
 
 import rsa.prime
 import rsa.pem
