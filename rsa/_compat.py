@@ -64,13 +64,6 @@ except NameError:
 
 b = byte_literal
 
-try:
-    # Python 2.6 or higher.
-    bytes_type = bytes
-except NameError:
-    # Python 2.5
-    bytes_type = str
-
 # To avoid calling b() multiple times in tight loops.
 ZERO_BYTE = b('\x00')
 EMPTY_BYTE = b('')
@@ -85,7 +78,7 @@ def is_bytes(obj):
     :returns:
         ``True`` if ``value`` is a byte string; ``False`` otherwise.
     """
-    return isinstance(obj, bytes_type)
+    return isinstance(obj, bytes)
 
 
 def is_integer(obj):
