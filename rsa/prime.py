@@ -20,9 +20,9 @@ Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
 """
 
-__all__ = ['getprime', 'are_relatively_prime']
-
 import rsa.randnum
+
+__all__ = ['getprime', 'are_relatively_prime']
 
 
 def gcd(p, q):
@@ -47,7 +47,8 @@ def jacobi(a, b):
     assert a > 0
     assert b > 0
 
-    if a == 0: return 0
+    if a == 0:
+        return 0
     result = 1
     while a > 1:
         if a & 1:
@@ -58,7 +59,8 @@ def jacobi(a, b):
             if (((b * b) - 1) >> 3) & 1:
                 result = -result
             a >>= 1
-    if a == 0: return 0
+    if a == 0:
+        return 0
     return result
 
 
@@ -69,7 +71,8 @@ def jacobi_witness(x, n):
 
     f = pow(x, n >> 1, n)
 
-    if j == f: return False
+    if j == f:
+        return False
     return True
 
 
@@ -93,7 +96,8 @@ def randomized_primality_testing(n, k):
 
     for _ in range(k):
         x = rsa.randnum.randint(n - 1)
-        if jacobi_witness(x, n): return False
+        if jacobi_witness(x, n):
+            return False
 
     return True
 

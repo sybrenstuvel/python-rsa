@@ -441,16 +441,16 @@ class PrivateKey(AbstractKey):
         # ASN.1 contents of DER encoded private key:
         #
         # RSAPrivateKey ::= SEQUENCE {
-        #     version           Version, 
+        #     version           Version,
         #     modulus           INTEGER,  -- n
         #     publicExponent    INTEGER,  -- e
         #     privateExponent   INTEGER,  -- d
         #     prime1            INTEGER,  -- p
         #     prime2            INTEGER,  -- q
         #     exponent1         INTEGER,  -- d mod (p-1)
-        #     exponent2         INTEGER,  -- d mod (q-1) 
+        #     exponent2         INTEGER,  -- d mod (q-1)
         #     coefficient       INTEGER,  -- (inverse of q) mod p
-        #     otherPrimeInfos   OtherPrimeInfos OPTIONAL 
+        #     otherPrimeInfos   OtherPrimeInfos OPTIONAL
         # }
 
         if priv[0] != 0:

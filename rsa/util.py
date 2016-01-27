@@ -50,7 +50,7 @@ def private_to_public():
 
     # Read the input data
     if cli.infilename:
-        print('Reading private key from %s in %s format' % \
+        print('Reading private key from %s in %s format' %
               (cli.infilename, cli.inform), file=sys.stderr)
         with open(cli.infilename, 'rb') as infile:
             in_data = infile.read()
@@ -69,7 +69,7 @@ def private_to_public():
     out_data = pub_key.save_pkcs1(cli.outform)
 
     if cli.outfilename:
-        print('Writing public key to %s in %s format' % \
+        print('Writing public key to %s in %s format' %
               (cli.outfilename, cli.outform), file=sys.stderr)
         with open(cli.outfilename, 'wb') as outfile:
             outfile.write(out_data)
