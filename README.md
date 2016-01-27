@@ -4,6 +4,8 @@ Pure Python RSA implementation
 [![PyPI](https://img.shields.io/pypi/v/rsa.svg)](https://pypi.python.org/pypi/rsa)
 [![Build Status](https://travis-ci.org/sybrenstuvel/python-rsa.svg?branch=master)]
     (https://travis-ci.org/sybrenstuvel/python-rsa)
+[![Coverage Status](https://coveralls.io/repos/github/sybrenstuvel/python-rsa/badge.svg?branch=master)]
+    (https://coveralls.io/github/sybrenstuvel/python-rsa?branch=master)
 [![Code Climate](https://img.shields.io/codeclimate/github/sybrenstuvel/python-rsa.svg)]
     (https://codeclimate.com/github/sybrenstuvel/python-rsa)
 
