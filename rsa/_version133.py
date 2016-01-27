@@ -14,8 +14,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""RSA module
-pri = k[1]                               	//Private part of keys d,p,q
+"""Deprecated version of the RSA module
+
+.. deprecated:: 2.0
+
+    This submodule is deprecated and will be completely removed as of version 4.0.
 
 Module for calculating large primes, and RSA encryption, decryption,
 signing and verification. Includes generating public and private keys.
@@ -53,6 +56,9 @@ from rsa._compat import byte
 import warnings
 warnings.warn('Insecure version of the RSA module is imported as %s, be careful'
         % __name__)
+warnings.warn('This submodule is deprecated and will be completely removed as of version 4.0.',
+              DeprecationWarning)
+
 
 def gcd(p, q):
     """Returns the greatest common divisor of p and q

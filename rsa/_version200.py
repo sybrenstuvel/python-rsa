@@ -14,14 +14,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""RSA module
+"""Deprecated version of the RSA module
 
-Module for calculating large primes, and RSA encryption, decryption,
-signing and verification. Includes generating public and private keys.
+.. deprecated:: 3.0
 
-WARNING: this implementation does not use random padding, compression of the
-cleartext input to prevent repetitions, or other common security improvements.
-Use with care.
+    This submodule is deprecated and will be completely removed as of version 4.0.
 
 """
 
@@ -39,6 +36,8 @@ from rsa._compat import byte
 # Display a warning that this insecure version is imported.
 import warnings
 warnings.warn('Insecure version of the RSA module is imported as %s' % __name__)
+warnings.warn('This submodule is deprecated and will be completely removed as of version 4.0.',
+              DeprecationWarning)
 
 
 def bit_size(number):

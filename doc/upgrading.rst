@@ -3,7 +3,7 @@ Upgrading from older versions
 
 Previous versions of Python-RSA were less secure than the current
 version. In order to be able to gradually upgrade your software, those
-old versions are still available.
+old versions will be available until Python-RSA 4.0.
 
 To use version 1.3.3, use this::
 
@@ -25,6 +25,12 @@ re-encrypt them::
 
 Those import statements *will create warnings* as they import much
 less secure code into your project.
+
+.. warning::
+
+    These modules are included to allow upgrading to the latest version
+    of Python-RSA, and not as a way to keep using those old versions.
+    They will be removed in version 4.0.
 
 The random padding introduced in version 3.0 made things much more
 secure, but also requires a larger key to encrypt the same message.
