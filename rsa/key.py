@@ -70,13 +70,20 @@ class AbstractKey(object):
             'DER': cls._load_pkcs1_der,
         }
 
-        if format not in methods:
-            formats = ', '.join(sorted(methods.keys()))
-            raise ValueError('Unsupported format: %r, try one of %s' % (format,
-                                                                        formats))
-
-        method = methods[format]
+        method = cls._assert_format_exists(format, methods)
         return method(keyfile)
+
+    @staticmethod
+    def _assert_format_exists(file_format, methods):
+        """Checks whether the given file format exists in 'methods'.
+        """
+
+        try:
+            return methods[file_format]
+        except KeyError:
+            formats = ', '.join(sorted(methods.keys()))
+            raise ValueError('Unsupported format: %r, try one of %s' % (file_format,
+                                                                        formats))
 
     def save_pkcs1(self, format='PEM'):
         """Saves the public key in PKCS#1 DER or PEM format.
@@ -90,12 +97,7 @@ class AbstractKey(object):
             'DER': self._save_pkcs1_der,
         }
 
-        if format not in methods:
-            formats = ', '.join(sorted(methods.keys()))
-            raise ValueError('Unsupported format: %r, try one of %s' % (format,
-                                                                        formats))
-
-        method = methods[format]
+        method = self._assert_format_exists(format, methods)
         return method()
 
     def blind(self, message, r):
