@@ -301,13 +301,13 @@ class PrivateKey(AbstractKey):
     >>> PrivateKey(3247, 65537, 833, 191, 17)
     PrivateKey(3247, 65537, 833, 191, 17)
 
-    exp1, exp2 and coef don't have to be given, they will be calculated:
+    exp1, exp2 and coef can be given, but if None or omitted they will be calculated:
 
-    >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+    >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287, exp2=4)
     >>> pk.exp1
     55063
-    >>> pk.exp2
-    10095
+    >>> pk.exp2  # this is of course not a correct value, but it is the one we passed.
+    4
     >>> pk.coef
     50797
 
@@ -337,7 +337,7 @@ class PrivateKey(AbstractKey):
         else:
             self.exp1 = exp1
 
-        if exp1 is None:
+        if exp2 is None:
             self.exp2 = int(d % (q - 1))
         else:
             self.exp2 = exp2
