@@ -9,9 +9,10 @@ Version 3.4 - in development
 - Solved side-channel vulnerability by implementing blinding, fixes #19
 - Deprecated the VARBLOCK format and rsa.bigfile module due to security issues, see
     https://github.com/sybrenstuvel/python-rsa/issues/13
-- Integration with Travis-CI [1] and Coveralls [2]
+- Integration with Travis-CI [1] and Code Climate [2]
 - Deprecated the old rsa._version133 and rsa._version200 submodules, they will be
   completely removed in version 4.0.
+- Add an 'exponent' argument to key.newkeys()
 - Fixed bugs #12, #14, #27, #30
 
 [1] https://travis-ci.org/sybrenstuvel/python-rsa
