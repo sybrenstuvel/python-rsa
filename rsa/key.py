@@ -43,6 +43,7 @@ import rsa.randnum
 import rsa.core
 
 log = logging.getLogger(__name__)
+DEFAULT_EXPONENT = 65537
 
 
 class AbstractKey(object):
@@ -597,31 +598,48 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     return max(p, q), min(p, q)
 
 
-def calculate_keys(p, q, nbits):
-    """Calculates an encryption and a decryption key given p and q, and
-    returns them as a tuple (e, d)
+def calculate_keys_custom_exponent(p, q, exponent):
+    """Calculates an encryption and a decryption key given p, q and an exponent,
+    and returns them as a tuple (e, d)
+
+    :param p: the first large prime
+    :param q: the second large prime
+    :param exponent: the exponent for the key; only change this if you know
+        what you're doing, as the exponent influences how difficult your
+        private key can be cracked. A very common choice for e is 65537.
+    :type exponent: int
 
     """
 
     phi_n = (p - 1) * (q - 1)
 
-    # A very common choice for e is 65537
-    e = 65537
-
     try:
-        d = rsa.common.inverse(e, phi_n)
+        d = rsa.common.inverse(exponent, phi_n)
     except ValueError:
         raise ValueError("e (%d) and phi_n (%d) are not relatively prime" %
-                         (e, phi_n))
+                         (exponent, phi_n))
 
-    if (e * d) % phi_n != 1:
+    if (exponent * d) % phi_n != 1:
         raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "
-                         "phi_n (%d)" % (e, d, phi_n))
+                         "phi_n (%d)" % (exponent, d, phi_n))
 
-    return e, d
+    return exponent, d
 
 
-def gen_keys(nbits, getprime_func, accurate=True):
+def calculate_keys(p, q):
+    """Calculates an encryption and a decryption key given p and q, and
+    returns them as a tuple (e, d)
+
+    :param p: the first large prime
+    :param q: the second large prime
+
+    :return: tuple (e, d) with the encryption and decryption exponents.
+    """
+
+    return calculate_keys_custom_exponent(p, q, DEFAULT_EXPONENT)
+
+
+def gen_keys(nbits, getprime_func, accurate=True, exponent=DEFAULT_EXPONENT):
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
@@ -630,6 +648,10 @@ def gen_keys(nbits, getprime_func, accurate=True):
         ``q`` will use ``nbits/2`` bits.
     :param getprime_func: either :py:func:`rsa.prime.getprime` or a function
         with similar signature.
+    :param exponent: the exponent for the key; only change this if you know
+        what you're doing, as the exponent influences how difficult your
+        private key can be cracked. A very common choice for e is 65537.
+    :type exponent: int
     """
 
     # Regenerate p and q values, until calculate_keys doesn't raise a
@@ -637,7 +659,7 @@ def gen_keys(nbits, getprime_func, accurate=True):
     while True:
         (p, q) = find_p_q(nbits // 2, getprime_func, accurate)
         try:
-            (e, d) = calculate_keys(p, q, nbits // 2)
+            (e, d) = calculate_keys_custom_exponent(p, q, exponent=exponent)
             break
         except ValueError:
             pass
@@ -645,7 +667,7 @@ def gen_keys(nbits, getprime_func, accurate=True):
     return p, q, e, d
 
 
-def newkeys(nbits, accurate=True, poolsize=1):
+def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
     """Generates public and private keys, and returns them as (pub, priv).
 
     The public key is also known as the 'encryption key', and is a
@@ -659,6 +681,10 @@ def newkeys(nbits, accurate=True, poolsize=1):
     :param poolsize: the number of processes to use to generate the prime
         numbers. If set to a number > 1, a parallel algorithm will be used.
         This requires Python 2.6 or newer.
+    :param exponent: the exponent for the key; only change this if you know
+        what you're doing, as the exponent influences how difficult your
+        private key can be cracked. A very common choice for e is 65537.
+    :type exponent: int
 
     :returns: a tuple (:py:class:`rsa.PublicKey`, :py:class:`rsa.PrivateKey`)
 
@@ -683,7 +709,7 @@ def newkeys(nbits, accurate=True, poolsize=1):
         getprime_func = rsa.prime.getprime
 
     # Generate the key components
-    (p, q, e, d) = gen_keys(nbits, getprime_func, accurate=accurate)
+    (p, q, e, d) = gen_keys(nbits, getprime_func, accurate=accurate, exponent=exponent)
 
     # Create the key objects
     n = p * q

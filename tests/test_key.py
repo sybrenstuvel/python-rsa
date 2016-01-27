@@ -2,7 +2,6 @@
 Some tests for the rsa/key.py file.
 """
 
-
 import unittest
 
 import rsa.key
@@ -10,7 +9,6 @@ import rsa.core
 
 
 class BlindingTest(unittest.TestCase):
-
     def test_blinding(self):
         """Test blinding and unblinding.
 
@@ -28,3 +26,17 @@ class BlindingTest(unittest.TestCase):
         unblinded = pk.unblind(decrypted, 4134431)
 
         self.assertEqual(unblinded, message)
+
+
+class KeyGenTest(unittest.TestCase):
+    def test_custom_exponent(self):
+        priv, pub = rsa.key.newkeys(16, exponent=3)
+
+        self.assertEqual(3, priv.e)
+        self.assertEqual(3, pub.e)
+
+    def test_default_exponent(self):
+        priv, pub = rsa.key.newkeys(16)
+
+        self.assertEqual(0x10001, priv.e)
+        self.assertEqual(0x10001, pub.e)
