@@ -44,11 +44,9 @@ else:
 try:
     # < Python3
     unicode_type = unicode
-    have_python3 = False
 except NameError:
     # Python3.
     unicode_type = str
-    have_python3 = True
 
 # Fake byte literals.
 if str is unicode_type:

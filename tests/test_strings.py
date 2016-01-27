@@ -22,7 +22,7 @@ import unittest
 
 import rsa
 
-from constants import unicode_string
+unicode_string = u"Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 class StringTest(unittest.TestCase):
