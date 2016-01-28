@@ -146,9 +146,9 @@ def are_relatively_prime(a, b):
     are not.
 
     >>> are_relatively_prime(2, 3)
-    1
+    True
     >>> are_relatively_prime(2, 4)
-    0
+    False
     """
 
     d = gcd(a, b)
