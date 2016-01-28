@@ -47,8 +47,6 @@ def jacobi(a, b):
     assert a > 0
     assert b > 0
 
-    if a == 0:
-        return 0
     result = 1
     while a > 1:
         if a & 1:
