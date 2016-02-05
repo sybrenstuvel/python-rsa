@@ -1,11 +1,11 @@
 Reference
-==================================================
+=========
 
 This is the class and function reference. For more usage information
 see the :ref:`usage` page.
 
 Functions
---------------------------------------------------
+---------
 
 .. autofunction:: rsa.encrypt
 
@@ -19,7 +19,7 @@ Functions
 
 
 Classes
---------------------------------------------------
+-------
 
 .. note::
 
@@ -38,7 +38,7 @@ Classes
     :inherited-members:
 
 Exceptions
---------------------------------------------------
+----------
 
 .. autoclass:: rsa.pkcs1.CryptoError(Exception)
 
@@ -50,7 +50,7 @@ Exceptions
 .. index:: VARBLOCK (file format)
 
 Module: rsa.bigfile
---------------------------------------------------
+-------------------
 
 .. warning::
 
@@ -69,7 +69,7 @@ decrypting files that are larger than the RSA key. See
 .. _VARBLOCK:
 
 The VARBLOCK file format
-++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++
 
 .. warning::
 
@@ -95,11 +95,11 @@ The varint-format was taken from Google's Protobuf_, and allows us to
 efficiently encode an arbitrarily long integer.
 
 .. _Protobuf:
-    http://code.google.com/apis/protocolbuffers/docs/encoding.html#varints
+    https://code.google.com/apis/protocolbuffers/docs/encoding.html#varints
 
 
 Module: rsa.core
---------------------------------------------------
+----------------
 
 At the core of the RSA encryption method lie these functions. They
 both operate on (arbitrarily long) integers only. They probably aren't

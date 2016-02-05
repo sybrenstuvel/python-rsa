@@ -1,7 +1,7 @@
 .. _usage:
 
 Usage
-==================================================
+=====
 
 This section describes the usage of the Python-RSA module.
 
@@ -25,7 +25,7 @@ after signing.
 
 
 Generating keys
---------------------------------------------------
+---------------
 
 You can use the :py:func:`rsa.newkeys` function to create a keypair:
 
@@ -42,7 +42,7 @@ Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
 
 
 Time to generate a key
-++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++
 
 Generating a keypair may take a long time, depending on the number of
 bits required. The number of bits determines the cryptographic
@@ -91,7 +91,7 @@ generates a 4096-bit key in 3.5 seconds on the same machine as used
 above. See :ref:`openssl` for more information.
 
 Key size requirements
---------------------------------------------------
+---------------------
 
 Python-RSA version 3.0 introduced PKCS#1-style random padding. This
 means that 11 bytes (88 bits) of your key are no longer usable for
@@ -118,7 +118,7 @@ on the used hash method:
 
 
 Encryption and decryption
---------------------------------------------------
+-------------------------
 
 To encrypt or decrypt a message, use :py:func:`rsa.encrypt` resp.
 :py:func:`rsa.decrypt`. Let's say that Alice wants to send a message
@@ -182,7 +182,7 @@ Altering the encrypted information will *likely* cause a
     makes cracking the keys easier.
 
 Low-level operations
-++++++++++++++++++++++++++++++
+++++++++++++++++++++
 
 The core RSA algorithm operates on large integers. These operations
 are considered low-level and are supported by the
@@ -190,7 +190,7 @@ are considered low-level and are supported by the
 functions.
 
 Signing and verification
---------------------------------------------------
+------------------------
 
 You can create a detached signature for a message using the
 :py:func:`rsa.sign` function:
@@ -244,7 +244,7 @@ In that case the file is hashed in 1024-byte blocks at the time.
 .. _bigfiles:
 
 Working with big files
---------------------------------------------------
+----------------------
 
 RSA can only encrypt messages that are smaller than the key. A couple
 of bytes are lost on random padding, and the rest is available for the
@@ -253,7 +253,7 @@ message (512 bit = 64 bytes, 11 bytes are used for random padding and
 other stuff).
 
 How it usually works
-++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++
 
 The most common way to use RSA with larger files uses a block cypher
 like AES or DES3 to encrypt the file with a random key, then encrypt
@@ -280,7 +280,7 @@ the encrypted key to the recipient. The complete flow is:
     encryption for you.
 
 Only using Python-RSA: the VARBLOCK format
-+++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++
 
 .. warning::
 

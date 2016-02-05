@@ -1,5 +1,5 @@
 Upgrading from older versions
-==================================================
+=============================
 
 Previous versions of Python-RSA were less secure than the current
 version. In order to be able to gradually upgrade your software, those
@@ -38,7 +38,7 @@ You can either generate a new key with :py:func:`rsa.newkeys`, or use
 :py:func:`rsa.bigfile.encrypt_bigfile` to encrypt your files.
 
 Converting keys
---------------------------------------------------
+---------------
 
 Version 3.0 introduced industrial standard RSA keys according to
 PKCS#1. The old keys were just dictionaries. To convert a key from an

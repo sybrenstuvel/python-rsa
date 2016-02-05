@@ -6,7 +6,7 @@
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ def bit_size(num):
     Number of bits needed to represent a integer excluding any prefix
     0 bits.
 
-    As per definition from http://wiki.python.org/moin/BitManipulation and
+    As per definition from https://wiki.python.org/moin/BitManipulation and
     to match the behavior of the Python 3 API.
 
     Usage::
