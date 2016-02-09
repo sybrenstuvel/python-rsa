@@ -129,10 +129,7 @@ def getprime(nbits):
     """
 
     while True:
-        integer = rsa.randnum.read_random_int(nbits)
-
-        # Make sure it's odd
-        integer |= 1
+        integer = rsa.randnum.read_random_odd_int(nbits)
 
         # Test for primeness
         if is_prime(integer):

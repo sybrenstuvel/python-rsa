@@ -34,10 +34,7 @@ import rsa.randnum
 
 def _find_prime(nbits, pipe):
     while True:
-        integer = rsa.randnum.read_random_int(nbits)
-
-        # Make sure it's odd
-        integer |= 1
+        integer = rsa.randnum.read_random_odd_int(nbits)
 
         # Test for primeness
         if rsa.prime.is_prime(integer):
