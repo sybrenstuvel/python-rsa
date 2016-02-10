@@ -100,16 +100,85 @@ def randomized_primality_testing(n, k):
     return True
 
 
+def miller_rabin_primality_testing(n, k):
+    """Calculates whether n is composite (which is always correct) or prime
+    (which theoretically is incorrect with error probability 4**-k), by
+    applying Miller-Rabin primality testing.
+
+    For reference and implementation example, see:
+    https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
+
+    :param n: Integer to be tested for primality.
+    :type n: int
+    :param k: Number of rounds (witnesses) of Miller-Rabin testing.
+    :type k: int
+    :return: False if the number is composite, True if it's probably prime.
+    :rtype: bool
+    """
+
+    # Decompose (n - 1) to write it as (2 ** r) * d
+    # While d is even, divide it by 2 and increase the exponent.
+    d = n - 1
+    r = 0
+    while not (d & 1):
+        r += 1
+        d >>= 1
+
+    # Test k witnesses.
+    for _ in range(k):
+        # Generate random integer a, where 2 <= a <= (n - 2)
+        a = 0
+        while a < 2:
+            a = rsa.randnum.randint(n - 2)
+
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+            if x == 1:
+                # n is composite.
+                return False
+            if x == n - 1:
+                # Exit inner loop and continue with next witness.
+                break
+        else:
+            # If loop doesn't break, n is composite.
+            return False
+
+    return True
+
+
 def is_prime(number):
     """Returns True if the number is prime, and False otherwise.
 
+    >>> is_prime(2)
+    True
     >>> is_prime(42)
     False
     >>> is_prime(41)
     True
+    >>> [x for x in range(901, 1000) if is_prime(x)]
+    [907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997]
     """
 
-    return randomized_primality_testing(number, 6)
+    # Check for small numbers.
+    if number < 10:
+        return number in [2, 3, 5, 7]
+
+    # Check for even numbers.
+    if not (number & 1):
+        return False
+
+    # According to NIST FIPS 186-4, Appendix C, Table C.3, minimum number of
+    # rounds of M-R testing, using an error probability of 2 ** (-100), for
+    # different p, q bitsizes are:
+    #   * p, q bitsize: 512; rounds: 7
+    #   * p, q bitsize: 1024; rounds: 4
+    #   * p, q bitsize: 1536; rounds: 3
+    # See: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+    return miller_rabin_primality_testing(number, 7)
 
 
 def getprime(nbits):
