@@ -18,7 +18,7 @@ from setuptools import setup
 
 if __name__ == '__main__':
     setup(name='rsa',
-          version='3.3',
+          version='3.4',
           description='Pure-Python RSA implementation',
           author='Sybren A. Stuvel',
           author_email='sybren@stuvel.eu',
