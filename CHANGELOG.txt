@@ -1,6 +1,17 @@
 Python-RSA changelog
 ========================================
 
+Version 4.0 - in development
+----------------------------------------
+
+- Removed deprecated modules:
+    - rsa.varblock
+    - rsa.bigfile
+    - rsa._version133
+    - rsa._version200
+- Removed CLI commands that use the VARBLOCK/bigfile format.
+- Ensured that PublicKey.save_pkcs1() and PrivateKey.save_pkcs1() always return bytes.
+
 
 Version 3.4 - released 2006-03-17
 ----------------------------------------
