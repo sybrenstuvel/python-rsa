@@ -16,8 +16,9 @@
 
 import unittest
 import struct
+import sys
 
-from rsa._compat import is_bytes, byte
+from rsa._compat import is_bytes, byte, b
 
 
 class TestByte(unittest.TestCase):
@@ -30,3 +31,6 @@ class TestByte(unittest.TestCase):
     def test_raises_StructError_on_overflow(self):
         self.assertRaises(struct.error, byte, 256)
         self.assertRaises(struct.error, byte, -1)
+
+    def test_byte_literal(self):
+        self.assertIsInstance(b('abc'), bytes)

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-'''Unittest for saving and loading keys.'''
+"""Unittest for saving and loading keys."""
 
 import base64
 import unittest
@@ -89,6 +89,7 @@ class DerTest(unittest.TestCase):
         key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
         der = key.save_pkcs1('DER')
 
+        self.assertIsInstance(der, bytes)
         self.assertEqual(PRIVATE_DER, der)
 
     def test_load_public_key(self):
@@ -105,6 +106,7 @@ class DerTest(unittest.TestCase):
         key = rsa.key.PublicKey(3727264081, 65537)
         der = key.save_pkcs1('DER')
 
+        self.assertIsInstance(der, bytes)
         self.assertEqual(PUBLIC_DER, der)
 
 
@@ -125,6 +127,7 @@ class PemTest(unittest.TestCase):
         key = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
         pem = key.save_pkcs1('PEM')
 
+        self.assertIsInstance(pem, bytes)
         self.assertEqual(CLEAN_PRIVATE_PEM, pem)
 
     def test_load_public_key(self):
@@ -141,6 +144,7 @@ class PemTest(unittest.TestCase):
         key = rsa.key.PublicKey(3727264081, 65537)
         pem = key.save_pkcs1('PEM')
 
+        self.assertIsInstance(pem, bytes)
         self.assertEqual(CLEAN_PUBLIC_PEM, pem)
 
     def test_load_from_disk(self):

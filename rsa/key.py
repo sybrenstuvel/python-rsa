@@ -34,8 +34,8 @@ of pyasn1.
 """
 
 import logging
-from rsa._compat import b
 
+from rsa._compat import b
 import rsa.prime
 import rsa.pem
 import rsa.common
@@ -56,14 +56,55 @@ class AbstractKey(object):
         self.e = e
 
     @classmethod
+    def _load_pkcs1_pem(cls, keyfile):
+        """Loads a key in PKCS#1 PEM format, implement in a subclass.
+
+        :param keyfile: contents of a PEM-encoded file that contains
+            the public key.
+        :type keyfile: bytes
+
+        :return: the loaded key
+        :rtype: AbstractKey
+        """
+
+    @classmethod
+    def _load_pkcs1_der(cls, keyfile):
+        """Loads a key in PKCS#1 PEM format, implement in a subclass.
+
+        :param keyfile: contents of a DER-encoded file that contains
+            the public key.
+        :type keyfile: bytes
+
+        :return: the loaded key
+        :rtype: AbstractKey
+        """
+
+    def _save_pkcs1_pem(self):
+        """Saves the key in PKCS#1 PEM format, implement in a subclass.
+
+        :returns: the PEM-encoded key.
+        :rtype: bytes
+        """
+
+    def _save_pkcs1_der(self):
+        """Saves the key in PKCS#1 DER format, implement in a subclass.
+
+        :returns: the DER-encoded key.
+        :rtype: bytes
+        """
+
+    @classmethod
     def load_pkcs1(cls, keyfile, format='PEM'):
         """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
-            the public key.
+            the key.
+        :type keyfile: bytes
         :param format: the format of the file to load; 'PEM' or 'DER'
+        :type format: str
 
-        :return: a PublicKey object
+        :return: the loaded key
+        :rtype: AbstractKey
         """
 
         methods = {
@@ -87,10 +128,12 @@ class AbstractKey(object):
                                                                         formats))
 
     def save_pkcs1(self, format='PEM'):
-        """Saves the public key in PKCS#1 DER or PEM format.
+        """Saves the key in PKCS#1 DER or PEM format.
 
         :param format: the format to save; 'PEM' or 'DER'
-        :returns: the DER- or PEM-encoded public key.
+        :type format: str
+        :returns: the DER- or PEM-encoded key.
+        :rtype: bytes
         """
 
         methods = {
@@ -215,7 +258,8 @@ class PublicKey(AbstractKey):
     def _save_pkcs1_der(self):
         """Saves the public key in PKCS#1 DER format.
 
-        @returns: the DER-encoded public key.
+        :returns: the DER-encoded public key.
+        :rtype: bytes
         """
 
         from pyasn1.codec.der import encoder
@@ -247,6 +291,7 @@ class PublicKey(AbstractKey):
         """Saves a PKCS#1 PEM-encoded public key file.
 
         :return: contents of a PEM-encoded file that contains the public key.
+        :rtype: bytes
         """
 
         der = self._save_pkcs1_der()
@@ -264,6 +309,7 @@ class PublicKey(AbstractKey):
 
         :param keyfile: contents of a PEM-encoded file that contains the public
             key, from OpenSSL.
+        :type keyfile: bytes
         :return: a PublicKey object
         """
 
@@ -277,6 +323,7 @@ class PublicKey(AbstractKey):
         :param keyfile: contents of a DER-encoded file that contains the public
             key, from OpenSSL.
         :return: a PublicKey object
+        :rtype: bytes
 
         """
 
@@ -420,6 +467,7 @@ class PrivateKey(AbstractKey):
 
         :param keyfile: contents of a DER-encoded file that contains the private
             key.
+        :type keyfile: bytes
         :return: a PrivateKey object
 
         First let's construct a DER encoded key:
@@ -462,7 +510,8 @@ class PrivateKey(AbstractKey):
     def _save_pkcs1_der(self):
         """Saves the private key in PKCS#1 DER format.
 
-        @returns: the DER-encoded private key.
+        :returns: the DER-encoded private key.
+        :rtype: bytes
         """
 
         from pyasn1.type import univ, namedtype
@@ -504,6 +553,7 @@ class PrivateKey(AbstractKey):
 
         :param keyfile: contents of a PEM-encoded file that contains the private
             key.
+        :type keyfile: bytes
         :return: a PrivateKey object
         """
 
@@ -514,6 +564,7 @@ class PrivateKey(AbstractKey):
         """Saves a PKCS#1 PEM-encoded private key file.
 
         :return: contents of a PEM-encoded file that contains the private key.
+        :rtype: bytes
         """
 
         der = self._save_pkcs1_der()

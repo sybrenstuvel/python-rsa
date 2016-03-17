@@ -84,8 +84,10 @@ def keygen():
     else:
         print('Writing private key to stdout', file=sys.stderr)
         if sys.version_info[0] >= 3:
-            data = data.decode('ascii')  # on Py3 we must write text, not bytes
-        sys.stdout.write(data)
+            # on Py3 we must use the buffer interface to write bytes.
+            sys.stdout.buffer.write(data)
+        else:
+            sys.stdout.write(data)
 
 
 class CryptoOperation(object):
@@ -114,7 +116,7 @@ class CryptoOperation(object):
         self.output_help = self.output_help % self.__class__.__dict__
 
     @abc.abstractmethod
-    def perform_operation(self, indata, key, cli_args=None):
+    def perform_operation(self, indata, key, cli_args):
         """Performs the program's operation.
 
         Implement in a subclass.
@@ -192,8 +194,10 @@ class CryptoOperation(object):
         else:
             print('Writing output to stdout', file=sys.stderr)
             if sys.version_info[0] >= 3:
-                data = outdata.decode('ascii')  # on Py3 we must write text, not bytes
-            sys.stdout.write(outdata)
+                # on Py3 we must use the buffer interface to write bytes.
+                sys.stdout.buffer.write(outdata)
+            else:
+                sys.stdout.write(outdata)
 
 
 class EncryptOperation(CryptoOperation):
