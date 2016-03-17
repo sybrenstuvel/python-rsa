@@ -53,10 +53,15 @@ def miller_rabin_primality_testing(n, k):
     :rtype: bool
     """
 
+    # prevent potential infinite loop when d = 0
+    if n < 2:
+        return False
+
     # Decompose (n - 1) to write it as (2 ** r) * d
     # While d is even, divide it by 2 and increase the exponent.
     d = n - 1
     r = 0
+
     while not (d & 1):
         r += 1
         d >>= 1
@@ -64,9 +69,7 @@ def miller_rabin_primality_testing(n, k):
     # Test k witnesses.
     for _ in range(k):
         # Generate random integer a, where 2 <= a <= (n - 2)
-        a = 0
-        while a < 2:
-            a = rsa.randnum.randint(n - 2)
+        a = rsa.randnum.randint(n - 4) + 2
 
         x = pow(a, d, n)
         if x == 1 or x == n - 1:
@@ -133,6 +136,8 @@ def getprime(nbits):
     >>> common.bit_size(p) == 128
     True
     """
+
+    assert nbits > 3  # the loop wil hang on too small numbers
 
     while True:
         integer = rsa.randnum.read_random_odd_int(nbits)
