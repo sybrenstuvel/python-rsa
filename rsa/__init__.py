@@ -30,7 +30,7 @@ from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2016-03-17"
-__version__ = '3.4'
+__version__ = '4.0-alpha'
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
