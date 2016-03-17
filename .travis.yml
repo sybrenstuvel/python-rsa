@@ -8,7 +8,6 @@ python:
 # Environment changes have to be manually synced with 'tox.ini'.
 # See: https://github.com/travis-ci/travis-ci/issues/3024
 env:
-  - TOXENV=py26
   - TOXENV=py27
   - TOXENV=py33
   - TOXENV=py34
