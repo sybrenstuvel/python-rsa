@@ -14,6 +14,7 @@ from io import StringIO, BytesIO
 
 import rsa
 import rsa.cli
+import rsa.util
 from rsa._compat import b
 
 if sys.version_info[0] < 3:
@@ -278,3 +279,21 @@ class SignVerifyTest(AbstractCliTest):
         with cli_args('-i', 'cleartext.txt', self.pub_fname, 'signature.txt'):
             with captured_output() as (out, err):
                 self.assertExits('Verification failed.', rsa.cli.verify)
+
+
+class PrivatePublicTest(AbstractCliTest):
+    """Test CLI command to convert a private to a public key."""
+
+    @cleanup_files('test_private_to_public.pem')
+    def test_private_to_public(self):
+
+        with cli_args('-i', self.priv_fname, '-o', 'test_private_to_public.pem'):
+            with captured_output():
+                rsa.util.private_to_public()
+
+        # Check that the key is indeed valid.
+        with open('test_private_to_public.pem', 'rb') as pemfile:
+            key = rsa.PublicKey.load_pkcs1(pemfile.read())
+
+        self.assertEqual(self.priv_key.n, key.n)
+        self.assertEqual(self.priv_key.e, key.e)
