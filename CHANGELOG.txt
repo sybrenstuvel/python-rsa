@@ -13,7 +13,7 @@ Version 3.4 - in development
 - Deprecated the old rsa._version133 and rsa._version200 submodules, they will be
   completely removed in version 4.0.
 - Add an 'exponent' argument to key.newkeys()
-- Fixed bugs #12, #14, #27, #30
+- Fixed bugs #12, #14, #27, #30, #49
 - Switched from Solovay-Strassen to Miller-Rabin primality testing, to
   comply with NIST FIPS 186-4 [4] as probabilistic primality test
   (Appendix C, subsection C.3):

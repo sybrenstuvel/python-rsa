@@ -47,6 +47,10 @@ def load_pem(contents, pem_marker):
 
     """
 
+    # We want bytes, not text. If it's text, it can be converted to ASCII bytes.
+    if not is_bytes(contents):
+        contents = contents.encode('ascii')
+
     (pem_start, pem_end) = _markers(pem_marker)
 
     pem_lines = []
