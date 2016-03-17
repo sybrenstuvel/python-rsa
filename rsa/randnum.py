@@ -59,6 +59,19 @@ def read_random_int(nbits):
     return value
 
 
+def read_random_odd_int(nbits):
+    """Reads a random odd integer of approximately nbits bits.
+
+    >>> read_random_odd_int(512) & 1
+    1
+    """
+
+    value = read_random_int(nbits)
+
+    # Make sure it's odd
+    return value | 1
+
+
 def randint(maxvalue):
     """Returns a random integer x with 1 <= x <= maxvalue
 
