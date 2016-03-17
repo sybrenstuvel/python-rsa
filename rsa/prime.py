@@ -99,8 +99,6 @@ def is_prime(number):
     False
     >>> is_prime(41)
     True
-    >>> [x for x in range(901, 1000) if is_prime(x)]
-    [907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997]
     """
 
     # Check for small numbers.
