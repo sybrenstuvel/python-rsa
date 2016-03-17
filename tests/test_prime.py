@@ -19,3 +19,26 @@
 import unittest
 
 import rsa.prime
+
+
+class PrimeTest(unittest.TestCase):
+    def test_is_prime(self):
+        """Test some common primes."""
+
+        # Test some trivial numbers
+        self.assertFalse(rsa.prime.is_prime(-1))
+        self.assertFalse(rsa.prime.is_prime(0))
+        self.assertFalse(rsa.prime.is_prime(1))
+        self.assertTrue(rsa.prime.is_prime(2))
+        self.assertFalse(rsa.prime.is_prime(42))
+        self.assertTrue(rsa.prime.is_prime(41))
+
+        # Test some slightly larger numbers
+        self.assertEqual(
+            [907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997],
+            [x for x in range(901, 1000) if rsa.prime.is_prime(x)]
+        )
+
+        # Test around the 50th millionth known prime.
+        self.assertTrue(rsa.prime.is_prime(982451653))
+        self.assertFalse(rsa.prime.is_prime(982451653 * 961748941))
