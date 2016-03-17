@@ -28,7 +28,6 @@ check_command() {
 
 python_versions="
     pypy
-    python2.6
     python2.7
     python3.3
     python3.4
