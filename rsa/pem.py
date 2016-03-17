@@ -22,14 +22,14 @@ from rsa._compat import b, is_bytes
 
 def _markers(pem_marker):
     """
-    Returns the start and end PEM markers
+    Returns the start and end PEM markers, as bytes.
     """
 
-    if is_bytes(pem_marker):
-        pem_marker = pem_marker.decode('utf-8')
+    if not is_bytes(pem_marker):
+        pem_marker = pem_marker.encode('ascii')
 
-    return (b('-----BEGIN %s-----' % pem_marker),
-            b('-----END %s-----' % pem_marker))
+    return (b('-----BEGIN ') + pem_marker + b('-----'),
+            b('-----END ') + pem_marker + b('-----'))
 
 
 def load_pem(contents, pem_marker):
@@ -106,7 +106,7 @@ def save_pem(contents, pem_marker):
         when your file has '-----BEGIN RSA PRIVATE KEY-----' and
         '-----END RSA PRIVATE KEY-----' markers.
 
-    :return: the base64-encoded content between the start and end markers.
+    :return: the base64-encoded content between the start and end markers, as bytes.
 
     """
 

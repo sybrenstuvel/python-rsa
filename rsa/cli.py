@@ -83,6 +83,8 @@ def keygen():
             outfile.write(data)
     else:
         print('Writing private key to stdout', file=sys.stderr)
+        if sys.version_info[0] >= 3:
+            data = data.decode('ascii')  # on Py3 we must write text, not bytes
         sys.stdout.write(data)
 
 
@@ -189,6 +191,8 @@ class CryptoOperation(object):
                 outfile.write(outdata)
         else:
             print('Writing output to stdout', file=sys.stderr)
+            if sys.version_info[0] >= 3:
+                data = outdata.decode('ascii')  # on Py3 we must write text, not bytes
             sys.stdout.write(outdata)
 
 
