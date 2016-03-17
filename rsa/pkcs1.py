@@ -317,6 +317,27 @@ def verify(message, signature, pub_key):
     return True
 
 
+def yield_fixedblocks(infile, blocksize):
+    """Generator, yields each block of ``blocksize`` bytes in the input file.
+
+    :param infile: file to read and separate in blocks.
+    :param blocksize: block size in bytes.
+    :returns: a generator that yields the contents of each block
+    """
+
+    while True:
+        block = infile.read(blocksize)
+
+        read_bytes = len(block)
+        if read_bytes == 0:
+            break
+
+        yield block
+
+        if read_bytes < blocksize:
+            break
+
+
 def _hash(message, method_name):
     """Returns the message digest.
 
@@ -335,11 +356,8 @@ def _hash(message, method_name):
     hasher = method()
 
     if hasattr(message, 'read') and hasattr(message.read, '__call__'):
-        # Late import to prevent DeprecationWarnings.
-        from . import varblock
-
         # read as 1K blocks
-        for block in varblock.yield_fixedblocks(message, 1024):
+        for block in yield_fixedblocks(message, 1024):
             hasher.update(block)
     else:
         # hash the message object itself.
