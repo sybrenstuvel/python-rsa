@@ -40,3 +40,18 @@ class KeyGenTest(unittest.TestCase):
 
         self.assertEqual(0x10001, priv.e)
         self.assertEqual(0x10001, pub.e)
+
+
+class PrivateKeyTest(unittest.TestCase):
+    def test_supplied_parameters(self):
+        """Test exponents and coefficient assignation.
+
+        Checks correct assignation for PrivateKey's exponents and coefficient.
+        """
+
+        pk = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287,
+                                exp1="", exp2=None)
+
+        self.assertIsInstance(pk.exp1, int)
+        self.assertIsInstance(pk.exp2, int)
+        self.assertIsInstance(pk.coef, int)

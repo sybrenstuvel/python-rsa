@@ -382,20 +382,9 @@ class PrivateKey(AbstractKey):
         self.q = q
 
         # Calculate the other values if they aren't supplied
-        if exp1 is None:
-            self.exp1 = int(d % (p - 1))
-        else:
-            self.exp1 = exp1
-
-        if exp2 is None:
-            self.exp2 = int(d % (q - 1))
-        else:
-            self.exp2 = exp2
-
-        if coef is None:
-            self.coef = rsa.common.inverse(q, p)
-        else:
-            self.coef = coef
+        self.exp1 = exp1 or int(d % (p - 1))
+        self.exp2 = exp2 or int(d % (q - 1))
+        self.coef = coef or rsa.common.inverse(q, p)
 
     def __getitem__(self, key):
         return getattr(self, key)
