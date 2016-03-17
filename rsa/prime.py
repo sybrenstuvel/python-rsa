@@ -103,7 +103,7 @@ def is_prime(number):
 
     # Check for small numbers.
     if number < 10:
-        return number in [2, 3, 5, 7]
+        return number in {2, 3, 5, 7}
 
     # Check for even numbers.
     if not (number & 1):
