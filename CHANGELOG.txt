@@ -14,10 +14,14 @@ Version 3.4 - in development
   completely removed in version 4.0.
 - Add an 'exponent' argument to key.newkeys()
 - Fixed bugs #12, #14, #27, #30
+- Switched from Solovay-Strassen to Miller-Rabin primality testing, to
+  comply with NIST FIPS 186-4 [4] as probabilistic primality test
+  (Appendix C, subsection C.3):
 
 [1] https://travis-ci.org/sybrenstuvel/python-rsa
 [2] https://coveralls.io/github/sybrenstuvel/python-rsa
 [3] https://codeclimate.com/github/sybrenstuvel/python-rsa
+[4] http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pd
 
 
 Version 3.3 - released 2016-01-13
