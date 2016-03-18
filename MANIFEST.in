@@ -1,4 +1,4 @@
-include README
+include README.md
 include LICENSE
 include *.py
 recursive-include rsa *.py
