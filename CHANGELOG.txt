@@ -1,6 +1,12 @@
 Python-RSA changelog
 ========================================
 
+Version 3.4.1 - released 2006-03-26
+----------------------------------------
+
+- Included tests/private.pem in MANIFEST.in
+- Included README.md and CHANGELOG.txt in MANIFEST.in
+
 
 Version 3.4 - released 2006-03-17
 ----------------------------------------
