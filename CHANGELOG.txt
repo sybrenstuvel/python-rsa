@@ -14,14 +14,14 @@ Version 4.0 - in development
 - Dropped support for Python 2.6
 
 
-Version 3.4.1 - released 2006-03-26
+Version 3.4.1 - released 2016-03-26
 ----------------------------------------
 
 - Included tests/private.pem in MANIFEST.in
 - Included README.md and CHANGELOG.txt in MANIFEST.in
 
 
-Version 3.4 - released 2006-03-17
+Version 3.4 - released 2016-03-17
 ----------------------------------------
 
 - Moved development to Github: https://github.com/sybrenstuvel/python-rsa
