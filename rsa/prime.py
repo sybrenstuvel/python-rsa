@@ -69,7 +69,7 @@ def miller_rabin_primality_testing(n, k):
     # Test k witnesses.
     for _ in range(k):
         # Generate random integer a, where 2 <= a <= (n - 2)
-        a = rsa.randnum.randint(n - 4) + 2
+        a = rsa.randnum.randint(n - 3) + 1
 
         x = pow(a, d, n)
         if x == 1 or x == n - 1:
