@@ -12,6 +12,7 @@ Version 4.0 - in development
 - Removed CLI commands that use the VARBLOCK/bigfile format.
 - Ensured that PublicKey.save_pkcs1() and PrivateKey.save_pkcs1() always return bytes.
 - Dropped support for Python 2.6
+- Miller-Rabin iterations determined by bitsize of key.
 
 
 Version 3.4.2 - released 2016-03-29

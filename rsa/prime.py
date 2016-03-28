@@ -20,6 +20,7 @@ Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
 """
 
+import rsa.common
 import rsa.randnum
 
 __all__ = ['getprime', 'are_relatively_prime']
@@ -35,6 +36,32 @@ def gcd(p, q):
     while q != 0:
         (p, q) = (q, p % q)
     return p
+
+
+def get_primality_testing_rounds(number):
+    """Returns minimum number of rounds for Miller-Rabing primality testing,
+    based on number bitsize.
+
+    According to NIST FIPS 186-4, Appendix C, Table C.3, minimum number of
+    rounds of M-R testing, using an error probability of 2 ** (-100), for
+    different p, q bitsizes are:
+      * p, q bitsize: 512; rounds: 7
+      * p, q bitsize: 1024; rounds: 4
+      * p, q bitsize: 1536; rounds: 3
+    See: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+    """
+
+    # Calculate number bitsize.
+    bitsize = rsa.common.bit_size(number)
+    # Set number of rounds.
+    if bitsize >= 1536:
+        return 3
+    if bitsize >= 1024:
+        return 4
+    if bitsize >= 512:
+        return 7
+    # For smaller bitsizes, set arbitrary number of rounds.
+    return 10
 
 
 def miller_rabin_primality_testing(n, k):
@@ -109,14 +136,11 @@ def is_prime(number):
     if not (number & 1):
         return False
 
-    # According to NIST FIPS 186-4, Appendix C, Table C.3, minimum number of
-    # rounds of M-R testing, using an error probability of 2 ** (-100), for
-    # different p, q bitsizes are:
-    #   * p, q bitsize: 512; rounds: 7
-    #   * p, q bitsize: 1024; rounds: 4
-    #   * p, q bitsize: 1536; rounds: 3
-    # See: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
-    return miller_rabin_primality_testing(number, 7)
+    # Calculate minimum number of rounds.
+    k = get_primality_testing_rounds(number)
+
+    # Run primality testing with (minimum + 1) rounds.
+    return miller_rabin_primality_testing(number, k + 1)
 
 
 def getprime(nbits):
