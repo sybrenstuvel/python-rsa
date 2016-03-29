@@ -29,8 +29,8 @@ from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
     VerificationError
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
-__date__ = "2016-03-26"
-__version__ = '3.4.1'
+__date__ = "2016-03-29"
+__version__ = '3.4.2'
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
