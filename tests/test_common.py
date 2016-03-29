@@ -18,7 +18,7 @@
 import unittest
 import struct
 from rsa._compat import byte, b
-from rsa.common import byte_size, bit_size, _bit_size
+from rsa.common import byte_size, bit_size, _bit_size, inverse
 
 
 class TestByte(unittest.TestCase):
@@ -75,3 +75,13 @@ class TestBitSize(unittest.TestCase):
         self.assertEqual(_bit_size(1 << 1024), 1025)
         self.assertEqual(_bit_size((1 << 1024) + 1), 1025)
         self.assertEqual(_bit_size((1 << 1024) - 1), 1024)
+
+
+class TestInverse(unittest.TestCase):
+    def test_normal(self):
+        self.assertEqual(3, inverse(7, 4))
+        self.assertEqual(9, inverse(5, 11))
+
+    def test_not_relprime(self):
+        self.assertRaises(ValueError, inverse, 4, 8)
+        self.assertRaises(ValueError, inverse, 25, 5)

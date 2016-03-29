@@ -131,7 +131,7 @@ def extended_gcd(a, b):
 
 
 def inverse(x, n):
-    """Returns x^-1 (mod n)
+    """Returns the inverse of x % n under multiplication, a.k.a x^-1 (mod n)
 
     >>> inverse(7, 4)
     3
