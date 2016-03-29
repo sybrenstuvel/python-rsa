@@ -43,7 +43,9 @@ class KeyGenTest(unittest.TestCase):
 
     def test_custom_getprime_func(self):
         # List of primes to test with, in order [p, q, p, q, ....]
-        primes = [64123, 50957, 39317, 33107]
+        # By starting with two of the same primes, we test that this is
+        # properly rejected.
+        primes = [64123, 64123, 64123, 50957, 39317, 33107]
 
         def getprime(_):
             return primes.pop(0)

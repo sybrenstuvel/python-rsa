@@ -19,6 +19,7 @@
 import unittest
 
 import rsa.prime
+import rsa.randnum
 
 
 class PrimeTest(unittest.TestCase):
@@ -42,3 +43,34 @@ class PrimeTest(unittest.TestCase):
         # Test around the 50th millionth known prime.
         self.assertTrue(rsa.prime.is_prime(982451653))
         self.assertFalse(rsa.prime.is_prime(982451653 * 961748941))
+
+    def test_miller_rabin_primality_testing(self):
+        """Uses monkeypatching to ensure certain random numbers.
+
+        This allows us to predict/control the code path.
+        """
+
+        randints = []
+
+        def fake_randint(maxvalue):
+            return randints.pop(0)
+
+        orig_randint = rsa.randnum.randint
+        rsa.randnum.randint = fake_randint
+        try:
+            # 'n is composite'
+            randints.append(2630484831)  # causes the 'n is composite' case with n=3784949785
+            self.assertEqual(False, rsa.prime.miller_rabin_primality_testing(2787998641, 7))
+            self.assertEqual([], randints)
+
+            # 'Exit inner loop and continue with next witness'
+            randints.extend([
+                2119139097,  # causes 'Exit inner loop and continue with next witness'
+                # the next witnesses for the above case:
+                3051067715, 3603501762, 3230895846, 3687808132, 3760099986, 4026931494, 3022471881,
+            ])
+            self.assertEqual(True, rsa.prime.miller_rabin_primality_testing(2211417913,
+                                                                            len(randints)))
+            self.assertEqual([], randints)
+        finally:
+            rsa.randnum.randint = orig_randint
