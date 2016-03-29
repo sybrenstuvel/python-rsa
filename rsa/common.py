@@ -16,6 +16,8 @@
 
 """Common functionality shared by several modules."""
 
+from rsa._compat import is_integer
+
 
 class NotRelativePrimeError(ValueError):
     def __init__(self, a, b, d, msg=None):
@@ -50,21 +52,17 @@ def bit_size(num):
     :returns:
         Returns the number of bits in the integer.
     """
+    # Make sure this is an int and not a float.
+    if not is_integer(num):
+        raise TypeError
+
     if num == 0:
         return 0
     if num < 0:
         num = -num
 
-    # Make sure this is an int and not a float.
-    num & 1
-
-    hex_num = "%x" % num
-    return ((len(hex_num) - 1) * 4) + {
-        '0': 0, '1': 1, '2': 2, '3': 2,
-        '4': 3, '5': 3, '6': 3, '7': 3,
-        '8': 4, '9': 4, 'a': 4, 'b': 4,
-        'c': 4, 'd': 4, 'e': 4, 'f': 4,
-    }[hex_num[0]]
+    binary_num = "{0:b}".format(num)
+    return len(binary_num)
 
 
 def _bit_size(number):

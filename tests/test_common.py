@@ -55,6 +55,7 @@ class TestByteSize(unittest.TestCase):
         self.assertRaises(TypeError, byte_size, dict())
         self.assertRaises(TypeError, byte_size, "")
         self.assertRaises(TypeError, byte_size, None)
+        self.assertRaises(TypeError, byte_size, 0.0)
 
 
 class TestBitSize(unittest.TestCase):
@@ -75,6 +76,16 @@ class TestBitSize(unittest.TestCase):
         self.assertEqual(_bit_size(1 << 1024), 1025)
         self.assertEqual(_bit_size((1 << 1024) + 1), 1025)
         self.assertEqual(_bit_size((1 << 1024) - 1), 1024)
+
+    def test_negative_values(self):
+        self.assertEqual(bit_size(-1023), 10)
+        self.assertEqual(bit_size(-1024), 11)
+        self.assertEqual(bit_size(-1025), 11)
+        self.assertEqual(bit_size(-1 << 1024), 1025)
+        self.assertEqual(bit_size(-((1 << 1024) + 1)), 1025)
+        self.assertEqual(bit_size(-((1 << 1024) - 1)), 1024)
+
+        self.assertRaises(ValueError, _bit_size, -1024)
 
 
 class TestInverse(unittest.TestCase):
