@@ -228,6 +228,9 @@ class PublicKey(AbstractKey):
     def __ne__(self, other):
         return not (self == other)
 
+    def __hash__(self):
+        return hash((self.n, self.e))
+
     @classmethod
     def _load_pkcs1_der(cls, keyfile):
         """Loads a key in PKCS#1 DER format.
@@ -429,6 +432,9 @@ class PrivateKey(AbstractKey):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def __hash__(self):
+        return hash((self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef))
 
     def blinded_decrypt(self, encrypted):
         """Decrypts the message using blinding to prevent side-channel attacks.

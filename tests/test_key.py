@@ -59,3 +59,14 @@ class KeyGenTest(unittest.TestCase):
                                         exponent=exponent)
         self.assertEqual(39317, p)
         self.assertEqual(33107, q)
+
+
+class HashTest(unittest.TestCase):
+    """Test hashing of keys"""
+
+    def test_hash_possible(self):
+        priv, pub = rsa.key.newkeys(16)
+
+        # This raises a TypeError when hashing isn't possible.
+        hash(priv)
+        hash(pub)
