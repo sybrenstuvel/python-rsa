@@ -17,6 +17,15 @@
 """Common functionality shared by several modules."""
 
 
+class NotRelativePrimeError(ValueError):
+    def __init__(self, a, b, d, msg=None):
+        super(NotRelativePrimeError, self).__init__(
+            msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
+        self.a = a
+        self.b = b
+        self.d = d
+
+
 def bit_size(num):
     """
     Number of bits needed to represent a integer excluding any prefix
@@ -142,7 +151,7 @@ def inverse(x, n):
     (divider, inv, _) = extended_gcd(x, n)
 
     if divider != 1:
-        raise ValueError("x (%d) and n (%d) are not relatively prime" % (x, n))
+        raise NotRelativePrimeError(x, n, divider)
 
     return inv
 

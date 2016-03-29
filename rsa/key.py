@@ -666,9 +666,11 @@ def calculate_keys_custom_exponent(p, q, exponent):
 
     try:
         d = rsa.common.inverse(exponent, phi_n)
-    except ValueError:
-        raise ValueError("e (%d) and phi_n (%d) are not relatively prime" %
-                         (exponent, phi_n))
+    except rsa.common.NotRelativePrimeError as ex:
+        raise rsa.common.NotRelativePrimeError(
+            exponent, phi_n, ex.d,
+            msg="e (%d) and phi_n (%d) are not relatively prime (divider=%i)" %
+                (exponent, phi_n, ex.d))
 
     if (exponent * d) % phi_n != 1:
         raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "
