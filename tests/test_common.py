@@ -18,7 +18,7 @@
 import unittest
 import struct
 from rsa._compat import byte, b
-from rsa.common import byte_size, bit_size, _bit_size, inverse
+from rsa.common import byte_size, bit_size, inverse
 
 
 class TestByte(unittest.TestCase):
@@ -69,12 +69,21 @@ class TestBitSize(unittest.TestCase):
         self.assertEqual(bit_size((1 << 1024) + 1), 1025)
         self.assertEqual(bit_size((1 << 1024) - 1), 1024)
 
-        self.assertEqual(_bit_size(1023), 10)
-        self.assertEqual(_bit_size(1024), 11)
-        self.assertEqual(_bit_size(1025), 11)
-        self.assertEqual(_bit_size(1 << 1024), 1025)
-        self.assertEqual(_bit_size((1 << 1024) + 1), 1025)
-        self.assertEqual(_bit_size((1 << 1024) - 1), 1024)
+    def test_negative_values(self):
+        self.assertEqual(bit_size(-1023), 10)
+        self.assertEqual(bit_size(-1024), 11)
+        self.assertEqual(bit_size(-1025), 11)
+        self.assertEqual(bit_size(-1 << 1024), 1025)
+        self.assertEqual(bit_size(-((1 << 1024) + 1)), 1025)
+        self.assertEqual(bit_size(-((1 << 1024) - 1)), 1024)
+
+    def test_bad_type(self):
+        self.assertRaises(TypeError, bit_size, [])
+        self.assertRaises(TypeError, bit_size, ())
+        self.assertRaises(TypeError, bit_size, dict())
+        self.assertRaises(TypeError, bit_size, "")
+        self.assertRaises(TypeError, bit_size, None)
+        self.assertRaises(TypeError, bit_size, 0.0)
 
 
 class TestInverse(unittest.TestCase):
