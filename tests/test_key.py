@@ -40,3 +40,20 @@ class KeyGenTest(unittest.TestCase):
 
         self.assertEqual(0x10001, priv.e)
         self.assertEqual(0x10001, pub.e)
+
+    def test_custom_getprime_func(self):
+        # List of primes to test with, in order [p, q, p, q, ....]
+        primes = [64123, 50957, 39317, 33107]
+
+        def getprime(_):
+            return primes.pop(0)
+
+        # This exponent will cause two other primes to be generated.
+        exponent = 136407
+
+        (p, q, e, d) = rsa.key.gen_keys(64,
+                                        accurate=False,
+                                        getprime_func=getprime,
+                                        exponent=exponent)
+        self.assertEqual(39317, p)
+        self.assertEqual(33107, q)
