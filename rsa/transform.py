@@ -21,16 +21,6 @@ From bytes to a number, number to bytes, etc.
 
 from __future__ import absolute_import
 
-try:
-    # We'll use psyco if available on 32-bit architectures to speed up code.
-    # Using psyco (if available) cuts down the execution time on Python 2.5
-    # at least by half.
-    import psyco
-
-    psyco.full()
-except ImportError:
-    pass
-
 import binascii
 from struct import pack
 from rsa import common
