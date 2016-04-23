@@ -75,6 +75,25 @@ class PrimeTest(unittest.TestCase):
         finally:
             rsa.randnum.randint = orig_randint
 
+    def test_mersenne_primes(self):
+        """Tests first known Mersenne primes.
+
+        Mersenne primes are prime numbers that can be written in the form
+        `Mn = 2**n - 1` for some integer `n`. For the list of known Mersenne
+        primes, see:
+        https://en.wikipedia.org/wiki/Mersenne_prime#List_of_known_Mersenne_primes
+        """
+
+        # List of 20 first known Mersenne exponents.
+        known_mersenne_exponents = [
+            2, 3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279,
+            2203, 2281, 3217, 4253, 4423,
+        ]
+
+        # Test Mersenne primes.
+        for exp in known_mersenne_exponents:
+            self.assertTrue(rsa.prime.is_prime(2**exp - 1))
+
     def test_get_primality_testing_rounds(self):
         """Test round calculation for primality testing."""
 
