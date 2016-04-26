@@ -23,6 +23,7 @@ from __future__ import absolute_import
 
 import binascii
 from struct import pack
+
 from rsa import common
 from rsa._compat import is_integer, b, byte, get_word_alignment, ZERO_BYTE, EMPTY_BYTE
 

@@ -52,6 +52,14 @@ else:
     def byte_literal(s):
         return s
 
+# Range generator.
+try:
+    # < Python3
+    range = xrange
+except NameError:
+    # Python3
+    range = range
+
 # ``long`` is no more. Do type detection using this instead.
 try:
     integer_types = (int, long)

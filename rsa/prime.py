@@ -20,6 +20,7 @@ Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
 """
 
+from rsa._compat import range
 import rsa.common
 import rsa.randnum
 
