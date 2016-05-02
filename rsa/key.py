@@ -34,6 +34,7 @@ of pyasn1.
 """
 
 import logging
+import warnings
 
 from rsa._compat import range
 import rsa.prime
@@ -41,6 +42,7 @@ import rsa.pem
 import rsa.common
 import rsa.randnum
 import rsa.core
+
 
 log = logging.getLogger(__name__)
 DEFAULT_EXPONENT = 65537
@@ -354,51 +356,30 @@ class PrivateKey(AbstractKey):
     >>> PrivateKey(3247, 65537, 833, 191, 17)
     PrivateKey(3247, 65537, 833, 191, 17)
 
-    exp1, exp2 and coef can be given, but if None or omitted they will be calculated:
+    exp1, exp2 and coef will be calculated:
 
-    >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287, exp2=4)
+    >>> pk = PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
     >>> pk.exp1
     55063
-    >>> pk.exp2  # this is of course not a correct value, but it is the one we passed.
-    4
+    >>> pk.exp2
+    10095
     >>> pk.coef
     50797
-
-    If you give exp1, exp2 or coef, they will be used as-is:
-
-    >>> pk = PrivateKey(1, 2, 3, 4, 5, 6, 7, 8)
-    >>> pk.exp1
-    6
-    >>> pk.exp2
-    7
-    >>> pk.coef
-    8
 
     """
 
     __slots__ = ('n', 'e', 'd', 'p', 'q', 'exp1', 'exp2', 'coef')
 
-    def __init__(self, n, e, d, p, q, exp1=None, exp2=None, coef=None):
+    def __init__(self, n, e, d, p, q):
         AbstractKey.__init__(self, n, e)
         self.d = d
         self.p = p
         self.q = q
 
-        # Calculate the other values if they aren't supplied
-        if exp1 is None:
-            self.exp1 = int(d % (p - 1))
-        else:
-            self.exp1 = exp1
-
-        if exp2 is None:
-            self.exp2 = int(d % (q - 1))
-        else:
-            self.exp2 = exp2
-
-        if coef is None:
-            self.coef = rsa.common.inverse(q, p)
-        else:
-            self.coef = coef
+        # Calculate exponents and coefficient.
+        self.exp1 = int(d % (p - 1))
+        self.exp2 = int(d % (q - 1))
+        self.coef = rsa.common.inverse(q, p)
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -510,8 +491,20 @@ class PrivateKey(AbstractKey):
         if priv[0] != 0:
             raise ValueError('Unable to read this file, version %s != 0' % priv[0])
 
-        as_ints = tuple(int(x) for x in priv[1:9])
-        return cls(*as_ints)
+        as_ints = tuple(map(int, priv[1:6]))
+        key = cls(*as_ints)
+
+        exp1, exp2, coef = map(int, priv[6:9])
+
+        if (key.exp1, key.exp2, key.coef) != (exp1, exp2, coef):
+            warnings.warn(
+                'You have provided a malformed keyfile. Either the exponents '
+                'or the coefficient are incorrect. Using the correct values '
+                'instead.',
+                UserWarning,
+            )
+
+        return key
 
     def _save_pkcs1_der(self):
         """Saves the private key in PKCS#1 DER format.
