@@ -25,7 +25,7 @@ import binascii
 from struct import pack
 
 from rsa import common
-from rsa._compat import is_integer, b, byte, get_word_alignment, ZERO_BYTE, EMPTY_BYTE
+from rsa._compat import byte, is_integer, get_word_alignment
 
 
 def bytes2int(raw_bytes):
@@ -83,7 +83,7 @@ def _int2bytes(number, block_size=None):
     # Do some bounds checking
     if number == 0:
         needed_bytes = 1
-        raw_bytes = [ZERO_BYTE]
+        raw_bytes = [b'\x00']
     else:
         needed_bytes = common.byte_size(number)
         raw_bytes = []
@@ -101,14 +101,14 @@ def _int2bytes(number, block_size=None):
 
     # Pad with zeroes to fill the block
     if block_size and block_size > 0:
-        padding = (block_size - needed_bytes) * ZERO_BYTE
+        padding = (block_size - needed_bytes) * b'\x00'
     else:
-        padding = EMPTY_BYTE
+        padding = b''
 
-    return padding + EMPTY_BYTE.join(raw_bytes)
+    return padding + b''.join(raw_bytes)
 
 
-def bytes_leading(raw_bytes, needle=ZERO_BYTE):
+def bytes_leading(raw_bytes, needle=b'\x00'):
     """
     Finds the number of prefixed byte occurrences in the haystack.
 
@@ -117,7 +117,7 @@ def bytes_leading(raw_bytes, needle=ZERO_BYTE):
     :param raw_bytes:
         Raw bytes.
     :param needle:
-        The byte to count. Default \000.
+        The byte to count. Default \x00.
     :returns:
         The number of leading needle bytes.
     """
@@ -177,7 +177,7 @@ def int2bytes(number, fill_size=None, chunk_size=None, overflow=False):
     # Ensure these are integers.
     number & 1
 
-    raw_bytes = b('')
+    raw_bytes = b''
 
     # Pack the integer one machine word at a time into bytes.
     num = number
@@ -189,7 +189,7 @@ def int2bytes(number, fill_size=None, chunk_size=None, overflow=False):
     # Obtain the index of the first non-zero byte.
     zero_leading = bytes_leading(raw_bytes)
     if number == 0:
-        raw_bytes = ZERO_BYTE
+        raw_bytes = b'\x00'
     # De-padding.
     raw_bytes = raw_bytes[zero_leading:]
 
@@ -200,12 +200,12 @@ def int2bytes(number, fill_size=None, chunk_size=None, overflow=False):
                     "Need %d bytes for number, but fill size is %d" %
                     (length, fill_size)
             )
-        raw_bytes = raw_bytes.rjust(fill_size, ZERO_BYTE)
+        raw_bytes = raw_bytes.rjust(fill_size, b'\x00')
     elif chunk_size and chunk_size > 0:
         remainder = length % chunk_size
         if remainder:
             padding_size = chunk_size - remainder
-            raw_bytes = raw_bytes.rjust(length + padding_size, ZERO_BYTE)
+            raw_bytes = raw_bytes.rjust(length + padding_size, b'\x00')
     return raw_bytes
 
 

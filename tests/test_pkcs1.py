@@ -21,7 +21,7 @@ import unittest
 
 import rsa
 from rsa import pkcs1
-from rsa._compat import byte, b, is_bytes
+from rsa._compat import byte, is_bytes
 
 
 class BinaryTest(unittest.TestCase):
@@ -73,7 +73,7 @@ class SignatureTest(unittest.TestCase):
     def test_sign_verify(self):
         """Test happy flow of sign and verify"""
 
-        message = b('je moeder')
+        message = b'je moeder'
         print("\tMessage:   %r" % message)
 
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
@@ -84,16 +84,16 @@ class SignatureTest(unittest.TestCase):
     def test_alter_message(self):
         """Altering the message should let the verification fail."""
 
-        signature = pkcs1.sign(b('je moeder'), self.priv, 'SHA-256')
+        signature = pkcs1.sign(b'je moeder', self.priv, 'SHA-256')
         self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
-                          b('mijn moeder'), signature, self.pub)
+                          b'mijn moeder', signature, self.pub)
 
     def test_sign_different_key(self):
         """Signing with another key should let the verification fail."""
 
         (otherpub, _) = rsa.newkeys(512)
 
-        message = b('je moeder')
+        message = b'je moeder'
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
         self.assertRaises(pkcs1.VerificationError, pkcs1.verify,
                           message, signature, otherpub)

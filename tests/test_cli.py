@@ -15,7 +15,6 @@ from io import StringIO, BytesIO
 import rsa
 import rsa.cli
 import rsa.util
-from rsa._compat import b
 
 if sys.version_info[0] < 3:
     def make_buffer():
@@ -135,8 +134,8 @@ class KeygenTest(AbstractCliTest):
                 rsa.cli.keygen()
 
         lines = get_bytes_out(out).splitlines()
-        self.assertEqual(b('-----BEGIN RSA PRIVATE KEY-----'), lines[0])
-        self.assertEqual(b('-----END RSA PRIVATE KEY-----'), lines[-1])
+        self.assertEqual(b'-----BEGIN RSA PRIVATE KEY-----', lines[0])
+        self.assertEqual(b'-----END RSA PRIVATE KEY-----', lines[-1])
 
         # The key size should be shown on stderr
         self.assertTrue('128-bit key' in err.getvalue())
@@ -217,7 +216,7 @@ class EncryptDecryptTest(AbstractCliTest):
 
         # We should have the original cleartext on stdout now.
         output = get_bytes_out(out)
-        self.assertEqual(b('Hello cleartext RSA users!'), output)
+        self.assertEqual(b'Hello cleartext RSA users!', output)
 
     @cleanup_files('encrypted.txt', 'cleartext.txt')
     def test_encrypt_decrypt_unhappy(self):

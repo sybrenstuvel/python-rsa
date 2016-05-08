@@ -17,14 +17,14 @@
 
 import unittest
 import struct
-from rsa._compat import byte, b
+from rsa._compat import byte
 from rsa.common import byte_size, bit_size, inverse
 
 
 class TestByte(unittest.TestCase):
     def test_values(self):
-        self.assertEqual(byte(0), b('\x00'))
-        self.assertEqual(byte(255), b('\xff'))
+        self.assertEqual(byte(0), b'\x00')
+        self.assertEqual(byte(255), b'\xff')
 
     def test_struct_error_when_out_of_bounds(self):
         self.assertRaises(struct.error, byte, 256)

@@ -37,21 +37,6 @@ else:
     # Else we just assume 64-bit processor keeping up with modern times.
     MACHINE_WORD_SIZE = 64
 
-try:
-    # < Python3
-    unicode_type = unicode
-except NameError:
-    # Python3.
-    unicode_type = str
-
-# Fake byte literals.
-if str is unicode_type:
-    def byte_literal(s):
-        return s.encode('latin1')
-else:
-    def byte_literal(s):
-        return s
-
 # Range generator.
 try:
     # < Python3
@@ -65,12 +50,6 @@ try:
     integer_types = (int, long)
 except NameError:
     integer_types = (int,)
-
-b = byte_literal
-
-# To avoid calling b() multiple times in tight loops.
-ZERO_BYTE = b('\x00')
-EMPTY_BYTE = b('')
 
 
 def is_bytes(obj):

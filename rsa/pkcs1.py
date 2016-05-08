@@ -31,16 +31,16 @@ to your users.
 import hashlib
 import os
 
-from rsa._compat import b, range
+from rsa._compat import range
 from rsa import common, transform, core
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
-    'MD5': b('\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10'),
-    'SHA-1': b('\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14'),
-    'SHA-256': b('\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20'),
-    'SHA-384': b('\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30'),
-    'SHA-512': b('\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40'),
+    'MD5': b'\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10',
+    'SHA-1': b'\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14',
+    'SHA-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20',
+    'SHA-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30',
+    'SHA-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40',
 }
 
 HASH_METHODS = {
@@ -87,7 +87,7 @@ def _pad_for_encryption(message, target_length):
                             ' space for %i' % (msglength, max_msglength))
 
     # Get random padding
-    padding = b('')
+    padding = b''
     padding_length = target_length - msglength - 3
 
     # We remove 0-bytes, so we'll end up with less padding than we've asked for,
@@ -99,15 +99,15 @@ def _pad_for_encryption(message, target_length):
         # after removing the 0-bytes. This increases the chance of getting
         # enough bytes, especially when needed_bytes is small
         new_padding = os.urandom(needed_bytes + 5)
-        new_padding = new_padding.replace(b('\x00'), b(''))
+        new_padding = new_padding.replace(b'\x00', b'')
         padding = padding + new_padding[:needed_bytes]
 
     assert len(padding) == padding_length
 
-    return b('').join([b('\x00\x02'),
-                       padding,
-                       b('\x00'),
-                       message])
+    return b''.join([b'\x00\x02',
+                     padding,
+                     b'\x00',
+                     message])
 
 
 def _pad_for_signing(message, target_length):
@@ -138,10 +138,10 @@ def _pad_for_signing(message, target_length):
 
     padding_length = target_length - msglength - 3
 
-    return b('').join([b('\x00\x01'),
-                       padding_length * b('\xff'),
-                       b('\x00'),
-                       message])
+    return b''.join([b'\x00\x01',
+                     padding_length * b'\xff',
+                     b'\x00',
+                     message])
 
 
 def encrypt(message, pub_key):
@@ -233,12 +233,12 @@ def decrypt(crypto, priv_key):
     cleartext = transform.int2bytes(decrypted, blocksize)
 
     # If we can't find the cleartext marker, decryption failed.
-    if cleartext[0:2] != b('\x00\x02'):
+    if cleartext[0:2] != b'\x00\x02':
         raise DecryptionError('Decryption failed')
 
     # Find the 00 separator between the padding and the message
     try:
-        sep_idx = cleartext.index(b('\x00'), 2)
+        sep_idx = cleartext.index(b'\x00', 2)
     except ValueError:
         raise DecryptionError('Decryption failed')
 

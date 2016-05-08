@@ -17,7 +17,7 @@
 
 import unittest
 
-from rsa._compat import b, is_bytes
+from rsa._compat import is_bytes
 from rsa.pem import _markers
 import rsa.key
 
@@ -49,8 +49,8 @@ prime2 = 88103681619592083641803383393198542599284510949756076218404908654323473
 class TestMarkers(unittest.TestCase):
     def test_values(self):
         self.assertEqual(_markers('RSA PRIVATE KEY'),
-                         (b('-----BEGIN RSA PRIVATE KEY-----'),
-                          b('-----END RSA PRIVATE KEY-----')))
+                         (b'-----BEGIN RSA PRIVATE KEY-----',
+                          b'-----END RSA PRIVATE KEY-----'))
 
 
 class TestBytesAndStrings(unittest.TestCase):

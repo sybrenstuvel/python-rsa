@@ -21,55 +21,53 @@ import unittest
 import os.path
 import pickle
 
-from rsa._compat import b
-
 import rsa.key
 
-B64PRIV_DER = b('MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt')
+B64PRIV_DER = b'MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt'
 PRIVATE_DER = base64.standard_b64decode(B64PRIV_DER)
 
-B64PUB_DER = b('MAwCBQDeKYlRAgMBAAE=')
+B64PUB_DER = b'MAwCBQDeKYlRAgMBAAE='
 PUBLIC_DER = base64.standard_b64decode(B64PUB_DER)
 
-PRIVATE_PEM = b('''
+PRIVATE_PEM = b'''\
 -----BEGIN CONFUSING STUFF-----
 Cruft before the key
 
 -----BEGIN RSA PRIVATE KEY-----
 Comment: something blah
 
-%s
+''' + B64PRIV_DER + b'''
 -----END RSA PRIVATE KEY-----
 
 Stuff after the key
 -----END CONFUSING STUFF-----
-''' % B64PRIV_DER.decode("utf-8"))
+'''
 
-CLEAN_PRIVATE_PEM = b('''\
+CLEAN_PRIVATE_PEM = b'''\
 -----BEGIN RSA PRIVATE KEY-----
-%s
+''' + B64PRIV_DER + b'''
 -----END RSA PRIVATE KEY-----
-''' % B64PRIV_DER.decode("utf-8"))
+'''
 
-PUBLIC_PEM = b('''
+PUBLIC_PEM = b'''\
 -----BEGIN CONFUSING STUFF-----
 Cruft before the key
 
 -----BEGIN RSA PUBLIC KEY-----
 Comment: something blah
 
-%s
+''' + B64PUB_DER + b'''
 -----END RSA PUBLIC KEY-----
 
 Stuff after the key
 -----END CONFUSING STUFF-----
-''' % B64PUB_DER.decode("utf-8"))
+'''
 
-CLEAN_PUBLIC_PEM = b('''\
+CLEAN_PUBLIC_PEM = b'''\
 -----BEGIN RSA PUBLIC KEY-----
-%s
+''' + B64PUB_DER + b'''
 -----END RSA PUBLIC KEY-----
-''' % B64PUB_DER.decode("utf-8"))
+'''
 
 
 class DerTest(unittest.TestCase):

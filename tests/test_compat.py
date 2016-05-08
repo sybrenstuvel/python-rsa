@@ -18,7 +18,7 @@ import unittest
 import struct
 import sys
 
-from rsa._compat import b, byte, is_bytes, range
+from rsa._compat import byte, is_bytes, range
 
 
 class TestByte(unittest.TestCase):
@@ -33,4 +33,4 @@ class TestByte(unittest.TestCase):
         self.assertRaises(struct.error, byte, -1)
 
     def test_byte_literal(self):
-        self.assertIsInstance(b('abc'), bytes)
+        self.assertIsInstance(b'abc', bytes)
