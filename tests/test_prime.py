@@ -97,13 +97,13 @@ class PrimeTest(unittest.TestCase):
     def test_get_primality_testing_rounds(self):
         """Test round calculation for primality testing."""
 
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 63),  10)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 127), 10)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 255), 10)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 511),  7)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 767),  7)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 1023), 4)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 1279), 4)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 1535), 3)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 2047), 3)
-        self.assertEquals(rsa.prime.get_primality_testing_rounds(1 << 4095), 3)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 63),  10)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 127), 10)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 255), 10)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 511),  7)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 767),  7)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 1023), 4)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 1279), 4)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 1535), 3)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 2047), 3)
+        self.assertEqual(rsa.prime.get_primality_testing_rounds(1 << 4095), 3)
