@@ -18,6 +18,7 @@
 
 import unittest
 
+from rsa._compat import range
 import rsa.prime
 import rsa.randnum
 

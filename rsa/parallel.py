@@ -28,6 +28,7 @@ from __future__ import print_function
 
 import multiprocessing as mp
 
+from rsa._compat import range
 import rsa.prime
 import rsa.randnum
 

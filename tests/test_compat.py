@@ -18,7 +18,7 @@ import unittest
 import struct
 import sys
 
-from rsa._compat import is_bytes, byte, b
+from rsa._compat import b, byte, is_bytes, range
 
 
 class TestByte(unittest.TestCase):
