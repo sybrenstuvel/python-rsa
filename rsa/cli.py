@@ -83,11 +83,7 @@ def keygen():
             outfile.write(data)
     else:
         print('Writing private key to stdout', file=sys.stderr)
-        if sys.version_info[0] >= 3:
-            # on Py3 we must use the buffer interface to write bytes.
-            sys.stdout.buffer.write(data)
-        else:
-            sys.stdout.write(data)
+        rsa._compat.write_to_stdout(data)
 
 
 class CryptoOperation(object):
@@ -193,11 +189,7 @@ class CryptoOperation(object):
                 outfile.write(outdata)
         else:
             print('Writing output to stdout', file=sys.stderr)
-            if sys.version_info[0] >= 3:
-                # on Py3 we must use the buffer interface to write bytes.
-                sys.stdout.buffer.write(outdata)
-            else:
-                sys.stdout.write(outdata)
+            rsa._compat.write_to_stdout(outdata)
 
 
 class EncryptOperation(CryptoOperation):

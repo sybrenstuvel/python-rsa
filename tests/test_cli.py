@@ -15,25 +15,23 @@ from io import StringIO, BytesIO
 import rsa
 import rsa.cli
 import rsa.util
+from rsa._compat import PY2
 
-if sys.version_info[0] < 3:
-    def make_buffer():
+
+def make_buffer():
+    if PY2:
         return BytesIO()
+    buf = StringIO()
+    buf.buffer = BytesIO()
+    return buf
 
 
-    def get_bytes_out(out):
-        # Python 2.x writes 'str' to stdout:
+def get_bytes_out(out):
+    if PY2:
+        # Python 2.x writes 'str' to stdout
         return out.getvalue()
-else:
-    def make_buffer():
-        buf = StringIO()
-        buf.buffer = BytesIO()
-        return buf
-
-
-    def get_bytes_out(out):
-        # Python 3.x writes 'bytes' to stdout.buffer:
-        return out.buffer.getvalue()
+    # Python 3.x writes 'bytes' to stdout.buffer
+    return out.buffer.getvalue()
 
 
 @contextmanager
