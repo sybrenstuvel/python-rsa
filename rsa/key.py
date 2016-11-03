@@ -182,7 +182,7 @@ class PublicKey(AbstractKey):
     This key is also known as the 'encryption key'. It contains the 'n' and 'e'
     values.
 
-    Supports attributes as well as dictionary-like access. Attribute accesss is
+    Supports attributes as well as dictionary-like access. Attribute access is
     faster, though.
 
     >>> PublicKey(5, 3)
@@ -348,7 +348,7 @@ class PrivateKey(AbstractKey):
     This key is also known as the 'decryption key'. It contains the 'n', 'e',
     'd', 'p', 'q' and other values.
 
-    Supports attributes as well as dictionary-like access. Attribute accesss is
+    Supports attributes as well as dictionary-like access. Attribute access is
     faster, though.
 
     >>> PrivateKey(3247, 65537, 833, 191, 17)
