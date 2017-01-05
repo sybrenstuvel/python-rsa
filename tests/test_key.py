@@ -41,6 +41,13 @@ class KeyGenTest(unittest.TestCase):
         self.assertEqual(0x10001, priv.e)
         self.assertEqual(0x10001, pub.e)
 
+    def test_exponents_coefficient_calculation(self):
+        pk = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+
+        self.assertEqual(pk.exp1, 55063)
+        self.assertEqual(pk.exp2, 10095)
+        self.assertEqual(pk.coef, 50797)
+
     def test_custom_getprime_func(self):
         # List of primes to test with, in order [p, q, p, q, ....]
         # By starting with two of the same primes, we test that this is

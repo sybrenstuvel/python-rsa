@@ -17,10 +17,13 @@
 """Unittest for saving and loading keys."""
 
 import base64
-import unittest
+import mock
 import os.path
 import pickle
+import unittest
+import warnings
 
+from rsa._compat import range
 import rsa.key
 
 B64PRIV_DER = b'MC4CAQACBQDeKYlRAgMBAAECBQDHn4npAgMA/icCAwDfxwIDANcXAgInbwIDAMZt'
@@ -80,6 +83,39 @@ class DerTest(unittest.TestCase):
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
+        self.assertEqual(key.exp1, 55063)
+        self.assertEqual(key.exp2, 10095)
+        self.assertEqual(key.coef, 50797)
+
+    @mock.patch('pyasn1.codec.der.decoder.decode')
+    def test_load_malformed_private_key(self, der_decode):
+        """Test loading malformed private DER keys."""
+
+        # Decode returns an invalid exp2 value.
+        der_decode.return_value = (
+            [0, 3727264081, 65537, 3349121513, 65063, 57287, 55063, 0, 50797],
+            0,
+        )
+
+        with warnings.catch_warnings(record=True) as w:
+            # Always print warnings
+            warnings.simplefilter('always')
+
+            # Load 3 keys
+            for _ in range(3):
+                key = rsa.key.PrivateKey.load_pkcs1(PRIVATE_DER, 'DER')
+
+            # Check that 3 warnings were generated.
+            self.assertEqual(3, len(w))
+
+            for warning in w:
+                self.assertTrue(issubclass(warning.category, UserWarning))
+                self.assertIn('malformed', str(warning.message))
+
+        # Check that we are creating the key with correct values
+        self.assertEqual(key.exp1, 55063)
+        self.assertEqual(key.exp2, 10095)
+        self.assertEqual(key.coef, 50797)
 
     def test_save_private_key(self):
         """Test saving private DER keys."""
@@ -118,6 +154,9 @@ class PemTest(unittest.TestCase):
         expected = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         self.assertEqual(expected, key)
+        self.assertEqual(key.exp1, 55063)
+        self.assertEqual(key.exp2, 10095)
+        self.assertEqual(key.coef, 50797)
 
     def test_save_private_key(self):
         """Test saving private PEM files."""
