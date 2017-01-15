@@ -16,7 +16,6 @@
 
 import unittest
 import struct
-import sys
 
 from rsa._compat import byte, is_bytes, range
 
