@@ -491,7 +491,7 @@ class PrivateKey(AbstractKey):
         if priv[0] != 0:
             raise ValueError('Unable to read this file, version %s != 0' % priv[0])
 
-        as_ints = tuple(map(int, priv[1:6]))
+        as_ints = map(int, priv[1:6])
         key = cls(*as_ints)
 
         exp1, exp2, coef = map(int, priv[6:9])

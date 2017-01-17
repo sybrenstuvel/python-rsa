@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import
 
+import itertools
 import sys
 from struct import pack
 
@@ -42,9 +43,11 @@ else:
 if PY2:
     integer_types = (int, long)
     range = xrange
+    zip = itertools.izip
 else:
     integer_types = (int, )
     range = range
+    zip = zip
 
 
 def write_to_stdout(data):
