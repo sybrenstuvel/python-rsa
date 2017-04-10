@@ -15,6 +15,8 @@ Functions
 
 .. autofunction:: rsa.verify
 
+.. autofunction:: rsa.find_signature_hash
+
 .. autofunction:: rsa.newkeys(keysize)
 
 

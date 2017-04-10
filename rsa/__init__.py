@@ -25,7 +25,7 @@ prevent repetitions, or other common security improvements. Use with care.
 
 from rsa.key import newkeys, PrivateKey, PublicKey
 from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
-    VerificationError
+    VerificationError, find_signature_hash
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2016-03-29"
