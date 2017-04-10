@@ -296,10 +296,6 @@ def sign(message, priv_key, hash_method):
         requested hash.
 
     """
-    
-    # Verify hash_method is a valid hash algorithm
-    if hash_method not in HASH_ASN1:
-        raise ValueError('Invalid hash method: %s' % hash_method)
 
     # Calculate the hash and perform the signing
     return sign_hash(hash(message, hash_method), priv_key, hash_method)
