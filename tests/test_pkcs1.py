@@ -74,10 +74,7 @@ class SignatureTest(unittest.TestCase):
         """Test happy flow of sign and verify"""
 
         message = b'je moeder'
-        print("\tMessage:   %r" % message)
-
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
-        print("\tSignature: %r" % signature)
 
         self.assertTrue(pkcs1.verify(message, signature, self.pub))
 
