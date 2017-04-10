@@ -28,7 +28,7 @@ import rsa
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.coverage', 'sphinx.ext.pngmath']
+              'sphinx.ext.coverage']
 
 # I would like to add 'sphinx.ext.viewcode', but it causes a UnicodeDecodeError
 
