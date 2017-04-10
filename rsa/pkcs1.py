@@ -297,8 +297,8 @@ def sign(message, priv_key, hash_method):
 
     """
 
-    # Calculate the hash and perform the signing
-    return sign_hash(hash(message, hash_method), priv_key, hash_method)
+    msg_hash = hash(message, hash_method)
+    return sign_hash(msg_hash, priv_key, hash_method)
 
 
 def verify(message, signature, pub_key):
