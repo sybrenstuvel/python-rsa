@@ -250,7 +250,7 @@ def sign_hash(hash_value, priv_key, hash_method):
 
     Hashes the message, then signs the hash with the given key. This is known
     as a "detached signature", because the message itself isn't altered.
-    
+
     :param hash_value: A precomputed hash to sign (ignores message). Should be set to
         None if needing to hash and sign message.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
