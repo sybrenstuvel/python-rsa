@@ -245,13 +245,13 @@ def decrypt(crypto, priv_key):
     return cleartext[sep_idx + 1:]
 
 
-def sign_hash(hash, priv_key, hash_method):
+def sign_hash(hash_value, priv_key, hash_method):
     """Signs a precomputed hash with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
     as a "detached signature", because the message itself isn't altered.
     
-    :param hash: A precomputed hash to sign (ignores message). Should be set to
+    :param hash_value: A precomputed hash to sign (ignores message). Should be set to
         None if needing to hash and sign message.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
@@ -268,7 +268,7 @@ def sign_hash(hash, priv_key, hash_method):
     asn1code = HASH_ASN1[hash_method]
 
     # Encrypt the hash with the private key
-    cleartext = asn1code + hash
+    cleartext = asn1code + hash_value
     keylength = common.byte_size(priv_key.n)
     padded = _pad_for_signing(cleartext, keylength)
 
@@ -297,7 +297,7 @@ def sign(message, priv_key, hash_method):
 
     """
 
-    msg_hash = hash(message, hash_method)
+    msg_hash = generate_hash(message, hash_method)
     return sign_hash(msg_hash, priv_key, hash_method)
 
 
@@ -322,7 +322,7 @@ def verify(message, signature, pub_key):
 
     # Get the hash method
     method_name = _find_method_hash(clearsig)
-    message_hash = hash(message, method_name)
+    message_hash = generate_hash(message, method_name)
 
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
@@ -356,7 +356,7 @@ def yield_fixedblocks(infile, blocksize):
             break
 
 
-def hash(message, method_name):
+def generate_hash(message, method_name):
     """Returns the message digest.
 
     :param message: the signed message. Can be an 8-bit string or a file-like
