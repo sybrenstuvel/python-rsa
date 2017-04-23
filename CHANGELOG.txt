@@ -14,6 +14,12 @@ Version 4.0 - in development
 - Dropped support for Python 2.6
 - Dropped support for Psyco
 - Miller-Rabin iterations determined by bitsize of key.
+  [#58](https://github.com/sybrenstuvel/python-rsa/pull/58)
+- Added function `rsa.find_signature_hash()` to return the name of the hashing
+  algorithm used to sign a message. `rsa.verify()` now also returns that name,
+  instead of always returning `True`.
+  [#78](https://github.com/sybrenstuvel/python-rsa/issues/13)
+
 
 
 Version 3.4.2 - released 2016-03-29

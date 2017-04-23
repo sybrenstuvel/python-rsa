@@ -76,11 +76,33 @@ def byte_size(number):
     :returns:
         The number of bytes required to hold a specific long number.
     """
-    quanta, mod = divmod(bit_size(number), 8)
-    if mod or number == 0:
+    if number == 0:
+        return 1
+    return ceil_div(bit_size(number), 8)
+
+
+def ceil_div(num, div):
+    """
+    Returns the ceiling function of a division between `num` and `div`.
+
+    Usage::
+
+        >>> ceil_div(100, 7)
+        15
+        >>> ceil_div(100, 10)
+        10
+        >>> ceil_div(1, 4)
+        1
+
+    :param num: Division's numerator, a number
+    :param div: Division's divisor, a number
+
+    :return: Rounded up result of the division between the parameters.
+    """
+    quanta, mod = divmod(num, div)
+    if mod:
         quanta += 1
     return quanta
-    # return int(math.ceil(bit_size(number) / 8.0))
 
 
 def extended_gcd(a, b):

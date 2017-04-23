@@ -198,7 +198,7 @@ You can create a detached signature for a message using the
     >>> (pubkey, privkey) = rsa.newkeys(512)
     >>> message = 'Go left at the blue tree'
     >>> signature = rsa.sign(message, privkey, 'SHA-1')
-    
+
 This hashes the message using SHA-1. Other hash methods are also
 possible, check the :py:func:`rsa.sign` function documentation for
 details. The hash is then signed with the private key.
@@ -294,7 +294,7 @@ Only using Python-RSA: the VARBLOCK format
 .. warning::
 
     The VARBLOCK format is NOT recommended for general use, has been deprecated since
-    Python-RSA 3.4, and will be removed in a future release. It's vulnerable to a
+    Python-RSA 3.4, and has been removed in version 4.0. It's vulnerable to a
     number of attacks:
 
     1. decrypt/encrypt_bigfile() does not implement `Authenticated encryption`_ nor
@@ -308,55 +308,6 @@ Only using Python-RSA: the VARBLOCK format
 .. _Authenticated encryption: https://en.wikipedia.org/wiki/Authenticated_encryption
 .. _issue #19 on Github: https://github.com/sybrenstuvel/python-rsa/issues/13
 
-
-As far as we know, there is no pure-Python AES encryption. Previous
-versions of Python-RSA included functionality to encrypt large files
-with just RSA, and so does this version. The format has been improved,
-though.
-
-Encrypting works as follows: the input file is split into blocks that
-are just large enough to encrypt with your RSA key. Every block is
-then encrypted using RSA, and the encrypted blocks are assembled into
-the output file. This file format is called the :ref:`VARBLOCK
-<VARBLOCK>` format.
-
-Decrypting works in reverse. The encrypted file is separated into
-encrypted blocks. Those are decrypted, and assembled into the original
-file.
-
-.. note::
-
-    The file will get larger after encryption, as each encrypted block
-    has 8 bytes of random padding and 3 more bytes of overhead.
-
-Since these encryption/decryption functions are potentially called on
-very large files, they use another approach. Where the regular
-functions store the message in memory in its entirety, these functions
-work on one block at the time. As a result, you should call them with
-:py:class:`file`-like objects as the parameters.
-
-Before using we of course need a keypair:
-
->>> import rsa
->>> (pub_key, priv_key) = rsa.newkeys(512)
-
-Encryption works on file handles using the
-:py:func:`rsa.bigfile.encrypt_bigfile` function:
-
->>> from rsa.bigfile import *
->>> with open('inputfile', 'rb') as infile, open('outputfile', 'wb') as outfile:
-...     encrypt_bigfile(infile, outfile, pub_key)
-
-As does decryption using the :py:func:`rsa.bigfile.decrypt_bigfile`
-function:
-
->>> from rsa.bigfile import *
->>> with open('inputfile', 'rb') as infile, open('outputfile', 'wb') as outfile:
-...     decrypt_bigfile(infile, outfile, priv_key)
-
-.. note::
-
-    :py:func:`rsa.sign` and :py:func:`rsa.verify` work on arbitrarily
-    long files, so they do not have a "bigfile" equivalent.
-
-
+As of Python-RSA version 4.0, the VARBLOCK format has been removed from the
+library. For now, this section is kept here to document the issues with that
+format, and ensure we don't do something like that again.
