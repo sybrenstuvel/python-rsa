@@ -116,7 +116,7 @@ class SignatureTest(unittest.TestCase):
         """Hashing and then signing should match with directly signing the message. """
 
         message = b'je moeder'
-        msg_hash = pkcs1.generate_hash(message, 'SHA-256')
+        msg_hash = pkcs1.compute_hash(message, 'SHA-256')
         signature1 = pkcs1.sign_hash(msg_hash, self.priv, 'SHA-256')
 
         # Calculate the signature using the unified method
@@ -128,7 +128,7 @@ class SignatureTest(unittest.TestCase):
         """Test happy flow of hash, sign, and verify"""
 
         message = b'je moeder'
-        msg_hash = pkcs1.generate_hash(message, 'SHA-256')
+        msg_hash = pkcs1.compute_hash(message, 'SHA-256')
         signature = pkcs1.sign_hash(msg_hash, self.priv, 'SHA-256')
 
         self.assertTrue(pkcs1.verify(message, signature, self.pub))

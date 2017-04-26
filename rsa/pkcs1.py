@@ -297,7 +297,7 @@ def sign(message, priv_key, hash_method):
 
     """
 
-    msg_hash = generate_hash(message, hash_method)
+    msg_hash = compute_hash(message, hash_method)
     return sign_hash(msg_hash, priv_key, hash_method)
 
 
@@ -323,7 +323,7 @@ def verify(message, signature, pub_key):
 
     # Get the hash method
     method_name = _find_method_hash(clearsig)
-    message_hash = generate_hash(message, method_name)
+    message_hash = compute_hash(message, method_name)
 
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
@@ -376,7 +376,7 @@ def yield_fixedblocks(infile, blocksize):
             break
 
 
-def generate_hash(message, method_name):
+def compute_hash(message, method_name):
     """Returns the message digest.
 
     :param message: the signed message. Can be an 8-bit string or a file-like
