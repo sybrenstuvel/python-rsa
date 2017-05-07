@@ -245,7 +245,41 @@ def decrypt(crypto, priv_key):
     return cleartext[sep_idx + 1:]
 
 
-def sign(message, priv_key, hash):
+def sign_hash(hash_value, priv_key, hash_method):
+    """Signs a precomputed hash with the private key.
+
+    Hashes the message, then signs the hash with the given key. This is known
+    as a "detached signature", because the message itself isn't altered.
+    
+    :param hash_value: A precomputed hash to sign (ignores message). Should be set to
+        None if needing to hash and sign message.
+    :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
+    :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
+        'SHA-256', 'SHA-384' or 'SHA-512'.
+    :return: a message signature block.
+    :raise OverflowError: if the private key is too small to contain the
+        requested hash.
+
+    """
+
+    # Get the ASN1 code for this hash method
+    if hash_method not in HASH_ASN1:
+        raise ValueError('Invalid hash method: %s' % hash_method)
+    asn1code = HASH_ASN1[hash_method]
+
+    # Encrypt the hash with the private key
+    cleartext = asn1code + hash_value
+    keylength = common.byte_size(priv_key.n)
+    padded = _pad_for_signing(cleartext, keylength)
+
+    payload = transform.bytes2int(padded)
+    encrypted = priv_key.blinded_encrypt(payload)
+    block = transform.int2bytes(encrypted, keylength)
+
+    return block
+
+
+def sign(message, priv_key, hash_method):
     """Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
@@ -255,7 +289,7 @@ def sign(message, priv_key, hash):
         object. If ``message`` has a ``read()`` method, it is assumed to be a
         file-like object.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
-    :param hash: the hash method used on the message. Use 'MD5', 'SHA-1',
+    :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
         'SHA-256', 'SHA-384' or 'SHA-512'.
     :return: a message signature block.
     :raise OverflowError: if the private key is too small to contain the
@@ -263,24 +297,8 @@ def sign(message, priv_key, hash):
 
     """
 
-    # Get the ASN1 code for this hash method
-    if hash not in HASH_ASN1:
-        raise ValueError('Invalid hash method: %s' % hash)
-    asn1code = HASH_ASN1[hash]
-
-    # Calculate the hash
-    hash = _hash(message, hash)
-
-    # Encrypt the hash with the private key
-    cleartext = asn1code + hash
-    keylength = common.byte_size(priv_key.n)
-    padded = _pad_for_signing(cleartext, keylength)
-
-    payload = transform.bytes2int(padded)
-    encrypted = priv_key.blinded_encrypt(payload)
-    block = transform.int2bytes(encrypted, keylength)
-
-    return block
+    msg_hash = compute_hash(message, hash_method)
+    return sign_hash(msg_hash, priv_key, hash_method)
 
 
 def verify(message, signature, pub_key):
@@ -305,7 +323,7 @@ def verify(message, signature, pub_key):
 
     # Get the hash method
     method_name = _find_method_hash(clearsig)
-    message_hash = _hash(message, method_name)
+    message_hash = compute_hash(message, method_name)
 
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
@@ -358,7 +376,7 @@ def yield_fixedblocks(infile, blocksize):
             break
 
 
-def _hash(message, method_name):
+def compute_hash(message, method_name):
     """Returns the message digest.
 
     :param message: the signed message. Can be an 8-bit string or a file-like
