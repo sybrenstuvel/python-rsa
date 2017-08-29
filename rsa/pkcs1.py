@@ -176,6 +176,33 @@ def encrypt(message, pub_key):
     return block
 
 
+def encrypt_with_private_key(message, priv_key):
+    """Encrypts the given message using PKCS#1 v1.5's private key
+
+    :param message: the message to encrypt. Must be a byte string no longer than
+        ``k-11`` bytes, where ``k`` is the number of bytes needed to encode
+        the ``n`` component of the public key.
+    :param priv_key: the :py:class:`rsa.PrivateKey` to encrypt with.
+    :raise OverflowError: when the message is too large to fit in the padded
+        block.
+
+    >>> from rsa import key, common
+    >>> (pub_key, priv_key) = key.newkeys(256)
+    >>> message = b'hello'
+    >>> crypto = encrypt_with_private_key(message, priv_key)
+
+    """
+
+    keylength = common.byte_size(priv_key.n)
+    padded = _pad_for_signing(message, keylength)
+
+    payload = transform.bytes2int(padded)
+    encrypted = core.encrypt_int(payload, priv_key.d, priv_key.n)
+    block = transform.int2bytes(encrypted, keylength)
+
+    return block
+
+
 def decrypt(crypto, priv_key):
     r"""Decrypts the given message using PKCS#1 v1.5
 
@@ -234,6 +261,49 @@ def decrypt(crypto, priv_key):
 
     # If we can't find the cleartext marker, decryption failed.
     if cleartext[0:2] != b'\x00\x02':
+        raise DecryptionError('Decryption failed')
+
+    # Find the 00 separator between the padding and the message
+    try:
+        sep_idx = cleartext.index(b'\x00', 2)
+    except ValueError:
+        raise DecryptionError('Decryption failed')
+
+    return cleartext[sep_idx + 1:]
+
+
+def decrypt_with_public_key(crypto, pub_key):
+    r"""Decrypts the given message using PKCS#1 v1.5's public key
+
+    The decryption is considered 'failed' when the resulting cleartext doesn't
+    start with the bytes 00 01, or when the 00 byte between the padding and
+    the message cannot be found.
+
+    :param crypto: the crypto text as returned by :py:func:`rsa.encrypt`
+    :param pub_key: the :py:class:`rsa.PublicKey` to decrypt with.
+    :raise DecryptionError: when the decryption fails. No details are given as
+        to why the code thinks the decryption fails, as this would leak
+        information about the private key.
+
+
+    >>> import rsa
+    >>> (pub_key, priv_key) = rsa.newkeys(256)
+
+    It works with strings:
+
+    >>> crypto = encrypt_with_private_key(b'hello', priv_key)
+    >>> decrypt_with_public_key(crypto, pub_key)
+    b'hello'
+
+    """
+
+    blocksize = common.byte_size(pub_key.n)
+    encrypted = transform.bytes2int(crypto)
+    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
+    cleartext = transform.int2bytes(decrypted, blocksize)
+
+    # If we can't find the cleartext marker, decryption failed.
+    if cleartext[0:2] != b'\x00\x01':
         raise DecryptionError('Decryption failed')
 
     # Find the 00 separator between the padding and the message
@@ -419,7 +489,7 @@ def _find_method_hash(clearsig):
     raise VerificationError('Verification failed')
 
 
-__all__ = ['encrypt', 'decrypt', 'sign', 'verify',
+__all__ = ['encrypt', 'encrypt_with_private_key', 'decrypt', 'decrypt_with_public_key', 'sign', 'verify',
            'DecryptionError', 'VerificationError', 'CryptoError']
 
 if __name__ == '__main__':

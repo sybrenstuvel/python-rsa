@@ -25,7 +25,8 @@ prevent repetitions, or other common security improvements. Use with care.
 
 from rsa.key import newkeys, PrivateKey, PublicKey
 from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
-    VerificationError, find_signature_hash,  sign_hash, compute_hash
+    VerificationError, find_signature_hash, sign_hash, compute_hash, \
+    encrypt_with_private_key, decrypt_with_public_key
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2016-03-29"
@@ -39,4 +40,4 @@ if __name__ == "__main__":
 
 __all__ = ["newkeys", "encrypt", "decrypt", "sign", "verify", 'PublicKey',
            'PrivateKey', 'DecryptionError', 'VerificationError',
-           'compute_hash', 'sign_hash']
+           'compute_hash', 'sign_hash', 'encrypt_with_private_key', 'decrypt_with_public_key']
