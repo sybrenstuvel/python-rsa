@@ -13,13 +13,13 @@ and a public key.
     The private key is called *private* for a reason. Never share this
     key with anyone.
 
-The public key is used for encypting a message such that it can only
+The public key is used for encrypting a message such that it can only
 be read by the owner of the private key. As such it's also referred to
 as the *encryption key*. Decrypting a message can only be done using
 the private key, hence it's also called the *decryption key*.
 
 The private key is used for signing a message. With this signature and
-the public key, the receiver can verifying that a message was signed
+the public key, the receiver can verify that a message was signed
 by the owner of the private key, and that the message was not modified
 after signing.
 
