@@ -4,3 +4,4 @@ sphinx
 tox
 wheel
 mock>=2.0.0
+pysha3>=1.0.2
