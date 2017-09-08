@@ -66,6 +66,20 @@ class BinaryTest(unittest.TestCase):
         self.assertRaises(pkcs1.DecryptionError, pkcs1.decrypt, encrypted,
                           self.priv)
 
+    def test_decoding_with_reverse_key_failure(self):
+        message = struct.pack('>IIII', 0, 0, 0, 1)
+        encrypted = pkcs1.encrypt_with_private_key(message, self.priv)
+
+        # Alter the encrypted stream
+        a = encrypted[5]
+        if is_bytes(a):
+            a = ord(a)
+        altered_a = (a + 1) % 256
+        encrypted = encrypted[:5] + byte(altered_a) + encrypted[6:]
+
+        self.assertRaises(pkcs1.DecryptionError, pkcs1.decrypt_with_public_key, encrypted,
+                          self.pub)
+
     def test_randomness(self):
         """Encrypting the same message twice should result in different
         cryptos.
