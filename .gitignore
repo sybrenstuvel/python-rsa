@@ -12,6 +12,7 @@
 /.coverage
 /.coverage.*
 /.cache/
+__pycache__/
 
 /build/
 /doc/_build/
