@@ -30,25 +30,19 @@ import multiprocessing as mp
 
 from rsa._compat import range
 import rsa.prime
-import rsa.randnum
 
 
-def _find_prime(nbits, pipe):
-    while True:
-        integer = rsa.randnum.read_random_odd_int(nbits)
-
-        # Test for primeness
-        if rsa.prime.is_prime(integer):
-            pipe.send(integer)
-            return
+def _find_prime(pipe,args,kwargs):
+    result=rsa.prime.getprime(*args,**kwargs)
+    pipe.send(result)
 
 
-def getprime(nbits, poolsize):
+def getprime(poolsize,*args,**kwargs):
     """Returns a prime number that can be stored in 'nbits' bits.
 
     Works in multiple threads at the same time.
 
-    >>> p = getprime(128, 3)
+    >>> p = getprime(3,2**127+1,2**128)
     >>> rsa.prime.is_prime(p-1)
     False
     >>> rsa.prime.is_prime(p)
@@ -61,12 +55,11 @@ def getprime(nbits, poolsize):
     True
 
     """
-
     (pipe_recv, pipe_send) = mp.Pipe(duplex=False)
 
     # Create processes
     try:
-        procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send))
+        procs = [mp.Process(target=_find_prime, args=(pipe_send,args,kwargs))
                  for _ in range(poolsize)]
         # Start processes
         for p in procs:

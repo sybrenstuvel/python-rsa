@@ -427,7 +427,7 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
+        blind_r = rsa.randnum.randint(1,self.n)
         blinded = self.blind(encrypted, blind_r)  # blind before decrypting
         decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
 
@@ -443,7 +443,7 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
+        blind_r = rsa.randnum.randint(1,self.n)
         blinded = self.blind(message, blind_r)  # blind before encrypting
         encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
         return self.unblind(encrypted, blind_r)
@@ -600,51 +600,48 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     True
 
     """
-
-    total_bits = nbits * 2
-
-    # Make sure that p and q aren't too close or the factoring programs can
-    # factor n.
-    shift = nbits // 16
-    pbits = nbits + shift
-    qbits = nbits - shift
-
-    # Choose the two initial primes
-    log.debug('find_p_q(%i): Finding p', nbits)
-    p = getprime_func(pbits)
-    log.debug('find_p_q(%i): Finding q', nbits)
-    q = getprime_func(qbits)
-
-    def is_acceptable(p, q):
-        """Returns True iff p and q are acceptable:
-
-            - p and q differ
-            - (p * q) has the right nr of bits (when accurate=True)
-        """
-
-        if p == q:
-            return False
-
-        if not accurate:
-            return True
-
-        # Make sure we have just the right amount of bits
-        found_size = rsa.common.bit_size(p * q)
-        return total_bits == found_size
-
-    # Keep choosing other primes until they match our requirements.
-    change_p = False
-    while not is_acceptable(p, q):
-        # Change p on one iteration and q on the other
-        if change_p:
-            p = getprime_func(pbits)
-        else:
-            q = getprime_func(qbits)
-
-        change_p = not change_p
-
-    # We want p > q as described on
-    # http://www.di-mgt.com.au/rsa_alg.html#crt
+    #constraints implemented are from FIPS 186-4 appendix B-3.1.2
+    #http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf#page=62
+    
+    #primes are chosen to be between (2**nbits-1) and ceil(2**nbits/sqrt(2))
+    #this ensures that regardless of what primes are chosen the final modulus
+    #will be between (2**(2*nbits)-1) and (2**(2*nbits-1)+1)
+     
+    maximum=2**nbits#up to but not including
+    #multiply by fractional representation of 1/sqrt(2)(rounded up) for minimum
+    minimum=(maximum*0xb504f333f9de6484597d89b3754abea0)>>128
+    minimum+=1#add 1 in case nbits is very small 
+    
+    ### code for generating the above constant
+    # divisor=2**128#fraction divisor
+    # target=divisor**2//2
+    # increment=divisor
+    # value=0
+    # while increment:
+    #     value+=increment
+    #     if value**2>target:
+    #         value-=increment
+    #     increment//=2
+    # value+=1#round up
+    # print(hex(value))
+    
+    while 1:#loop allows for restarting keygen process if primes do not meet required conditions
+        # Choose the two primes
+        log.debug('find_p_q(%i): Finding p', nbits)
+        p = getprime_func(minimum,maximum)
+        log.debug('find_p_q(%i): Finding q', nbits)
+        q = getprime_func(minimum,maximum)
+        
+        #check that the modulus has the correct bit size
+        assert rsa.common.bit_size(p * q)==nbits*2
+        
+        #test to ensure they are far enough apart (FIPS 168-4 appendix B-3.1.2)
+        required_distance=2**min(0,nbits-100)
+        if abs(p-q)<required_distance:
+            log.debug('find_p_q(%i): p and q not far enough apart, restarting', nbits)
+            continue#try again
+        break
+    
     return max(p, q), min(p, q)
 
 
@@ -754,9 +751,8 @@ def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
     # Determine which getprime function to use
     if poolsize > 1:
         from rsa import parallel
-        import functools
 
-        getprime_func = functools.partial(parallel.getprime, poolsize=poolsize)
+        getprime_func = lambda *args,**kwargs:parallel.getprime(poolsize,*args,**kwargs)
     else:
         getprime_func = rsa.prime.getprime
 

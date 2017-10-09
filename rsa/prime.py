@@ -97,7 +97,7 @@ def miller_rabin_primality_testing(n, k):
     # Test k witnesses.
     for _ in range(k):
         # Generate random integer a, where 2 <= a <= (n - 2)
-        a = rsa.randnum.randint(n - 3) + 1
+        a = rsa.randnum.randint(2,n-1)
 
         x = pow(a, d, n)
         if x == 1 or x == n - 1:
@@ -118,6 +118,40 @@ def miller_rabin_primality_testing(n, k):
     return True
 
 
+small_primes=(3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
+              67, 71, 73, 79, 83, 89, 97)
+def prime_sieve(start,end):
+    """for numbers in range(start,end) sieves out composites using trial division
+    
+    >>> sieve=prime_sieve(100,120)
+    >>> next(sieve)
+    101
+    >>> [x for x in sieve]
+    [103, 107, 109, 113]
+    """
+    #handle small numbers
+    if start<=small_primes[-1]:
+        if start<=2:yield 2
+        for p in small_primes:
+            if p<=start:yield p 
+    start|=1#make start odd
+    #We use an offset when doing the trial divisions. It is much smaller than
+    #the full number. This makes the modulo operations fast. When yielding a
+    #candidate we add the start and offset to get the candidate value.
+    residues=tuple((-start%p,p) for p in small_primes)
+    #start+offset=0 (mod p) <---condition to check for
+    #offset=-start (mod p)
+    #offset%p=(-start)%p <--that's the residue
+    offset=0
+    span=end-start
+    while offset<span:
+        for residue,p in residues:
+            if (offset%p)==residue:break
+        else:#all trial divisions were successful
+            yield start+offset
+        offset+=2
+
+
 def is_prime(number):
     """Returns True if the number is prime, and False otherwise.
 
@@ -128,15 +162,18 @@ def is_prime(number):
     >>> is_prime(41)
     True
     """
-
-    # Check for small numbers.
-    if number < 10:
-        return number in {2, 3, 5, 7}
-
+    
+    #handle small numbers
+    if number<100:
+        if number ==2:return True
+        if number in small_primes:return True
+        return False
     # Check for even numbers.
     if not (number & 1):
         return False
-
+    
+    
+    
     # Calculate minimum number of rounds.
     k = get_primality_testing_rounds(number)
 
@@ -144,10 +181,10 @@ def is_prime(number):
     return miller_rabin_primality_testing(number, k + 1)
 
 
-def getprime(nbits):
+def getprime(minimum,maximum):
     """Returns a prime number that can be stored in 'nbits' bits.
 
-    >>> p = getprime(128)
+    >>> p = getprime(2**127+1,2**128)
     >>> is_prime(p-1)
     False
     >>> is_prime(p)
@@ -159,17 +196,24 @@ def getprime(nbits):
     >>> common.bit_size(p) == 128
     True
     """
-
-    assert nbits > 3  # the loop wil hang on too small numbers
-
-    while True:
-        integer = rsa.randnum.read_random_odd_int(nbits)
-
+    start=rsa.randnum.randint(minimum, maximum)
+    for candidate in prime_sieve(start, maximum):
         # Test for primeness
-        if is_prime(integer):
-            return integer
+        if is_prime(candidate):
+            return candidate
+        candidate+=2
+    #nothing in the top part of the range
+    for candidate in prime_sieve(minimum, start):
+        #integer = rsa.randnum.read_random_odd_int(nbits)
+        # Test for primeness
+        if is_prime(candidate):
+            return candidate
+        candidate+=2
+    #nothing the bottom half either
+    raise ValueError("no primes in range")
+            
 
-            # Retry if not prime
+
 
 
 def are_relatively_prime(a, b):
