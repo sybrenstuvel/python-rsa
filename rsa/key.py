@@ -742,7 +742,7 @@ def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
     getprime_func = rsa.prime.getprimebyrange
     if poolsize > 1:
         from rsa import parallel
-        getprime_func = parallel.exec_parralel_curry(getprime_func, poolsize)
+        getprime_func = parallel.exec_parallel_curry(getprime_func, poolsize)
 
 
     # Generate the key components

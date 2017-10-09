@@ -84,7 +84,7 @@ def getprime(nbits, poolsize):
     return result
 
 
-def exec_parralel_curry(function,poolsize):
+def exec_parallel_curry(function,poolsize):
     """returns a multiprocess version of the supplied function for the given poolsize"""
     def retfunc(*args,**kwargs):
         return exec_parallel(poolsize,function,args,kwargs)
