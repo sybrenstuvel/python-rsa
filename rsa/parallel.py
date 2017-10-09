@@ -84,7 +84,44 @@ def getprime(nbits, poolsize):
     return result
 
 
-__all__ = ['getprime']
+def exec_parralel_curry(function,poolsize):
+    """returns a multiprocess version of the supplied function for the given poolsize"""
+    def retfunc(*args,**kwargs):
+        return exec_parallel(poolsize,function,args,kwargs)
+    return retfunc
+
+def _do_work(pipe,function,args,kwargs):
+    result=function(*args,**kwargs)
+    pipe.send(result)
+
+def exec_parallel(poolsize,function,args,kwargs):
+    """
+    carries out a function in multiple processes. Returns the first return value
+    to be produced by any process
+    """
+    (pipe_recv, pipe_send) = mp.Pipe(duplex=False)
+
+    # Create processes
+    try:
+        procs = [mp.Process(target=_do_work, args=(pipe_send,function,args,kwargs))
+                 for _ in range(poolsize)]
+        # Start processes
+        for p in procs:
+            p.start()
+
+        result = pipe_recv.recv()
+    finally:
+        pipe_recv.close()
+        pipe_send.close()
+
+    # Terminate processes
+    for p in procs:
+        p.terminate()
+
+    return result
+
+
+__all__ = ['getprime','exec_parallel']
 
 if __name__ == '__main__':
     print('Running doctests 1000x or until failure')

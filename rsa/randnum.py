@@ -96,3 +96,15 @@ def randint(maxvalue):
         tries += 1
 
     return value
+
+def randrange(start,end):
+    """Returns a random integer from range(start,end)
+    """
+    assert end>start
+    span=end-start
+    #get an int with at least 64 extra bits
+    #because of the extra bits, value%span wraps around at least 2^64 times
+    #the non-uniformity of the resulting distribution is below 2**-64
+    bytes=(common.bit_size(span)+64+7)//8
+    value = transform.bytes2int(os.urandom(bytes))
+    return start+value%span

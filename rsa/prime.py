@@ -171,6 +171,86 @@ def getprime(nbits):
 
             # Retry if not prime
 
+small_primes=(3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
+              67, 71, 73, 79, 83, 89, 97)
+def prime_sieve(start,end):
+    """for numbers in range(start,end) sieves out composites using trial
+    division returning potential primes
+
+    >>> sieve=prime_sieve(100,120)
+    >>> next(sieve)
+    101
+    >>> [x for x in sieve]
+    [103, 107, 109, 113]
+    """
+
+    #handle small numbers
+    if start<=small_primes[-1]:
+        if start<=2:yield 2
+        for p in small_primes:
+            if p<=start:yield p
+    start|=1#make start odd
+    #We use an offset when doing the trial divisions. It is much smaller than
+    #the full number. This makes the modulo operations fast. When yielding a
+    #candidate we add the start and offset to get the candidate value.
+    residues=tuple((-start%p,p) for p in small_primes)
+    #start+offset=0 (mod p) <---condition to check for
+    #offset=-start (mod p)
+    #offset%p=(-start)%p <--that's the residue
+    offset=0
+    span=end-start
+    while offset<span:
+        for residue,p in residues:
+            if (offset%p)==residue:break
+        else:#all trial divisions were successful
+            yield start+offset
+        offset+=2
+
+def getprimebyrange(start,end,initial=None):
+    """Returns a prime number randomly chosen from range(start,end)
+
+    randomly chooses an initial point within the range
+    This can be overriden with the optional initial argument
+
+    starts at the initial point scanning range(initial,end) then trying
+    range(start,initial)
+
+    >>> p = getprimebyrange(100,200)
+    >>> 100<=p<200
+    True
+    >>> is_prime(p-1)
+    False
+    >>> is_prime(p)
+    True
+    >>> is_prime(p+1)
+    False
+
+    >>> getprimebyrange(10000,20000,initial=10000)
+    10007
+    >>> getprimebyrange(10000,20000,initial=10010)
+    10037
+    >>> #when no primes in range(initial,end), it tries range(start,initial)
+    >>> getprimebyrange(10000,10020,initial=10010)
+    10007
+    """
+    #randomly choose the initial point in the range (unless specified)
+    if initial is None:
+        initial=rsa.randnum.randrange(start, end)
+    #check top part of range
+    for candidate in prime_sieve(initial, end):
+        # Test for primeness
+        if is_prime(candidate):
+            return candidate
+    #nothing in the top part of the given range
+    #check bottom part of range
+    for candidate in prime_sieve(start, initial):
+        #integer = rsa.randnum.read_random_odd_int(nbits)
+        # Test for primeness
+        if is_prime(candidate):
+            return candidate
+    #nothing the bottom half either
+    raise ValueError("no primes in range")
+
 
 def are_relatively_prime(a, b):
     """Returns True if a and b are relatively prime, and False if they

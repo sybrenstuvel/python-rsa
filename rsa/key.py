@@ -570,7 +570,7 @@ class PrivateKey(AbstractKey):
         return rsa.pem.save_pem(der, b'RSA PRIVATE KEY')
 
 
-def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
+def find_p_q(nbits, getprime_func=rsa.prime.getprimebyrange, accurate="unused parameter retained for compatibility"):
     """Returns a tuple of two different primes of nbits bits each.
 
     The resulting p * q has exacty 2 * nbits bits, and the returned p and q
@@ -578,73 +578,60 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
 
     :param nbits: the number of bits in each of p and q.
     :param getprime_func: the getprime function, defaults to
-        :py:func:`rsa.prime.getprime`.
+        :py:func:`rsa.prime.getprimebyrange`.
 
         *Introduced in Python-RSA 3.1*
 
-    :param accurate: whether to enable accurate mode or not.
     :returns: (p, q), where p > q
 
     >>> (p, q) = find_p_q(128)
     >>> from rsa import common
     >>> common.bit_size(p * q)
     256
-
-    When not in accurate mode, the number of bits can be slightly less
-
-    >>> (p, q) = find_p_q(128, accurate=False)
-    >>> from rsa import common
-    >>> common.bit_size(p * q) <= 256
-    True
-    >>> common.bit_size(p * q) > 240
-    True
-
     """
+    #constraints implemented are from FIPS 186-4 appendix B-3.1.2
+    #http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf#page=62
 
-    total_bits = nbits * 2
+    #primes are chosen to be between (2**nbits) and ceil(2**nbits/sqrt(2))
+    #this ensures that regardless of what primes are chosen the final modulus
+    #will be between (2**(2*nbits)) and (2**(2*nbits-1))
 
-    # Make sure that p and q aren't too close or the factoring programs can
-    # factor n.
-    shift = nbits // 16
-    pbits = nbits + shift
-    qbits = nbits - shift
+    maximum=2**nbits#up to but not including
+    #multiply by fractional representation of 1/sqrt(2)(rounded up) for minimum
+    minimum=(maximum*0xb504f333f9de6484597d89b3754abea0)
+    minimum>>=128 #divide by fractional divisor
+    minimum+=1#round up
 
-    # Choose the two initial primes
-    log.debug('find_p_q(%i): Finding p', nbits)
-    p = getprime_func(pbits)
-    log.debug('find_p_q(%i): Finding q', nbits)
-    q = getprime_func(qbits)
+    ### code for generating the above constant
+    # divisor=2**128#fraction divisor
+    # target=divisor**2//2
+    # increment=divisor
+    # value=0
+    # while increment:
+    #     value+=increment
+    #     if value**2>target:
+    #         value-=increment
+    #     increment//=2
+    # value+=1#round up
+    # print(hex(value))
 
-    def is_acceptable(p, q):
-        """Returns True iff p and q are acceptable:
+    while 1:#loop allows for restarting keygen process if primes do not meet required conditions
+        # Choose the two primes
+        log.debug('find_p_q(%i): Finding p', nbits)
+        p = getprime_func(minimum,maximum)
+        log.debug('find_p_q(%i): Finding q', nbits)
+        q = getprime_func(minimum,maximum)
 
-            - p and q differ
-            - (p * q) has the right nr of bits (when accurate=True)
-        """
+        #check that the modulus has the correct bit size
+        assert rsa.common.bit_size(p * q)==nbits*2
 
-        if p == q:
-            return False
+        #test to ensure they are far enough apart (FIPS 168-4 appendix B-3.1.2)
+        required_distance=2**max(0,nbits-100)
+        if abs(p-q)<required_distance:
+            log.debug('find_p_q(%i): p and q not far enough apart, restarting', nbits)
+            continue#try again
+        break
 
-        if not accurate:
-            return True
-
-        # Make sure we have just the right amount of bits
-        found_size = rsa.common.bit_size(p * q)
-        return total_bits == found_size
-
-    # Keep choosing other primes until they match our requirements.
-    change_p = False
-    while not is_acceptable(p, q):
-        # Change p on one iteration and q on the other
-        if change_p:
-            p = getprime_func(pbits)
-        else:
-            q = getprime_func(qbits)
-
-        change_p = not change_p
-
-    # We want p > q as described on
-    # http://www.di-mgt.com.au/rsa_alg.html#crt
     return max(p, q), min(p, q)
 
 
@@ -752,13 +739,11 @@ def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
         raise ValueError('Pool size (%i) should be >= 1' % poolsize)
 
     # Determine which getprime function to use
+    getprime_func = rsa.prime.getprimebyrange
     if poolsize > 1:
         from rsa import parallel
-        import functools
+        getprime_func = parallel.exec_parralel_curry(getprime_func, poolsize)
 
-        getprime_func = functools.partial(parallel.getprime, poolsize=poolsize)
-    else:
-        getprime_func = rsa.prime.getprime
 
     # Generate the key components
     (p, q, e, d) = gen_keys(nbits, getprime_func, accurate=accurate, exponent=exponent)
