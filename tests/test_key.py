@@ -52,20 +52,23 @@ class KeyGenTest(unittest.TestCase):
         # List of primes to test with, in order [p, q, p, q, ....]
         # By starting with two of the same primes, we test that this is
         # properly rejected.
-        primes = [64123, 64123, 64123, 50957, 39317, 33107]
+        primes = [64123, 64123,#discarded because identical
+                  61871, 61909,#rejected because too close
+                  64123, 50957,#discarded because of custom exponent
+                  61871, 46877]#should be returned
 
-        def getprime(_):
+        def getprime(a,b):
             return primes.pop(0)
 
         # This exponent will cause two other primes to be generated.
         exponent = 136407
 
-        (p, q, e, d) = rsa.key.gen_keys(64,
+        (p, q, e, d) = rsa.key.gen_keys(32,
                                         accurate=False,
                                         getprime_func=getprime,
                                         exponent=exponent)
-        self.assertEqual(39317, p)
-        self.assertEqual(33107, q)
+        self.assertEqual(61871, p)
+        self.assertEqual(46877, q)
 
 
 class HashTest(unittest.TestCase):
