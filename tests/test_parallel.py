@@ -11,7 +11,7 @@ class ParallelTest(unittest.TestCase):
     """Tests for multiprocess prime generation."""
 
     def test_parallel_primegen(self):
-        p = rsa.parallel.getprime(1024, 3)
+        p = rsa.parallel.getprime(3,2**1023+1,2**1024)
 
         self.assertFalse(rsa.prime.is_prime(p - 1))
         self.assertTrue(rsa.prime.is_prime(p))

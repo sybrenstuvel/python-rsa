@@ -53,22 +53,22 @@ class PrimeTest(unittest.TestCase):
 
         randints = []
 
-        def fake_randint(maxvalue):
+        def fake_randint(start,end):
             return randints.pop(0)
 
         orig_randint = rsa.randnum.randint
         rsa.randnum.randint = fake_randint
         try:
             # 'n is composite'
-            randints.append(2630484832)  # causes the 'n is composite' case with n=3784949785
+            randints.append(2630484831)  # causes the 'n is composite' case with n=3784949785
             self.assertEqual(False, rsa.prime.miller_rabin_primality_testing(2787998641, 7))
             self.assertEqual([], randints)
 
             # 'Exit inner loop and continue with next witness'
             randints.extend([
-                2119139098,  # causes 'Exit inner loop and continue with next witness'
+                2119139097,  # causes 'Exit inner loop and continue with next witness'
                 # the next witnesses for the above case:
-                3051067716, 3603501763, 3230895847, 3687808133, 3760099987, 4026931495, 3022471882,
+                3051067715, 3603501762, 3230895846, 3687808132, 3760099986, 4026931494, 3022471881,
             ])
             self.assertEqual(True, rsa.prime.miller_rabin_primality_testing(2211417913,
                                                                             len(randints)))
