@@ -18,6 +18,4 @@ script:
   - tox
 
 after_success:
-  # Coveralls submission only for py35 environment, because of being the only
-  # one that executes doctest-modules testing, according to tox.ini.
-  - if [[ $ENV == python=3.5* ]]; then coveralls; fi
+  - coveralls
