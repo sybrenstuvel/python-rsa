@@ -175,7 +175,9 @@ You can create a detached signature for a message using the
 
 This hashes the message using SHA-1. Other hash methods are also
 possible, check the :py:func:`rsa.sign` function documentation for
-details. The hash is then signed with the private key.
+details. The hash is then signed with the private key. Note in particular
+that it is also possible to skip hashing altogether by specifying `'RAW'`,
+creating a so-called 'raw signature'.
 
 It is possible to calculate the hash and signature in separate operations
 (i.e for generating the hash on a client machine and then sign with a

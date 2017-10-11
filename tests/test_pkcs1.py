@@ -132,3 +132,11 @@ class SignatureTest(unittest.TestCase):
         signature = pkcs1.sign_hash(msg_hash, self.priv, 'SHA-224')
 
         self.assertTrue(pkcs1.verify(message, signature, self.pub))
+
+    def test_sign_raw(self):
+        """Test raw signing and verification of signatures"""
+
+        message = b'hello world'
+        signature = pkcs1.sign(message, self.priv, 'RAW')
+
+        self.assertEqual('RAW', pkcs1.verify(message, signature, self.pub))

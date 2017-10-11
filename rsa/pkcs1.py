@@ -36,6 +36,7 @@ from rsa import common, transform, core
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
+    'RAW': b'',
     'MD5': b'\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10',
     'SHA-1': b'\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14',
     'SHA-224': b'\x30\x2d\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x04\x05\x00\x04\x1c',
@@ -45,6 +46,7 @@ HASH_ASN1 = {
 }
 
 HASH_METHODS = {
+    'RAW': None,
     'MD5': hashlib.md5,
     'SHA-1': hashlib.sha1,
     'SHA-224': hashlib.sha224,
@@ -257,7 +259,7 @@ def sign_hash(hash_value, priv_key, hash_method):
         None if needing to hash and sign message.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
-        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
+        'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'. Use 'RAW' to omit hashing.
     :return: a message signature block.
     :raise OverflowError: if the private key is too small to contain the
         requested hash.
@@ -292,7 +294,7 @@ def sign(message, priv_key, hash_method):
         file-like object.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
-        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
+        'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'. Use 'RAW' to omit hashing.
     :return: a message signature block.
     :raise OverflowError: if the private key is too small to contain the
         requested hash.
@@ -392,6 +394,9 @@ def compute_hash(message, method_name):
     if method_name not in HASH_METHODS:
         raise ValueError('Invalid hash method: %s' % method_name)
 
+    if method_name == 'RAW':
+        return message
+
     method = HASH_METHODS[method_name]
     hasher = method()
 
@@ -415,10 +420,10 @@ def _find_method_hash(clearsig):
     """
 
     for (hashname, asn1code) in HASH_ASN1.items():
-        if asn1code in clearsig:
+        if asn1code in clearsig and hashname != 'RAW':
             return hashname
 
-    raise VerificationError('Verification failed')
+    return 'RAW'
 
 
 __all__ = ['encrypt', 'decrypt', 'sign', 'verify',

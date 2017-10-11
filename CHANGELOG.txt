@@ -21,7 +21,8 @@ Version 4.0 - in development
   [#78](https://github.com/sybrenstuvel/python-rsa/issues/13)
 - Add support for SHA-224 for PKCS1 signatures.
   [#104](https://github.com/sybrenstuvel/python-rsa/pull/104)
-
+- Add support for raw PKCS1 signatures.
+  [#103](https://github.com/sybrenstuvel/python-rsa/pull/103)
 
 Version 3.4.2 - released 2016-03-29
 ----------------------------------------
