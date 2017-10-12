@@ -38,6 +38,7 @@ from rsa import common, transform, core
 HASH_ASN1 = {
     'MD5': b'\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10',
     'SHA-1': b'\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14',
+    'SHA-224': b'\x30\x2d\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x04\x05\x00\x04\x1c',
     'SHA-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20',
     'SHA-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30',
     'SHA-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40',
@@ -46,6 +47,7 @@ HASH_ASN1 = {
 HASH_METHODS = {
     'MD5': hashlib.md5,
     'SHA-1': hashlib.sha1,
+    'SHA-224': hashlib.sha224,
     'SHA-256': hashlib.sha256,
     'SHA-384': hashlib.sha384,
     'SHA-512': hashlib.sha512,
@@ -255,7 +257,7 @@ def sign_hash(hash_value, priv_key, hash_method):
         None if needing to hash and sign message.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
-        'SHA-256', 'SHA-384' or 'SHA-512'.
+        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
     :return: a message signature block.
     :raise OverflowError: if the private key is too small to contain the
         requested hash.
@@ -290,7 +292,7 @@ def sign(message, priv_key, hash_method):
         file-like object.
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
-        'SHA-256', 'SHA-384' or 'SHA-512'.
+        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
     :return: a message signature block.
     :raise OverflowError: if the private key is too small to contain the
         requested hash.

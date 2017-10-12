@@ -16,7 +16,7 @@ Encryption:
 
 Signatures:
     PKCS#1 v1.5 using the following hash methods:
-    MD5, SHA-1, SHA-256, SHA-384, SHA-512
+    MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512
 
 Private keys:
     PKCS#1 v1.5 in PEM and DER format, ASN.1 type RSAPrivateKey
