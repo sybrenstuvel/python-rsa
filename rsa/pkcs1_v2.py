@@ -27,14 +27,6 @@ from rsa import (
     transform,
 )
 
-HASH_METHOD_TO_BYTE_LENGTH = {
-    'MD5': 16,
-    'SHA-1': 20,
-    'SHA-256': 28,
-    'SHA-384': 48,
-    'SHA-512': 64,
-}
-
 
 def mgf1(seed, length, hasher='SHA-1'):
     """
@@ -59,11 +51,11 @@ def mgf1(seed, length, hasher='SHA-1'):
     """
 
     try:
-        hash_length = HASH_METHOD_TO_BYTE_LENGTH[hasher]
+        hash_length = pkcs1.HASH_METHODS[hasher]().digest_size
     except KeyError:
         raise ValueError(
             'Invalid `hasher` specified. Please select one of: {hash_list}'.format(
-                hash_list=', '.join(sorted(HASH_METHOD_TO_BYTE_LENGTH.keys()))
+                hash_list=', '.join(sorted(pkcs1.HASH_METHODS.keys()))
             )
         )
 
