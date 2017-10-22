@@ -303,10 +303,10 @@ Only using Python-RSA: the VARBLOCK format
     2. decrypt/encrypt_bigfile() does not use hybrid encryption (it uses plain RSA)
        and has no method for chaining, so block reordering is possible.
 
-    See `issue #19 on Github`_ for more information.
+    See `issue #19 on GitHub`_ for more information.
 
 .. _Authenticated encryption: https://en.wikipedia.org/wiki/Authenticated_encryption
-.. _issue #19 on Github: https://github.com/sybrenstuvel/python-rsa/issues/13
+.. _issue #19 on GitHub: https://github.com/sybrenstuvel/python-rsa/issues/13
 
 As of Python-RSA version 4.0, the VARBLOCK format has been removed from the
 library. For now, this section is kept here to document the issues with that

@@ -16,7 +16,7 @@ then type::
 
 
 The sources are tracked in our `Git repository`_ at
-Github. It also hosts the `issue tracker`_.
+GitHub. It also hosts the `issue tracker`_.
 
 .. _`Git repository`: https://github.com/sybrenstuvel/python-rsa.git
 .. _`issue tracker`: https://github.com/sybrenstuvel/python-rsa/issues
