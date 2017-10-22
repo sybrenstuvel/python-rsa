@@ -38,7 +38,7 @@ Version 3.4.1 - released 2016-03-26
 Version 3.4 - released 2016-03-17
 ----------------------------------------
 
-- Moved development to Github: https://github.com/sybrenstuvel/python-rsa
+- Moved development to GitHub: https://github.com/sybrenstuvel/python-rsa
 - Solved side-channel vulnerability by implementing blinding, fixes #19
 - Deprecated the VARBLOCK format and rsa.bigfile module due to security issues, see
     https://github.com/sybrenstuvel/python-rsa/issues/13
