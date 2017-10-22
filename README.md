@@ -40,4 +40,4 @@ Those modules are marked as deprecated in version 3.4.
 Furthermore, in 4.0 the I/O functions will be streamlined to always work with bytes on all
 supported versions of Python.
 
-Version 4.0 will drop support for Python 2.6, and possibly for Python 3.3.
+Version 4.0 will drop support for Python 2.6 and 3.3.
