@@ -90,32 +90,6 @@ generate them for you, then load them in your Python code. OpenSSL
 generates a 4096-bit key in 3.5 seconds on the same machine as used
 above. See :ref:`openssl` for more information.
 
-Key size requirements
----------------------
-
-Python-RSA version 3.0 introduced PKCS#1-style random padding. This
-means that 11 bytes (88 bits) of your key are no longer usable for
-encryption, so keys smaller than this are unusable. The larger the
-key, the higher the security.
-
-Creating signatures also requires a key of a certain size, depending
-on the used hash method:
-
-+-------------+-----------------------------------+
-| Hash method | Suggested minimum key size (bits) |
-+=============+===================================+
-| MD5         | 360                               |
-+-------------+-----------------------------------+
-| SHA-1       | 368                               |
-+-------------+-----------------------------------+
-| SHA-256     | 496                               |
-+-------------+-----------------------------------+
-| SHA-384     | 624                               |
-+-------------+-----------------------------------+
-| SHA-512     | 752                               |
-+-------------+-----------------------------------+
-
-
 
 Encryption and decryption
 -------------------------
