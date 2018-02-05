@@ -128,7 +128,7 @@ class SignatureTest(unittest.TestCase):
         """Test happy flow of hash, sign, and verify"""
 
         message = b'je moeder'
-        msg_hash = pkcs1.compute_hash(message, 'SHA-256')
-        signature = pkcs1.sign_hash(msg_hash, self.priv, 'SHA-256')
+        msg_hash = pkcs1.compute_hash(message, 'SHA-224')
+        signature = pkcs1.sign_hash(msg_hash, self.priv, 'SHA-224')
 
         self.assertTrue(pkcs1.verify(message, signature, self.pub))
