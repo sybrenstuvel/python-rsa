@@ -16,10 +16,15 @@
 
 from setuptools import setup
 
+with open('README.md') as f:
+    long_description = f.read()
+
 if __name__ == '__main__':
     setup(name='rsa',
           version='4.0-alpha',
           description='Pure-Python RSA implementation',
+          long_description=long_description,
+          long_description_content_type='text/markdown',
           author='Sybren A. Stuvel',
           author_email='sybren@stuvel.eu',
           maintainer='Sybren A. Stuvel',
