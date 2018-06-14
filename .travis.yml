@@ -1,4 +1,5 @@
 language: python
+cache: pip
 
 # Environment changes have to be manually synced with 'tox.ini'.
 # See: https://github.com/travis-ci/travis-ci/issues/3024
