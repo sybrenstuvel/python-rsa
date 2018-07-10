@@ -1,6 +1,0 @@
-pyasn1>=0.1.3
-
-sphinx
-tox
-wheel
-mock>=2.0.0
