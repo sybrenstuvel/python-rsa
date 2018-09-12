@@ -97,7 +97,7 @@ if __name__ == '__main__':
         if failures:
             break
 
-        if count and count % 100 == 0:
+        if count % 100 == 0 and count:
             print('%i times' % count)
 
     print('Doctests done')
