@@ -783,7 +783,7 @@ if __name__ == '__main__':
             if failures:
                 break
 
-            if (count and count % 10 == 0) or count == 1:
+            if (count % 10 == 0 and count) or count == 1:
                 print('%i times' % count)
     except KeyboardInterrupt:
         print('Aborted')
