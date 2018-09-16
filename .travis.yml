@@ -8,15 +8,15 @@ python:
   - 3.4
   - 3.5
   - 3.6
+  - 3.7
   - "pypy"
 
 install:
-  - pip install tox-travis
-  - pip install -r requirements.txt
-  - pip install coveralls
+  - pip install pipenv
+  - pipenv install --dev --ignore-pipfile
 
 script:
-  - tox
+  - pipenv run py.test tox
 
 after_success:
-  - coveralls
+  - pipenv run coveralls

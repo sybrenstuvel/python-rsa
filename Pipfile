@@ -10,6 +10,9 @@ name = "pypi"
 tox = "*"
 mock = ">=2.0.0"
 Sphinx = "*"
+coveralls = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.6"
