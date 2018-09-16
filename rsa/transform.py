@@ -24,8 +24,8 @@ from __future__ import absolute_import
 import binascii
 from struct import pack
 
-from rsa import common
-from rsa._compat import byte, is_integer, get_word_alignment
+from rsa._compat import byte, is_integer
+from rsa import common, machine_size
 
 
 def bytes2int(raw_bytes):
@@ -181,7 +181,7 @@ def int2bytes(number, fill_size=None, chunk_size=None, overflow=False):
 
     # Pack the integer one machine word at a time into bytes.
     num = number
-    word_bits, _, max_uint, pack_type = get_word_alignment(num)
+    word_bits, _, max_uint, pack_type = machine_size.get_word_alignment(num)
     pack_format = ">%s" % pack_type
     while num > 0:
         raw_bytes = pack(pack_format, num & max_uint) + raw_bytes
