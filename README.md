@@ -24,10 +24,10 @@ The source code is maintained at [GitHub](https://github.com/sybrenstuvel/python
 licensed under the [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 
-Plans for the future
+Major changes in 4.0
 --------------------
 
-Version 3.4 is the last version in the 3.x range. Version 4.0 will drop the following modules,
+Version 3.4 was the last version in the 3.x range. Version 4.0 drops the following modules,
 as they are insecure:
 
 - `rsa._version133`
@@ -35,9 +35,9 @@ as they are insecure:
 - `rsa.bigfile`
 - `rsa.varblock`
 
-Those modules are marked as deprecated in version 3.4.
+Those modules were marked as deprecated in version 3.4.
 
-Furthermore, in 4.0 the I/O functions will be streamlined to always work with bytes on all
+Furthermore, in 4.0 the I/O functions is streamlined to always work with bytes on all
 supported versions of Python.
 
-Version 4.0 will drop support for Python 2.6 and 3.3.
+Version 4.0 drops support for Python 2.6 and 3.3.
