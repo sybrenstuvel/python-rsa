@@ -16,7 +16,7 @@ install:
   - pipenv install --dev --ignore-pipfile
 
 script:
-  - pipenv run py.test tox
+  - pipenv run tox
 
 after_success:
   - pipenv run coveralls
