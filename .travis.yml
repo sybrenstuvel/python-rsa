@@ -3,12 +3,15 @@ cache: pip
 
 # Environment changes have to be manually synced with 'tox.ini'.
 # See: https://github.com/travis-ci/travis-ci/issues/3024
+
+# Python 3.7 is not yet supported by Travis CI.
+# See: https://github.com/travis-ci/travis-ci/issues/9815
+
 python:
   - 2.7
   - 3.4
   - 3.5
   - 3.6
-  - 3.7
   - "pypy"
 
 install:
@@ -16,7 +19,7 @@ install:
   - pipenv install --dev --ignore-pipfile
 
 script:
-  - pipenv run tox
+  - pipenv run py.test
 
 after_success:
   - pipenv run coveralls
