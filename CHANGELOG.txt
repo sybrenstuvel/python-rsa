@@ -11,8 +11,8 @@ Version 4.0 - in development
     - rsa._version200
 - Removed CLI commands that use the VARBLOCK/bigfile format.
 - Ensured that PublicKey.save_pkcs1() and PrivateKey.save_pkcs1() always return bytes.
-- Dropped support for Python 2.6
-- Dropped support for Psyco
+- Dropped support for Python 2.6 and 3.3.
+- Dropped support for Psyco.
 - Miller-Rabin iterations determined by bitsize of key.
   [#58](https://github.com/sybrenstuvel/python-rsa/pull/58)
 - Added function `rsa.find_signature_hash()` to return the name of the hashing
