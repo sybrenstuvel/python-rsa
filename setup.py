@@ -21,7 +21,7 @@ with open('README.md') as f:
 
 if __name__ == '__main__':
     setup(name='rsa',
-          version='4.0-alpha',
+          version='4.0',
           description='Pure-Python RSA implementation',
           long_description=long_description,
           long_description_content_type='text/markdown',

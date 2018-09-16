@@ -1,7 +1,7 @@
 Python-RSA changelog
 ========================================
 
-Version 4.0 - in development
+Version 4.0 - released 2018-09-16
 ----------------------------------------
 
 - Removed deprecated modules:
