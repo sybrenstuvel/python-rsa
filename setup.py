@@ -14,9 +14,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from io import open
 from setuptools import setup
 
-with open('README.md') as f:
+with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
 if __name__ == '__main__':
