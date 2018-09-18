@@ -14,9 +14,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# io.open is needed for projects that support Python 2.7. It ensures open()
+# defaults to text mode with universal newlines, and accepts an argument to
+# specify the text encoding Python 3 only projects can skip this import.
+from io import open
 from setuptools import setup
 
-with open('README.md') as f:
+with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 if __name__ == '__main__':
