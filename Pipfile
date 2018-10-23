@@ -15,5 +15,9 @@ pytest = "*"
 pytest-cov = "*"
 pathlib2 = {version = "*", markers="python_version < '3.6'"}
 
+# Required by pytest, not sure why it's not being picked up.
+funcsigs = {version = "*", markers="python_version < '3.3'"}
+scandir = {version = "*", markers="python_version < '3.3'"}
+
 [requires]
 python_version = "3.6"
