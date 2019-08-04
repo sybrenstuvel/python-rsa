@@ -1,6 +1,13 @@
 Python-RSA changelog
 ========================================
 
+Version 4.1 - in development
+----------------------------------------
+
+- Dropped support for Python 2 and 3.4.
+- Move to Python 3.7 in Pipfile (so `pipenv install` creates a Python 3.7 virtualenv).
+
+
 Version 4.0 - released 2018-09-16
 ----------------------------------------
 

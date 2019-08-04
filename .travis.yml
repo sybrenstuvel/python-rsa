@@ -1,23 +1,22 @@
 language: python
+dist: bionic   # required for Python >= 3.7
 cache: pip
 
 # Environment changes have to be manually synced with 'tox.ini'.
 # See: https://github.com/travis-ci/travis-ci/issues/3024
 
-# Python 3.7 is not yet supported by Travis CI.
-# See: https://github.com/travis-ci/travis-ci/issues/9815
-
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
   - "3.6"
-  - "3.7-dev"
+  - "3.7"
 
-# This is blocked by https://github.com/pypa/pipenv/issues/2449,
-# also see https://github.com/pypa/pipenv/projects/7
-#  - "pypy"
-  - "pypy3.5"
+matrix:
+  include:
+    - python: 3.5
+      dist: xenial  # Bionic has no Python 3.5
+
+    # Disabled, see https://github.com/sybrenstuvel/python-rsa/issues/131
+    #- python: pypy3.5
+    #  dist: xenial  # Bionic has no Python 3.5
 
 install:
   - pip install pipenv

@@ -23,6 +23,11 @@ or download it from the [Python Package Index](https://pypi.org/project/rsa/).
 The source code is maintained at [GitHub](https://github.com/sybrenstuvel/python-rsa/) and is
 licensed under the [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
+Major changes in 4.1
+--------------------
+
+Version 4.0 was the last version to support Python 2 and 3.4. Version 4.1 is compatible with Python 3.5+ only.
+
 
 Major changes in 4.0
 --------------------
