@@ -30,8 +30,9 @@ to your users.
 
 import hashlib
 import os
+import typing
 
-from rsa import common, transform, core
+from . import common, transform, core, key
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
@@ -65,7 +66,7 @@ class VerificationError(CryptoError):
     """Raised when verification fails."""
 
 
-def _pad_for_encryption(message, target_length):
+def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
     r"""Pads the message for encryption, returning the padded message.
 
     :return: 00 02 RANDOM_DATA 00 MESSAGE
@@ -111,7 +112,7 @@ def _pad_for_encryption(message, target_length):
                      message])
 
 
-def _pad_for_signing(message, target_length):
+def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     r"""Pads the message for signing, returning the padded message.
 
     The padding is always a repetition of FF bytes.
@@ -145,7 +146,7 @@ def _pad_for_signing(message, target_length):
                      message])
 
 
-def encrypt(message, pub_key):
+def encrypt(message: bytes, pub_key: key.PublicKey):
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
@@ -177,7 +178,7 @@ def encrypt(message, pub_key):
     return block
 
 
-def decrypt(crypto, priv_key):
+def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     r"""Decrypts the given message using PKCS#1 v1.5
 
     The decryption is considered 'failed' when the resulting cleartext doesn't
@@ -246,14 +247,13 @@ def decrypt(crypto, priv_key):
     return cleartext[sep_idx + 1:]
 
 
-def sign_hash(hash_value, priv_key, hash_method):
+def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
     as a "detached signature", because the message itself isn't altered.
 
-    :param hash_value: A precomputed hash to sign (ignores message). Should be set to
-        None if needing to hash and sign message.
+    :param hash_value: A precomputed hash to sign (ignores message).
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
         'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
@@ -280,7 +280,7 @@ def sign_hash(hash_value, priv_key, hash_method):
     return block
 
 
-def sign(message, priv_key, hash_method):
+def sign(message: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
@@ -302,7 +302,7 @@ def sign(message, priv_key, hash_method):
     return sign_hash(msg_hash, priv_key, hash_method)
 
 
-def verify(message, signature, pub_key):
+def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
     """Verifies that the signature matches the message.
 
     The hash method is detected automatically from the signature.
@@ -337,7 +337,7 @@ def verify(message, signature, pub_key):
     return method_name
 
 
-def find_signature_hash(signature, pub_key):
+def find_signature_hash(signature: bytes, pub_key: key.PublicKey) -> str:
     """Returns the hash name detected from the signature.
 
     If you also want to verify the message, use :py:func:`rsa.verify()` instead.
@@ -356,7 +356,7 @@ def find_signature_hash(signature, pub_key):
     return _find_method_hash(clearsig)
 
 
-def yield_fixedblocks(infile, blocksize):
+def yield_fixedblocks(infile: typing.BinaryIO, blocksize: int) -> typing.Iterator[bytes]:
     """Generator, yields each block of ``blocksize`` bytes in the input file.
 
     :param infile: file to read and separate in blocks.
@@ -377,7 +377,7 @@ def yield_fixedblocks(infile, blocksize):
             break
 
 
-def compute_hash(message, method_name):
+def compute_hash(message: typing.Union[bytes, typing.BinaryIO], method_name: str) -> bytes:
     """Returns the message digest.
 
     :param message: the signed message. Can be an 8-bit string or a file-like
@@ -394,18 +394,18 @@ def compute_hash(message, method_name):
     method = HASH_METHODS[method_name]
     hasher = method()
 
-    if hasattr(message, 'read') and hasattr(message.read, '__call__'):
+    if isinstance(message, bytes):
+        hasher.update(message)
+    else:
+        assert hasattr(message, 'read') and hasattr(message.read, '__call__')
         # read as 1K blocks
         for block in yield_fixedblocks(message, 1024):
             hasher.update(block)
-    else:
-        # hash the message object itself.
-        hasher.update(message)
 
     return hasher.digest()
 
 
-def _find_method_hash(clearsig):
+def _find_method_hash(clearsig: bytes) -> str:
     """Finds the hash method.
 
     :param clearsig: full padded ASN1 and hash.

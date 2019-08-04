@@ -21,14 +21,14 @@ mathematically on integers.
 """
 
 
-def assert_int(var, name):
+def assert_int(var: int, name: str):
     if isinstance(var, int):
         return
 
     raise TypeError('%s should be an integer, not %s' % (name, var.__class__))
 
 
-def encrypt_int(message, ekey, n):
+def encrypt_int(message: int, ekey: int, n: int) -> int:
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
     assert_int(message, 'message')
@@ -44,7 +44,7 @@ def encrypt_int(message, ekey, n):
     return pow(message, ekey, n)
 
 
-def decrypt_int(cyphertext, dkey, n):
+def decrypt_int(cyphertext: int, dkey: int, n: int) -> int:
     """Decrypts a cypher text using the decryption key 'dkey', working modulo n"""
 
     assert_int(cyphertext, 'cyphertext')

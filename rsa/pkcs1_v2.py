@@ -27,7 +27,7 @@ from rsa import (
 )
 
 
-def mgf1(seed, length, hasher='SHA-1'):
+def mgf1(seed: bytes, length: int, hasher='SHA-1') -> bytes:
     """
     MGF1 is a Mask Generation Function based on a hash function.
 

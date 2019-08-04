@@ -30,7 +30,7 @@ import rsa.prime
 import rsa.randnum
 
 
-def _find_prime(nbits, pipe):
+def _find_prime(nbits: int, pipe) -> None:
     while True:
         integer = rsa.randnum.read_random_odd_int(nbits)
 
@@ -40,7 +40,7 @@ def _find_prime(nbits, pipe):
             return
 
 
-def getprime(nbits, poolsize):
+def getprime(nbits: int, poolsize: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
     Works in multiple threads at the same time.
