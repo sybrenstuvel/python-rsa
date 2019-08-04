@@ -13,7 +13,8 @@ Sphinx = "*"
 coveralls = "*"
 pytest = "*"
 pytest-cov = "*"
-pathlib2 = {version = "*", markers="python_version < '3.6'"}
+pathlib2 = {version = "*",markers = "python_version < '3.6'"}
+mypy = "*"
 
 [requires]
 python_version = "3.7"

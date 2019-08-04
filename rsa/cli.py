@@ -21,9 +21,11 @@ These scripts are called by the executables defined in setup.py.
 
 import abc
 import sys
+import typing
 from optparse import OptionParser
 
 import rsa
+import rsa.key
 import rsa.pkcs1
 
 HASH_METHODS = sorted(rsa.pkcs1.HASH_METHODS.keys())
@@ -84,14 +86,12 @@ def keygen():
         sys.stdout.buffer.write(data)
 
 
-class CryptoOperation(object):
+class CryptoOperation(metaclass=abc.ABCMeta):
     """CLI callable that operates with input, output, and a key."""
-
-    __metaclass__ = abc.ABCMeta
 
     keyname = 'public'  # or 'private'
     usage = 'usage: %%prog [options] %(keyname)s_key'
-    description = None
+    description = ''
     operation = 'decrypt'
     operation_past = 'decrypted'
     operation_progressive = 'decrypting'
@@ -102,7 +102,7 @@ class CryptoOperation(object):
     expected_cli_args = 1
     has_output = True
 
-    key_class = rsa.PublicKey
+    key_class = rsa.PublicKey  # type: typing.Type[rsa.key.AbstractKey]
 
     def __init__(self):
         self.usage = self.usage % self.__class__.__dict__
