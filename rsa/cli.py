@@ -19,8 +19,6 @@
 These scripts are called by the executables defined in setup.py.
 """
 
-from __future__ import with_statement, print_function
-
 import abc
 import sys
 from optparse import OptionParser
@@ -83,7 +81,7 @@ def keygen():
             outfile.write(data)
     else:
         print('Writing private key to stdout', file=sys.stderr)
-        rsa._compat.write_to_stdout(data)
+        sys.stdout.buffer.write(data)
 
 
 class CryptoOperation(object):
@@ -189,7 +187,7 @@ class CryptoOperation(object):
                 outfile.write(outdata)
         else:
             print('Writing output to stdout', file=sys.stderr)
-            rsa._compat.write_to_stdout(outdata)
+            sys.stdout.buffer.write(outdata)
 
 
 class EncryptOperation(CryptoOperation):

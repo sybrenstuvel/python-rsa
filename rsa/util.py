@@ -16,8 +16,6 @@
 
 """Utility functions."""
 
-from __future__ import with_statement, print_function
-
 import sys
 from optparse import OptionParser
 

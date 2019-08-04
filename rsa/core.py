@@ -20,11 +20,9 @@ This is the actual core RSA implementation, which is only defined
 mathematically on integers.
 """
 
-from rsa._compat import is_integer
-
 
 def assert_int(var, name):
-    if is_integer(var):
+    if isinstance(var, int):
         return
 
     raise TypeError('%s should be an integer, not %s' % (name, var.__class__))

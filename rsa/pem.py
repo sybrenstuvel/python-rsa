@@ -18,15 +18,13 @@
 
 import base64
 
-from rsa._compat import is_bytes, range
-
 
 def _markers(pem_marker):
     """
     Returns the start and end PEM markers, as bytes.
     """
 
-    if not is_bytes(pem_marker):
+    if not isinstance(pem_marker, bytes):
         pem_marker = pem_marker.encode('ascii')
 
     return (b'-----BEGIN ' + pem_marker + b'-----',
@@ -49,7 +47,7 @@ def load_pem(contents, pem_marker):
     """
 
     # We want bytes, not text. If it's text, it can be converted to ASCII bytes.
-    if not is_bytes(contents):
+    if not isinstance(contents, bytes):
         contents = contents.encode('ascii')
 
     (pem_start, pem_end) = _markers(pem_marker)

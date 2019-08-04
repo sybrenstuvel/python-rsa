@@ -31,7 +31,6 @@ to your users.
 import hashlib
 import os
 
-from rsa._compat import range
 from rsa import common, transform, core
 
 # ASN.1 codes that describe the hash algorithm used.

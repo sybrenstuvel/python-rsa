@@ -19,9 +19,9 @@
 # Source inspired by code by Yesudeep Mangalapilly <yesudeep@gmail.com>
 
 import os
+import struct
 
 from rsa import common, transform
-from rsa._compat import byte
 
 
 def read_random_bits(nbits):
@@ -40,7 +40,7 @@ def read_random_bits(nbits):
     if rbits > 0:
         randomvalue = ord(os.urandom(1))
         randomvalue >>= (8 - rbits)
-        randomdata = byte(randomvalue) + randomdata
+        randomdata = struct.pack("B", randomvalue) + randomdata
 
     return randomdata
 

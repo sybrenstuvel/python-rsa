@@ -36,7 +36,6 @@ of pyasn1.
 import logging
 import warnings
 
-from rsa._compat import range
 import rsa.prime
 import rsa.pem
 import rsa.common
