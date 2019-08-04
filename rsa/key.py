@@ -118,7 +118,8 @@ class AbstractKey:
         return method(keyfile)
 
     @staticmethod
-    def _assert_format_exists(file_format: str, methods: typing.Mapping[str, typing.Callable]) -> typing.Callable:
+    def _assert_format_exists(file_format: str, methods: typing.Mapping[str, typing.Callable]) \
+            -> typing.Callable:
         """Checks whether the given file format exists in 'methods'.
         """
 

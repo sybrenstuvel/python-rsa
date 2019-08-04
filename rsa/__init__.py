@@ -39,4 +39,4 @@ if __name__ == "__main__":
 
 __all__ = ["newkeys", "encrypt", "decrypt", "sign", "verify", 'PublicKey',
            'PrivateKey', 'DecryptionError', 'VerificationError',
-           'compute_hash', 'sign_hash']
+           'find_signature_hash', 'compute_hash', 'sign_hash']

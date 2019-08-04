@@ -36,7 +36,7 @@ def bytes2int(raw_bytes: bytes) -> int:
     return int.from_bytes(raw_bytes, 'big', signed=False)
 
 
-def int2bytes(number: int, fill_size: int=0) -> bytes:
+def int2bytes(number: int, fill_size: int = 0) -> bytes:
     """
     Convert an unsigned integer to bytes (big-endian)::
 

@@ -33,14 +33,13 @@ import os
 import sys
 import typing
 
+from . import common, transform, core, key
+
 if sys.version_info < (3, 6):
     # Python 3.6 and newer have SHA-3 support. For Python 3.5 we need a third party library.
     # This library monkey-patches the hashlib module so that it looks like Python actually
     # supports SHA-3 natively.
-    import sha3
-
-
-from . import common, transform, core, key
+    import sha3  # noqa: F401
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {

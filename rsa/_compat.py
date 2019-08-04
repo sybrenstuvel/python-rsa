@@ -16,8 +16,6 @@
 
 """Python compatibility wrappers."""
 
-import itertools
-import sys
 from struct import pack
 
 

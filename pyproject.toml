@@ -42,6 +42,7 @@ pytest = "^5.0"
 pytest-cov = "^2.7"
 tox = "^3.13"
 mypy = "^0.720"
+flake8 = "^3.7"
 
 
 [build-system]
