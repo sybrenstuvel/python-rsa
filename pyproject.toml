@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "python-rsa"
+version = "4.1-dev0"
+license = "Apache-2.0"
+description = "Pure-Python RSA implementation"
+authors = ["Sybren A. Stüvel <sybren@stuvel.eu>"]
+homepage = "https://stuvel.eu/rsa"
+documentation = "https://stuvel.eu/python-rsa-doc/"
+repository = "https://github.com/sybrenstuvel/python-rsa/"
+classifiers=[
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Intended Audience :: Information Technology',
+    'Operating System :: OS Independent',
+    'Topic :: Security :: Cryptography',
+]
+
+packages = [
+    { include="rsa", from="." },
+]
+
+[tool.poetry.scripts]
+pyrsa-decrypt = "rsa.cli:decrypt"
+pyrsa-encrypt = "rsa.cli:encrypt"
+pyrsa-keygen = "rsa.cli:keygen"
+pyrsa-priv2pub = "rsa.util:private_to_public"
+pyrsa-sign = "rsa.cli:sign"
+pyrsa-verify = "rsa.cli:verify"
+
+
+[tool.poetry.dependencies]
+python = "^3.5"
+pyasn1 = ">=0.1.3"
+
+[tool.poetry.dev-dependencies]
+coveralls = "^1.8"
+Sphinx = "^2.1"
+pathlib2 = {version="^2.3.4", python="~3.5"}
+pytest = "^5.0"
+pytest-cov = "^2.7"
+tox = "^3.13"
+mypy = "^0.720"
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
