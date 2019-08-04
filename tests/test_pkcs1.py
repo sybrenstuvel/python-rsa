@@ -75,8 +75,10 @@ class SignatureTest(unittest.TestCase):
 
         message = b'je moeder'
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
-
         self.assertEqual('SHA-256', pkcs1.verify(message, signature, self.pub))
+
+        signature = pkcs1.sign(message, self.priv, 'SHA3-256')
+        self.assertEqual('SHA3-256', pkcs1.verify(message, signature, self.pub))
 
     def test_find_signature_hash(self):
         """Test happy flow of sign and find_signature_hash"""
