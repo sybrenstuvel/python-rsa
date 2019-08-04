@@ -35,6 +35,51 @@ def _markers(pem_marker: FlexiText) -> typing.Tuple[bytes, bytes]:
             b'-----END ' + pem_marker + b'-----')
 
 
+def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iterator[bytes]:
+    """Generator over PEM lines between pem_start and pem_end."""
+
+    in_pem_part = False
+    seen_pem_start = False
+
+    for line in contents.splitlines():
+        line = line.strip()
+
+        # Skip empty lines
+        if not line:
+            continue
+
+        # Handle start marker
+        if line == pem_start:
+            if in_pem_part:
+                raise ValueError('Seen start marker "%s" twice' % pem_start)
+
+            in_pem_part = True
+            seen_pem_start = True
+            continue
+
+        # Skip stuff before first marker
+        if not in_pem_part:
+            continue
+
+        # Handle end marker
+        if in_pem_part and line == pem_end:
+            in_pem_part = False
+            break
+
+        # Load fields
+        if b':' in line:
+            continue
+
+        yield line
+
+    # Do some sanity checks
+    if not seen_pem_start:
+        raise ValueError('No PEM start marker "%s" found' % pem_start)
+
+    if in_pem_part:
+        raise ValueError('No PEM end marker "%s" found' % pem_end)
+
+
 def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     """Loads a PEM file.
 
@@ -55,46 +100,7 @@ def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
         contents = contents.encode('ascii')
 
     (pem_start, pem_end) = _markers(pem_marker)
-
-    pem_lines = []
-    in_pem_part = False
-
-    for line in contents.splitlines():
-        line = line.strip()
-
-        # Skip empty lines
-        if not line:
-            continue
-
-        # Handle start marker
-        if line == pem_start:
-            if in_pem_part:
-                raise ValueError('Seen start marker "%s" twice' % pem_start)
-
-            in_pem_part = True
-            continue
-
-        # Skip stuff before first marker
-        if not in_pem_part:
-            continue
-
-        # Handle end marker
-        if in_pem_part and line == pem_end:
-            in_pem_part = False
-            break
-
-        # Load fields
-        if b':' in line:
-            continue
-
-        pem_lines.append(line)
-
-    # Do some sanity checks
-    if not pem_lines:
-        raise ValueError('No PEM start marker "%s" found' % pem_start)
-
-    if in_pem_part:
-        raise ValueError('No PEM end marker "%s" found' % pem_end)
+    pem_lines = [line for line in _pem_lines(contents, pem_start, pem_end)]
 
     # Base64-decode the contents
     pem = b''.join(pem_lines)
