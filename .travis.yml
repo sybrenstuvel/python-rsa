@@ -1,28 +1,24 @@
 language: python
-dist: bionic   # required for Python >= 3.7
+dist: bionic
 cache: pip
-
-# Environment changes have to be manually synced with 'tox.ini'.
-# See: https://github.com/travis-ci/travis-ci/issues/3024
-
-python:
-  - "3.6"
-  - "3.7"
 
 matrix:
   include:
-    - python: 3.5
+    - python: "3.5"
       dist: xenial  # Bionic has no Python 3.5
+    - python: "3.6"
+    - python: "3.7"
 
     # Disabled, see https://github.com/sybrenstuvel/python-rsa/issues/131
-    #- python: pypy3.5
-    #  dist: xenial  # Bionic has no Python 3.5
+    #- python: pypy3.6-7.1.1
+    #  dist: xenial  # Bionic has no Pypy 3
 
 install:
   - pip install poetry
   - poetry install -v
 
 script:
+  - poetry run flake8 .
   - poetry run py.test tests/
 
 after_success:
