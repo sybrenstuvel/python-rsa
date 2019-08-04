@@ -50,23 +50,25 @@ class KeyGenTest(unittest.TestCase):
 
     def test_custom_getprime_func(self):
         # List of primes to test with, in order [p, q, p, q, ....]
-        # By starting with two of the same primes, we test that this is
-        # properly rejected.
-        primes = [64123, 64123, 64123, 50957, 39317, 33107]
+        # By starting with two of the same primes, we test for minimum distance.
+        # The 3rd prime is too low, and falls below the lower threshold.
+        # The 4th and 5th prime form a correct pair.
+        primes = [64123, 64123, 33751, 50957, 56821, 51109]
 
         def getprime(_):
             return primes.pop(0)
 
-        # This exponent will cause two other primes to be generated.
-        exponent = 136407
+        (p, q, e, d) = rsa.key.gen_keys(32,
+                                        accurate=True,
+                                        getprime_func=getprime)
+        self.assertEqual(56821, p)
+        self.assertEqual(50957, q)
 
-        (p, q, e, d) = rsa.key.gen_keys(64,
-                                        accurate=False,
-                                        getprime_func=getprime,
-                                        exponent=exponent)
-        self.assertEqual(39317, p)
-        self.assertEqual(33107, q)
+    def test_gen_usable_sizes_1024(self):
+        priv, pub = rsa.key.newkeys(1024)
 
+    def test_gen_usable_sizes_2048(self):
+        priv, pub = rsa.key.newkeys(2048)
 
 class HashTest(unittest.TestCase):
     """Test hashing of keys"""

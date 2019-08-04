@@ -33,6 +33,7 @@ of pyasn1.
 
 """
 
+import decimal
 import logging
 import typing
 import warnings
@@ -46,6 +47,17 @@ import rsa.core
 
 log = logging.getLogger(__name__)
 DEFAULT_EXPONENT = 65537
+
+SQRT_2 = 2 ** 0.5
+
+# See the find_p_q() function below.
+# We have to resolve to using the Decimal module for really large
+# numbers, as otherwise Python refuses to convert to float for the
+# sqrt(2) multiplication. This causes a loss in precision of the
+# lower bound. To ensure we don't generate primes below the lower
+# bound described by FIPS.186-4, we nudge the value of sqrt(2)
+# slightly higher.
+SQRT_2_DEC = decimal.Decimal(SQRT_2 * 1.000000000000011)
 
 
 class AbstractKey:
@@ -602,17 +614,19 @@ def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typ
 
     total_bits = nbits * 2
 
-    # Make sure that p and q aren't too close or the factoring programs can
-    # factor n.
-    shift = nbits // 16
-    pbits = nbits + shift
-    qbits = nbits - shift
+    # From https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+    # section "B.3.1  Criteria for IFC Key Pairs", page 53.
+    sqrt_2 = SQRT_2 if nbits < 1024 else SQRT_2_DEC
+    lower_bound = int(sqrt_2 * 2 ** (nbits - 1))
+
+    upper_bound = 2 ** nbits - 1
+    distance_threshold = max(1, 2 ** (nbits - 100))
 
     # Choose the two initial primes
     log.debug('find_p_q(%i): Finding p', nbits)
-    p = getprime_func(pbits)
+    p = getprime_func(nbits)
     log.debug('find_p_q(%i): Finding q', nbits)
-    q = getprime_func(qbits)
+    q = getprime_func(nbits)
 
     def is_acceptable(p, q):
         """Returns True iff p and q are acceptable:
@@ -621,7 +635,11 @@ def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typ
             - (p * q) has the right nr of bits (when accurate=True)
         """
 
-        if p == q:
+        if abs(p - q) < distance_threshold:
+            return False
+        if not lower_bound <= p <= upper_bound:
+            return False
+        if not lower_bound <= q <= upper_bound:
             return False
 
         if not accurate:
@@ -636,9 +654,9 @@ def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typ
     while not is_acceptable(p, q):
         # Change p on one iteration and q on the other
         if change_p:
-            p = getprime_func(pbits)
+            p = getprime_func(nbits)
         else:
-            q = getprime_func(qbits)
+            q = getprime_func(nbits)
 
         change_p = not change_p
 
