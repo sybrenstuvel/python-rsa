@@ -5,9 +5,13 @@ Version 4.1 - in development
 ----------------------------------------
 
 - Dropped support for Python 2 and 3.4.
-- Move to Python 3.7 in Pipfile (so `pipenv install` creates a Python 3.7 virtualenv).
+- Added type annotations to the source code. This will make Python-RSA easier to use in
+  your IDE, and allows better type checking.
+- Added static type checking via [MyPy](http://mypy-lang.org/).
 - Fix [#129](https://github.com/sybrenstuvel/python-rsa/issues/129) Installing from source
   gives UnicodeDecodeError.
+- Switched to using [Poetry](https://poetry.eustace.io/) for package
+  management.
 
 
 Version 4.0 - released 2018-09-16
