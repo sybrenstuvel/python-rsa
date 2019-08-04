@@ -12,7 +12,7 @@ generation according to PKCS#1 version 1.5. It can be used as a Python
 library as well as on the commandline. The code was mostly written by
 Sybren A.  Stüvel.
 
-Documentation can be found at the [Python-RSA homepage](https://stuvel.eu/rsa).
+Documentation can be found at the [Python-RSA homepage](https://stuvel.eu/rsa). For all changes, check [the changelog](https://github.com/sybrenstuvel/python-rsa/blob/master/CHANGELOG.md).
 
 Download and install using:
 
