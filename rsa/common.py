@@ -20,7 +20,7 @@ import typing
 
 
 class NotRelativePrimeError(ValueError):
-    def __init__(self, a, b, d, msg=''):
+    def __init__(self, a: int, b: int, d: int, msg: str = '') -> None:
         super().__init__(msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
         self.a = a
         self.b = b

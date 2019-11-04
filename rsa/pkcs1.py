@@ -159,7 +159,7 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
                      message])
 
 
-def encrypt(message: bytes, pub_key: key.PublicKey):
+def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
