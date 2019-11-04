@@ -5,6 +5,9 @@
 - Switch to [Poetry](https://python-poetry.org/) for dependency and release management.
 - Chain exceptions using `raise new_exception from old_exception`
   ([#157](https://github.com/sybrenstuvel/python-rsa/pull/157))
+- Added marker file for PEP 561. This will allow type checking tools in dependent projects
+  to use type annotations from Python-RSA
+  ([#136](https://github.com/sybrenstuvel/python-rsa/pull/136)).
 
 ## Version 4.7.2 - released 2021-02-24
 
