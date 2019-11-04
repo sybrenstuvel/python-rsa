@@ -94,7 +94,7 @@ class AbstractKey:
         """
 
     @classmethod
-    def load_pkcs1(cls, keyfile: bytes, format='PEM') -> 'AbstractKey':
+    def load_pkcs1(cls, keyfile: bytes, format: str = 'PEM') -> 'AbstractKey':
         """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
@@ -128,7 +128,7 @@ class AbstractKey:
             raise ValueError('Unsupported format: %r, try one of %s' % (file_format,
                                                                         formats))
 
-    def save_pkcs1(self, format='PEM') -> bytes:
+    def save_pkcs1(self, format: str = 'PEM') -> bytes:
         """Saves the key in PKCS#1 DER or PEM format.
 
         :param format: the format to save; 'PEM' or 'DER'
@@ -203,7 +203,7 @@ class PublicKey(AbstractKey):
 
     __slots__ = ('n', 'e')
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
     def __repr__(self) -> str:
@@ -378,7 +378,7 @@ class PrivateKey(AbstractKey):
         self.exp2 = int(d % (q - 1))
         self.coef = rsa.common.inverse(q, p)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
     def __repr__(self) -> str:
@@ -388,7 +388,7 @@ class PrivateKey(AbstractKey):
         """Returns the key as tuple for pickling."""
         return self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef
 
-    def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]):
+    def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]) -> None:
         """Sets the key from tuple."""
         self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
 
@@ -574,7 +574,9 @@ class PrivateKey(AbstractKey):
         return rsa.pem.save_pem(der, b'RSA PRIVATE KEY')
 
 
-def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typing.Tuple[int, int]:
+def find_p_q(nbits: int,
+             getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+             accurate: bool = True) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
 
     The resulting p * q has exacty 2 * nbits bits, and the returned p and q
@@ -619,7 +621,7 @@ def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typ
     log.debug('find_p_q(%i): Finding q', nbits)
     q = getprime_func(qbits)
 
-    def is_acceptable(p, q):
+    def is_acceptable(p: int, q: int) -> bool:
         """Returns True iff p and q are acceptable:
 
             - p and q differ
@@ -697,8 +699,8 @@ def calculate_keys(p: int, q: int) -> typing.Tuple[int, int]:
 
 def gen_keys(nbits: int,
              getprime_func: typing.Callable[[int], int],
-             accurate=True,
-             exponent=DEFAULT_EXPONENT) -> typing.Tuple[int, int, int, int]:
+             accurate: bool = True,
+             exponent: int = DEFAULT_EXPONENT) -> typing.Tuple[int, int, int, int]:
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
@@ -726,8 +728,10 @@ def gen_keys(nbits: int,
     return p, q, e, d
 
 
-def newkeys(nbits: int, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT) \
-        -> typing.Tuple[PublicKey, PrivateKey]:
+def newkeys(nbits: int,
+            accurate: bool = True,
+            poolsize: int = 1,
+            exponent: int = DEFAULT_EXPONENT) -> typing.Tuple[PublicKey, PrivateKey]:
     """Generates public and private keys, and returns them as (pub, priv).
 
     The public key is also known as the 'encryption key', and is a
@@ -763,7 +767,7 @@ def newkeys(nbits: int, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT) \
     if poolsize > 1:
         from rsa import parallel
 
-        def getprime_func(nbits):
+        def getprime_func(nbits: int) -> int:
             return parallel.getprime(nbits, poolsize=poolsize)
     else:
         getprime_func = rsa.prime.getprime

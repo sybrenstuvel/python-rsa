@@ -110,7 +110,7 @@ class CryptoOperation(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def perform_operation(self, indata: bytes, key: rsa.key.AbstractKey,
-                          cli_args: Indexable):
+                          cli_args: Indexable) -> typing.Any:
         """Performs the program's operation.
 
         Implement in a subclass.
@@ -201,7 +201,7 @@ class EncryptOperation(CryptoOperation):
     operation_progressive = 'encrypting'
 
     def perform_operation(self, indata: bytes, pub_key: rsa.key.AbstractKey,
-                          cli_args: Indexable = ()):
+                          cli_args: Indexable = ()) -> bytes:
         """Encrypts files."""
         assert isinstance(pub_key, rsa.key.PublicKey)
         return rsa.encrypt(indata, pub_key)
@@ -219,7 +219,7 @@ class DecryptOperation(CryptoOperation):
     key_class = rsa.PrivateKey
 
     def perform_operation(self, indata: bytes, priv_key: rsa.key.AbstractKey,
-                          cli_args: Indexable = ()):
+                          cli_args: Indexable = ()) -> bytes:
         """Decrypts files."""
         assert isinstance(priv_key, rsa.key.PrivateKey)
         return rsa.decrypt(indata, priv_key)
@@ -242,7 +242,7 @@ class SignOperation(CryptoOperation):
                    'to stdout if this option is not present.')
 
     def perform_operation(self, indata: bytes, priv_key: rsa.key.AbstractKey,
-                          cli_args: Indexable):
+                          cli_args: Indexable) -> bytes:
         """Signs files."""
         assert isinstance(priv_key, rsa.key.PrivateKey)
 
@@ -269,7 +269,7 @@ class VerifyOperation(CryptoOperation):
     has_output = False
 
     def perform_operation(self, indata: bytes, pub_key: rsa.key.AbstractKey,
-                          cli_args: Indexable):
+                          cli_args: Indexable) -> None:
         """Verifies files."""
         assert isinstance(pub_key, rsa.key.PublicKey)
 

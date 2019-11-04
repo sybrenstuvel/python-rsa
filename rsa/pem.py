@@ -49,7 +49,7 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
         # Handle start marker
         if line == pem_start:
             if in_pem_part:
-                raise ValueError('Seen start marker "%s" twice' % pem_start)
+                raise ValueError('Seen start marker "%r" twice' % pem_start)
 
             in_pem_part = True
             seen_pem_start = True
@@ -72,10 +72,10 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
 
     # Do some sanity checks
     if not seen_pem_start:
-        raise ValueError('No PEM start marker "%s" found' % pem_start)
+        raise ValueError('No PEM start marker "%r" found' % pem_start)
 
     if in_pem_part:
-        raise ValueError('No PEM end marker "%s" found' % pem_end)
+        raise ValueError('No PEM end marker "%r" found' % pem_end)
 
 
 def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:

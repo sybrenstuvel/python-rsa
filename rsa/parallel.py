@@ -23,12 +23,13 @@ Introduced in Python-RSA 3.1.
 """
 
 import multiprocessing as mp
+from multiprocessing.connection import Connection
 
 import rsa.prime
 import rsa.randnum
 
 
-def _find_prime(nbits: int, pipe) -> None:
+def _find_prime(nbits: int, pipe: Connection) -> None:
     while True:
         integer = rsa.randnum.read_random_odd_int(nbits)
 

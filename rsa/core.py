@@ -19,7 +19,7 @@ mathematically on integers.
 """
 
 
-def assert_int(var: int, name: str):
+def assert_int(var: int, name: str) -> None:
     if isinstance(var, int):
         return
 

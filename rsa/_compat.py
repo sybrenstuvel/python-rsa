@@ -17,7 +17,7 @@
 from struct import pack
 
 
-def byte(num: int):
+def byte(num: int) -> bytes:
     """
     Converts a number between 0 and 255 (both inclusive) to a base-256 (byte)
     representation.
