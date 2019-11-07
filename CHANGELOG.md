@@ -7,6 +7,8 @@
 - Added type annotations to the source code. This will make Python-RSA easier to use in
   your IDE, and allows better type checking.
 - Added static type checking via [MyPy](http://mypy-lang.org/).
+- Added marker file for PEP 561. This will allow type checking tools in dependent projects
+  to use type annotations from Python-RSA.
 - Fix [#129](https://github.com/sybrenstuvel/python-rsa/issues/129) Installing from source
   gives UnicodeDecodeError.
 - Switched to using [Poetry](https://poetry.eustace.io/) for package
