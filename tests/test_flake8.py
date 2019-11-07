@@ -9,7 +9,7 @@ test_modules = ['rsa', 'tests']
 class Flake8RunnerTest(unittest.TestCase):
     def test_run_flake8(self):
         proj_root = pathlib.Path(__file__).parent.parent
-        paths = [proj_root / dirname for dirname in test_modules]
+        paths = [str(proj_root / dirname) for dirname in test_modules]
 
         style_guide = flake8.get_style_guide()
         report = style_guide.check_files(paths)
