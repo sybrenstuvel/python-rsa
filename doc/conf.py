@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Python-RSA documentation build configuration file, created by
 # sphinx-quickstart on Sat Jul 30 23:11:07 2011.
 #
