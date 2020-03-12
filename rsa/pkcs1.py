@@ -13,7 +13,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 """Functions for PKCS#1 version 1.5 encryption and signing
 
 This module implements certain functionality from PKCS#1 version 1.5. For a
@@ -79,7 +78,7 @@ class VerificationError(CryptoError):
     """Raised when verification fails."""
 
 
-def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
+def _pad_for_encryption(message: bytes, target_length: int, lowKey: bool) -> bytes:
     r"""Pads the message for encryption, returning the padded message.
 
     :return: 00 02 RANDOM_DATA 00 MESSAGE
@@ -97,6 +96,9 @@ def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
     max_msglength = target_length - 11
     msglength = len(message)
 
+    if msglength > max_msglength and not lowKey:
+        raise OverflowError('%i bytes needed for message, but there is only'
+                            ' space for %i' % (msglength, max_msglength))
 
     # Get random padding
     padding = b''
@@ -114,11 +116,7 @@ def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
         new_padding = new_padding.replace(b'\x00', b'')
         padding = padding + new_padding[:needed_bytes]
 
-
-    return b''.join([b'\x00\x02',
-                     padding,
-                     b'\x00',
-                     message])
+    return b''.join([b'\x00\x02', padding, b'\x00', message])
 
 
 def _pad_for_signing(message: bytes, target_length: int) -> bytes:
@@ -143,16 +141,16 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     max_msglength = target_length - 11
     msglength = len(message)
 
+    if msglength > max_msglength:
+        raise OverflowError('%i bytes needed for message, but there is only'
+                            ' space for %i' % (msglength, max_msglength))
 
     padding_length = target_length - msglength - 3
 
-    return b''.join([b'\x00\x01',
-                     padding_length * b'\xff',
-                     b'\x00',
-                     message])
+    return b''.join([b'\x00\x01', padding_length * b'\xff', b'\x00', message])
 
 
-def encrypt(message: bytes, pub_key: key.PublicKey):
+def encrypt(message: bytes, pub_key: key.PublicKey, lowKey: bool):
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
@@ -175,7 +173,7 @@ def encrypt(message: bytes, pub_key: key.PublicKey):
     """
 
     keylength = common.byte_size(pub_key.n)
-    padded = _pad_for_encryption(message, keylength)
+    padded = _pad_for_encryption(message, keylength, lowKey)
 
     payload = transform.bytes2int(padded)
     encrypted = core.encrypt_int(payload, pub_key.e, pub_key.n)
@@ -426,8 +424,9 @@ def _find_method_hash(clearsig: bytes) -> str:
     raise VerificationError('Verification failed')
 
 
-__all__ = ['encrypt', 'decrypt', 'sign', 'verify',
-           'DecryptionError', 'VerificationError', 'CryptoError']
+__all__ = [
+    'encrypt', 'decrypt', 'sign', 'verify', 'DecryptionError', 'VerificationError', 'CryptoError'
+]
 
 if __name__ == '__main__':
     print('Running doctests 1000x or until failure')
