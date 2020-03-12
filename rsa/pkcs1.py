@@ -152,7 +152,7 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     return b''.join([b'\x00\x01', padding_length * b'\xff', b'\x00', message])
 
 
-def encrypt(message: bytes, pub_key: key.PublicKey, lowKey: bool):
+def encrypt(message: bytes, pub_key: key.PublicKey, lowKey: bool= False):
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
