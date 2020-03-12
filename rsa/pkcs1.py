@@ -32,7 +32,7 @@ import os
 import sys
 import typing
 
-from . import common, transform, core, key
+from . import common, core, key, transform
 
 if sys.version_info < (3, 6):
     # Python 3.6 and newer have SHA-3 support. For Python 3.5 we need a third party library.
@@ -115,6 +115,8 @@ def _pad_for_encryption(message: bytes, target_length: int, lowKey: bool) -> byt
         new_padding = os.urandom(needed_bytes + 5)
         new_padding = new_padding.replace(b'\x00', b'')
         padding = padding + new_padding[:needed_bytes]
+
+    if not lowKey: assert len(padding) == padding_length
 
     return b''.join([b'\x00\x02', padding, b'\x00', message])
 
