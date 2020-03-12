@@ -97,9 +97,6 @@ def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
     max_msglength = target_length - 11
     msglength = len(message)
 
-    if msglength > max_msglength:
-        raise OverflowError('%i bytes needed for message, but there is only'
-                            ' space for %i' % (msglength, max_msglength))
 
     # Get random padding
     padding = b''
@@ -117,7 +114,6 @@ def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
         new_padding = new_padding.replace(b'\x00', b'')
         padding = padding + new_padding[:needed_bytes]
 
-    assert len(padding) == padding_length
 
     return b''.join([b'\x00\x02',
                      padding,
@@ -147,9 +143,6 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     max_msglength = target_length - 11
     msglength = len(message)
 
-    if msglength > max_msglength:
-        raise OverflowError('%i bytes needed for message, but there is only'
-                            ' space for %i' % (msglength, max_msglength))
 
     padding_length = target_length - msglength - 3
 
