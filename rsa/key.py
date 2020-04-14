@@ -416,6 +416,13 @@ class PrivateKey(AbstractKey):
     def __hash__(self) -> int:
         return hash((self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef))
 
+    def _get_blinding_factor(self) -> int:
+        for _ in range(1000):
+            blind_r = rsa.randnum.randint(self.n - 1)
+            if rsa.prime.are_relatively_prime(self.n, blind_r):
+                return blind_r
+        raise RuntimeError('unable to find blinding factor')
+
     def blinded_decrypt(self, encrypted: int) -> int:
         """Decrypts the message using blinding to prevent side-channel attacks.
 
@@ -426,7 +433,7 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
+        blind_r = self._get_blinding_factor()
         blinded = self.blind(encrypted, blind_r)  # blind before decrypting
         decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
 
@@ -442,7 +449,7 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
+        blind_r = self._get_blinding_factor()
         blinded = self.blind(message, blind_r)  # blind before encrypting
         encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
         return self.unblind(encrypted, blind_r)

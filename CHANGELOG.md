@@ -14,6 +14,7 @@
 - Added support for SHA3 hashing: SHA3-256, SHA3-384, SHA3-512. This
   is natively supported by Python 3.6+ and supported via a third-party
   library on Python 3.5.
+- Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
 
 
 ## Version 4.0 - released 2018-09-16
