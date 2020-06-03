@@ -234,6 +234,12 @@ def decrypt(crypto, priv_key):
     decrypted = priv_key.blinded_decrypt(encrypted)
     cleartext = transform.int2bytes(decrypted, blocksize)
 
+    # Detect leading zeroes in the crypto. These are not reflected in the
+    # encrypted value (as leading zeroes do not influence the value of an
+    # integer). This fixes CVE-2020-13757.
+    if len(crypto) > blocksize:
+        raise DecryptionError('Decryption failed')
+
     # If we can't find the cleartext marker, decryption failed.
     if cleartext[0:2] != b'\x00\x02':
         raise DecryptionError('Decryption failed')
@@ -330,6 +336,9 @@ def verify(message, signature, pub_key):
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
     expected = _pad_for_signing(cleartext, keylength)
+
+    if len(signature) != keylength:
+        raise VerificationError('Verification failed')
 
     # Compare with the signed one
     if expected != clearsig:
