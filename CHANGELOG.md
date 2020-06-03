@@ -15,6 +15,9 @@
   is natively supported by Python 3.6+ and supported via a third-party
   library on Python 3.5.
 - Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
+- Reject cyphertexts (when decrypting) and signatures (when verifying) that have
+  been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
+  Carnil for pointing this out.
 
 
 ## Version 4.0 - released 2018-09-16
