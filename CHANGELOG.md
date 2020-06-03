@@ -17,7 +17,7 @@
 - Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
 - Reject cyphertexts (when decrypting) and signatures (when verifying) that have
   been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
-  Carnil for pointing this out.
+  Adelapie for pointing this out.
 
 
 ## Version 4.0 - released 2018-09-16
