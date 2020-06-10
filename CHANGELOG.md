@@ -1,7 +1,7 @@
 # Python-RSA changelog
 
 
-## Version 4.1 - in development
+## Version 4.1 - released 2020-06-10
 
 - Added support for Python 3.8.
 - Dropped support for Python 2 and 3.4.
