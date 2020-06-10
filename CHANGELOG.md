@@ -3,6 +3,7 @@
 
 ## Version 4.1 - in development
 
+- Added support for Python 3.8.
 - Dropped support for Python 2 and 3.4.
 - Added type annotations to the source code. This will make Python-RSA easier to use in
   your IDE, and allows better type checking.
