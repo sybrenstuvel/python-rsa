@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "python-rsa"
+name = "rsa"
 version = "4.2-dev0"
 license = "Apache-2.0"
 description = "Pure-Python RSA implementation"
