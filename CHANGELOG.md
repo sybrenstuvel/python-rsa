@@ -1,5 +1,12 @@
 # Python-RSA changelog
 
+## Version 4.2 - in development
+
+- Rolled back the switch to Poetry, and reverted back to using Pipenv + setup.py
+  for dependency management. There apparently is an issue no-binary installs of
+  packages build with Poetry. This fixes
+  [#148](https://github.com/sybrenstuvel/python-rsa/issues/148)
+
 
 ## Version 4.1 - released 2020-06-10
 
