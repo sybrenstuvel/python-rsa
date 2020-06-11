@@ -15,6 +15,7 @@
 """Tests string operations."""
 
 import struct
+import sys
 import unittest
 
 import rsa
@@ -101,6 +102,12 @@ class SignatureTest(unittest.TestCase):
         signature = pkcs1.sign(message, self.priv, 'SHA-256')
         self.assertEqual('SHA-256', pkcs1.verify(message, signature, self.pub))
 
+
+    @unittest.skipIf(sys.version_info < (3, 6), "SHA3 requires Python 3.6+")
+    def test_sign_verify_sha3(self):
+        """Test happy flow of sign and verify with SHA3-256"""
+
+        message = b'je moeder'
         signature = pkcs1.sign(message, self.priv, 'SHA3-256')
         self.assertEqual('SHA3-256', pkcs1.verify(message, signature, self.pub))
 

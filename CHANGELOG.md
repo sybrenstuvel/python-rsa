@@ -6,6 +6,10 @@
   for dependency management. There apparently is an issue no-binary installs of
   packages build with Poetry. This fixes
   [#148](https://github.com/sybrenstuvel/python-rsa/issues/148)
+- Limited SHA3 support to those Python versions (3.6+) that support it natively.
+  The third-party library that adds support for this to Python 3.5 is a binary
+  package, and thus breaks the pure-Python nature of Python-RSA.
+  This should fix [#147](https://github.com/sybrenstuvel/python-rsa/issues/147).
 
 
 ## Version 4.1 - released 2020-06-10

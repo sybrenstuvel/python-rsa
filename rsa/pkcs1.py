@@ -33,12 +33,6 @@ import typing
 
 from . import common, transform, core, key
 
-if sys.version_info < (3, 6):
-    # Python 3.6 and newer have SHA-3 support. For Python 3.5 we need a third party library.
-    # This library monkey-patches the hashlib module so that it looks like Python actually
-    # supports SHA-3 natively.
-    import sha3  # noqa: F401
-
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
     'MD5': b'\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10',
@@ -47,9 +41,6 @@ HASH_ASN1 = {
     'SHA-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20',
     'SHA-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30',
     'SHA-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40',
-    'SHA3-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20',
-    'SHA3-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30',
-    'SHA3-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40',
 }
 
 HASH_METHODS = {
@@ -59,10 +50,22 @@ HASH_METHODS = {
     'SHA-256': hashlib.sha256,
     'SHA-384': hashlib.sha384,
     'SHA-512': hashlib.sha512,
-    'SHA3-256': hashlib.sha3_256,
-    'SHA3-384': hashlib.sha3_384,
-    'SHA3-512': hashlib.sha3_512,
 }
+
+
+if sys.version_info >= (3, 6):
+    # Python 3.6 introduced SHA3 support.
+    HASH_ASN1.update({
+        'SHA3-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20',
+        'SHA3-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30',
+        'SHA3-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40',
+    })
+
+    HASH_METHODS.update({
+        'SHA3-256': hashlib.sha3_256,
+        'SHA3-384': hashlib.sha3_384,
+        'SHA3-512': hashlib.sha3_512,
+    })
 
 
 class CryptoError(Exception):
