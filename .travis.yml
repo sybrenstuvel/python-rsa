@@ -20,11 +20,12 @@ matrix:
     #  dist: xenial  # Bionic has no Python 3.5
 
 install:
-  - pip install poetry
-  - poetry install -v
+  - pip install -U pip setuptools  # https://github.com/pypa/virtualenv/issues/1630
+  - pip install pipenv
+  - pipenv install --dev
 
 script:
-  - poetry run py.test tests/
+  - pipenv run py.test tests/
 
 after_success:
-  - poetry run coveralls
+  - pipenv run coveralls

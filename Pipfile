@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"pyasn1" = ">=0.1.3"
+"pysha3" = {version = "~=1.0, >=1.0",markers = "python_version < '3.6'"}
+
+[dev-packages]
+coveralls = "~=1.8, >=1.8"
+"Sphinx" = "~=2.1, >=2.1"
+"pathlib2" = {version = "~=2.3, >=2.3.4",markers = "python_version < '3.6'"}
+"pytest" = "~=5.0, >=5.0"
+"pytest-cov" = "~=2.7, >=2.7"
+"tox" = "~=3.13, >=3.13"
+"mypy" = "~=0.720, >=0.720"
+"flake8" = "~=3.7, >=3.7"
+"zipp" = {version = "*", markers = "python_version < '3.6'"}
+
+[requires]
+python_version = "3.7"

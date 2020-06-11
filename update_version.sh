@@ -9,11 +9,10 @@ DATE=$(date +'%Y-%m-%d')
 
 sed "s/__date__\s=\s'[^']*'/__date__ = '$DATE'/" -i rsa/__init__.py
 sed "s/__version__\s=\s'[^']*'/__version__ = '$1'/" -i rsa/__init__.py
-
-poetry version $1
+sed "s/version='[^']*'/version='$1'/" -i setup.py
 
 git diff
 echo
 echo "Don't forget to commit and tag:"
-echo git commit -m \'Bumped version to $1\' pyproject.toml rsa/__init__.py
+echo git commit -m \'Bumped version to $1\' rsa/__init__.py setup.py
 echo git tag -a version-$1 -m \'Tagged version $1\'

@@ -9,6 +9,12 @@ Depending on your system you may need to use ``sudo pip`` if you want to install
 the library system-wide, or use ``pip install --user rsa`` to install the
 library in your home directory.
 
+Installation from source is also quite easy. Download the source and
+then type::
+
+    python setup.py install
+
+
 The sources are tracked in our `Git repository`_ at
 GitHub. It also hosts the `issue tracker`_.
 
