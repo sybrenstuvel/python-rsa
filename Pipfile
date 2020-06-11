@@ -16,7 +16,6 @@ coveralls = "~=1.8, >=1.8"
 "tox" = "~=3.13, >=3.13"
 "mypy" = "~=0.720, >=0.720"
 "flake8" = "~=3.7, >=3.7"
-"zipp" = {version = "*", markers = "python_version < '3.6'"}
 
 [requires]
 python_version = "3.7"
