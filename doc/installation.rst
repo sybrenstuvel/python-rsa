@@ -42,10 +42,10 @@ the source::
 
     git clone https://github.com/sybrenstuvel/python-rsa.git
 
-Use Poetry_ to install the development requirements in a virtual environment::
+Use Pipenv_ to install the development requirements in a virtual environment::
 
     cd python-rsa
-    poetry install
+    pipenv install --dev
 
 .. _Git: https://git-scm.com/
-.. _Poetry: https://poetry.eustace.io/
+.. _Pipenv: https://pipenv.pypa.io/en/latest/
