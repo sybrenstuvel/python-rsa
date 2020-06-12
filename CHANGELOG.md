@@ -1,25 +1,24 @@
 # Python-RSA changelog
 
 
-## Version 4.4.1 - released 2020-06-12
+## Version 4.4 & 4.6 - released 2020-06-12
 
-This makes Python 3.8 support explicit in `setup.py`.
-
-
-## Version 4.4 - released 2020-06-12
-
-Version 4.3 is almost a re-tagged release of version 4.0. It requires Python
-3.5+. To avoid older Python installations from trying to upgrade to RSA 4.4,
-this is now made explicit in the `python_requires` argument in `setup.py`.
+Version 4.4 and 4.6 are almost a re-tagged release of version 4.2. It requires
+Python 3.5+. To avoid older Python installations from trying to upgrade to RSA
+4.4, this is now made explicit in the `python_requires` argument in `setup.py`.
+There was a mistake releasing 4.4 as "3.5+ only", which made it necessary to
+retag 4.4 as 4.6 as well.
 
 No functional changes compared to version 4.2.
 
 
 ## Version 4.3 - released 2020-06-12
 
-Version 4.3 is almost a re-tagged release of version 4.0. It is the last to
-support Python 2.7. This is now made explicit in the `python_requires` argument
-in `setup.py`. Python 3.4 is not supported by this release.
+Version 4.3 and 4.5 are almost a re-tagged release of version 4.0. It is the
+last to support Python 2.7. This is now made explicit in the `python_requires`
+argument in `setup.py`. Python 3.4 is not supported by this release. There was a
+mistake releasing 4.4 as "3.5+ only", which made it necessary to retag 4.3 as
+4.5 as well.
 
 Two security fixes have also been backported, so 4.3 = 4.0 + these two fixes.
 
