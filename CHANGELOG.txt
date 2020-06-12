@@ -1,6 +1,16 @@
 Python-RSA changelog
 ========================================
 
+Version 4.3 - released 2020-06-12
+----------------------------------------
+
+Version 4.3 is a re-tagged release of version 4.0. It is the last to support
+Python 2.7. This is now made explicit in the `python_requires` argument in
+`setup.py`.
+
+There are no functional differences.
+
+
 Version 4.0 - released 2018-09-16
 ----------------------------------------
 
