@@ -6,7 +6,7 @@ Version 4.3 - released 2020-06-12
 
 Version 4.3 is almost a re-tagged release of version 4.0. It is the last to
 support Python 2.7. This is now made explicit in the `python_requires` argument
-in `setup.py`.
+in `setup.py`. Python 3.4 is not supported by this release.
 
 Two security fixes have also been backported, so 4.3 = 4.0 + these two fixes.
 
