@@ -1,6 +1,29 @@
 # Python-RSA changelog
 
-## Version 4.2 - in development
+## Version 4.4 - released 2020-06-12
+
+Version 4.3 is almost a re-tagged release of version 4.0. It requires Python
+3.5+. To avoid older Python installations from trying to upgrade to RSA 4.4,
+this is now made explicit in the `python_requires` argument in `setup.py`.
+
+No functional changes compared to version 4.2.
+
+
+## Version 4.3 - released 2020-06-12
+
+Version 4.3 is almost a re-tagged release of version 4.0. It is the last to
+support Python 2.7. This is now made explicit in the `python_requires` argument
+in `setup.py`. Python 3.4 is not supported by this release.
+
+Two security fixes have also been backported, so 4.3 = 4.0 + these two fixes.
+
+- Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
+- Reject cyphertexts (when decrypting) and signatures (when verifying) that have
+  been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
+  Carnil for pointing this out.
+
+
+## Version 4.2 - released 2020-06-10
 
 - Rolled back the switch to Poetry, and reverted back to using Pipenv + setup.py
   for dependency management. There apparently is an issue no-binary installs of
