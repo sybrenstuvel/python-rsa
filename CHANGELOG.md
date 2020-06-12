@@ -1,5 +1,11 @@
 # Python-RSA changelog
 
+
+## Version 4.4.1 - released 2020-06-12
+
+This makes Python 3.8 support explicit in `setup.py`.
+
+
 ## Version 4.4 - released 2020-06-12
 
 Version 4.3 is almost a re-tagged release of version 4.0. It requires Python
