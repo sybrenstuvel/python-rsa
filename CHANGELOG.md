@@ -12,7 +12,7 @@ retag 4.4 as 4.6 as well.
 No functional changes compared to version 4.2.
 
 
-## Version 4.3 - released 2020-06-12
+## Version 4.3 & 4.5- released 2020-06-12
 
 Version 4.3 and 4.5 are almost a re-tagged release of version 4.0. It is the
 last to support Python 2.7. This is now made explicit in the `python_requires`
