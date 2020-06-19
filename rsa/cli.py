@@ -58,10 +58,10 @@ def keygen() -> None:
 
     try:
         keysize = int(cli_args[0])
-    except ValueError:
+    except ValueError as ex:
         parser.print_help()
         print('Not a valid number: %s' % cli_args[0], file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) from ex
 
     print('Generating %i-bit key' % keysize, file=sys.stderr)
     (pub_key, priv_key) = rsa.newkeys(keysize)
@@ -280,8 +280,8 @@ class VerifyOperation(CryptoOperation):
 
         try:
             rsa.verify(indata, signature, pub_key)
-        except rsa.VerificationError:
-            raise SystemExit('Verification failed.')
+        except rsa.VerificationError as ex:
+            raise SystemExit('Verification failed.') from ex
 
         print('Verification OK', file=sys.stderr)
 

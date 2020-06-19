@@ -123,10 +123,10 @@ class AbstractKey:
 
         try:
             return methods[file_format]
-        except KeyError:
+        except KeyError as ex:
             formats = ', '.join(sorted(methods.keys()))
             raise ValueError('Unsupported format: %r, try one of %s' % (file_format,
-                                                                        formats))
+                                                                        formats)) from ex
 
     def save_pkcs1(self, format: str = 'PEM') -> bytes:
         """Saves the key in PKCS#1 DER or PEM format.
@@ -675,7 +675,7 @@ def calculate_keys_custom_exponent(p: int, q: int, exponent: int) -> typing.Tupl
         raise rsa.common.NotRelativePrimeError(
             exponent, phi_n, ex.d,
             msg="e (%d) and phi_n (%d) are not relatively prime (divider=%i)" %
-                (exponent, phi_n, ex.d))
+                (exponent, phi_n, ex.d)) from ex
 
     if (exponent * d) % phi_n != 1:
         raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "

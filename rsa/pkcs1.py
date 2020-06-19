@@ -261,8 +261,8 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     # Find the 00 separator between the padding and the message
     try:
         sep_idx = cleartext.index(b'\x00', 2)
-    except ValueError:
-        raise DecryptionError('Decryption failed')
+    except ValueError as ex:
+        raise DecryptionError('Decryption failed') from ex
 
     return cleartext[sep_idx + 1:]
 
