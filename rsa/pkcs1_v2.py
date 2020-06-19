@@ -49,12 +49,12 @@ def mgf1(seed: bytes, length: int, hasher: str = 'SHA-1') -> bytes:
 
     try:
         hash_length = pkcs1.HASH_METHODS[hasher]().digest_size
-    except KeyError:
+    except KeyError as ex:
         raise ValueError(
             'Invalid `hasher` specified. Please select one of: {hash_list}'.format(
                 hash_list=', '.join(sorted(pkcs1.HASH_METHODS.keys()))
             )
-        )
+        ) from ex
 
     # If l > 2^32(hLen), output "mask too long" and stop.
     if length > (2**32 * hash_length):
