@@ -2,8 +2,9 @@
 
 ## Version 4.7 - in development
 
-- Fix #165: CVE-2020-25658 - Bleichenbacher-style timing oracle in PKCS#1 v1.5
-  decryption code
+- Fix [#165](https://github.com/sybrenstuvel/python-rsa/issues/165]:
+  CVE-2020-25658 - Bleichenbacher-style timing oracle in PKCS#1 v1.5 decryption
+  code
 - Add padding length check as described by PKCS#1 v1.5 (Fixes
   [#164](https://github.com/sybrenstuvel/python-rsa/issues/164))
 
