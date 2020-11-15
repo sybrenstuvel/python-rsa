@@ -183,3 +183,36 @@ class SignatureTest(unittest.TestCase):
         signature = signature + bytes.fromhex('0000')
         with self.assertRaises(rsa.VerificationError):
             pkcs1.verify(message, signature, self.pub)
+
+
+class PaddingSizeTest(unittest.TestCase):
+    def test_too_little_padding(self):
+        """Padding less than 8 bytes should be rejected."""
+
+        # Construct key that will be small enough to need only 7 bytes of padding.
+        # This key is 168 bit long, and was generated with rsa.newkeys(nbits=168).
+        self.private_key = rsa.PrivateKey.load_pkcs1(b'''
+-----BEGIN RSA PRIVATE KEY-----
+MHkCAQACFgCIGbbNSkIRLtprxka9NgOf5UxgxCMCAwEAAQIVQqymO0gHubdEVS68
+CdCiWmOJxVfRAgwBQM+e1JJwMKmxSF0CCmya6CFxO8Evdn8CDACMM3AlVC4FhlN8
+3QIKC9cjoam/swMirwIMAR7Br9tdouoH7jAE
+-----END RSA PRIVATE KEY-----
+        ''')
+        self.public_key = rsa.PublicKey(n=self.private_key.n, e=self.private_key.e)
+
+        cyphertext = self.encrypt_with_short_padding(b'op je hoofd')
+        with self.assertRaises(rsa.DecryptionError):
+            rsa.decrypt(cyphertext, self.private_key)
+
+    def encrypt_with_short_padding(self, message: bytes) -> bytes:
+        # This is a copy of rsa.pkcs1.encrypt() adjusted to use the wrong padding length.
+        keylength = rsa.common.byte_size(self.public_key.n)
+
+        # The word 'padding' has 7 letters, so is one byte short of a valid padding length.
+        padded = b'\x00\x02padding\x00' + message
+
+        payload = rsa.transform.bytes2int(padded)
+        encrypted_value = rsa.core.encrypt_int(payload, self.public_key.e, self.public_key.n)
+        cyphertext = rsa.transform.int2bytes(encrypted_value, keylength)
+
+        return cyphertext

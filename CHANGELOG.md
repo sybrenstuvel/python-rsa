@@ -4,6 +4,8 @@
 
 - Fix #165: CVE-2020-25658 - Bleichenbacher-style timing oracle in PKCS#1 v1.5
   decryption code
+- Add padding length check as described by PKCS#1 v1.5 (Fixes
+  [#164](https://github.com/sybrenstuvel/python-rsa/issues/164))
 
 
 ## Version 4.4 & 4.6 - released 2020-06-12
