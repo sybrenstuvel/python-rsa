@@ -30,6 +30,7 @@ import hashlib
 import os
 import sys
 import typing
+from hmac import compare_digest
 
 from . import common, transform, core, key
 
@@ -251,17 +252,20 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     # Detect leading zeroes in the crypto. These are not reflected in the
     # encrypted value (as leading zeroes do not influence the value of an
     # integer). This fixes CVE-2020-13757.
-    if len(crypto) > blocksize:
-        raise DecryptionError('Decryption failed')
+    crypto_len_bad = len(crypto) > blocksize
 
     # If we can't find the cleartext marker, decryption failed.
-    if cleartext[0:2] != b'\x00\x02':
-        raise DecryptionError('Decryption failed')
+    cleartext_marker_bad = not compare_digest(cleartext[:2], b'\x00\x02')
 
     # Find the 00 separator between the padding and the message
     try:
         sep_idx = cleartext.index(b'\x00', 2)
     except ValueError:
+        sep_idx = -1
+    sep_idx_bad = sep_idx < 0
+
+    anything_bad = crypto_len_bad | cleartext_marker_bad | sep_idx_bad
+    if anything_bad:
         raise DecryptionError('Decryption failed')
 
     return cleartext[sep_idx + 1:]

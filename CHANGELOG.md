@@ -1,5 +1,10 @@
 # Python-RSA changelog
 
+## Version 4.7 - in development
+
+- Fix #165: CVE-2020-25658 - Bleichenbacher-style timing oracle in PKCS#1 v1.5
+  decryption code
+
 
 ## Version 4.4 & 4.6 - released 2020-06-12
 
