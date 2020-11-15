@@ -252,7 +252,9 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     # Detect leading zeroes in the crypto. These are not reflected in the
     # encrypted value (as leading zeroes do not influence the value of an
     # integer). This fixes CVE-2020-13757.
-    crypto_len_bad = len(crypto) > blocksize
+    if len(crypto) > blocksize:
+        # This is operating on public information, so doesn't need to be constant-time.
+        raise DecryptionError('Decryption failed')
 
     # If we can't find the cleartext marker, decryption failed.
     cleartext_marker_bad = not compare_digest(cleartext[:2], b'\x00\x02')
@@ -267,7 +269,7 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     # `\x00\x02` marker that preceeds it).
     sep_idx_bad = sep_idx < 10
 
-    anything_bad = crypto_len_bad | cleartext_marker_bad | sep_idx_bad
+    anything_bad = cleartext_marker_bad | sep_idx_bad
     if anything_bad:
         raise DecryptionError('Decryption failed')
 
