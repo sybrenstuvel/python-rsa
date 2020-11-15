@@ -258,10 +258,8 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     cleartext_marker_bad = not compare_digest(cleartext[:2], b'\x00\x02')
 
     # Find the 00 separator between the padding and the message
-    try:
-        sep_idx = cleartext.index(b'\x00', 2)
-    except ValueError:
-        sep_idx = -1
+    sep_idx = cleartext.find(b'\x00', 2)
+
     # sep_idx indicates the position of the `\x00` separator that separates the
     # padding from the actual message. The padding should be at least 8 bytes
     # long (see https://tools.ietf.org/html/rfc8017#section-7.2.2 step 3), which
