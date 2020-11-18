@@ -39,6 +39,18 @@ class BinaryTest(unittest.TestCase):
 
         self.assertEqual(message, decrypted)
 
+    def test_enc_dec_exchange(self):
+        message = struct.pack('>IIII', 0, 0, 0, 1)
+        print("\tMessage:   %r" % message)
+
+        encrypted = pkcs1.encryptUsePrivate(message, self.priv)
+        print("\tEncrypted: %r" % encrypted)
+
+        decrypted = pkcs1.decryptUsePublic(encrypted, self.pub)
+        print("\tDecrypted: %r" % decrypted)
+
+        self.assertEqual(message, decrypted)
+
     def test_decoding_failure(self):
         message = struct.pack('>IIII', 0, 0, 0, 1)
         encrypted = pkcs1.encrypt(message, self.pub)
