@@ -276,6 +276,113 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     return cleartext[sep_idx + 1:]
 
 
+def encryptUsePrivate(message: bytes, priv_key: key.PrivateKey) -> bytes:
+    """Encrypts the given message using PKCS#1 v1.5
+
+    :param message: the message to encrypt. Must be a byte string no longer than
+        ``k-11`` bytes, where ``k`` is the number of bytes needed to encode
+        the ``n`` component of the public key.
+    :param priv_key: the :py:class:`rsa.PrivateKey` to encrypt with.
+    :raise OverflowError: when the message is too large to fit in the padded
+        block.
+
+    >>> from rsa import key, common
+    >>> (pub_key, priv_key) = key.newkeys(256)
+    >>> message = b'hello'
+    >>> crypto = encryptUsePrivate(message, priv_key)
+
+    The crypto text should be just as long as the public key 'n' component:
+
+    >>> len(crypto) == common.byte_size(pub_key.n)
+    True
+
+    """
+
+    keylength = common.byte_size(priv_key.n)
+    padded = _pad_for_encryption(message, keylength)
+
+    payload = transform.bytes2int(padded)
+    encrypted = core.encrypt_int(payload, priv_key.d, priv_key.n)
+    block = transform.int2bytes(encrypted, keylength)
+
+    return block
+
+
+def decryptUsePublic(crypto: bytes, pub_key: key.PublicKey) -> bytes:
+    r"""Decrypts the given message using PKCS#1 v1.5
+
+    The decryption is considered 'failed' when the resulting cleartext doesn't
+    start with the bytes 00 02, or when the 00 byte between the padding and
+    the message cannot be found.
+
+    :param crypto: the crypto text as returned by :py:func:`rsa.encrypt`
+    :param pub_key: the :py:class:`rsa.PublicKey` to decrypt with.
+    :raise DecryptionError: when the decryption fails. No details are given as
+        to why the code thinks the decryption fails, as this would leak
+        information about the private key.
+
+
+    >>> import rsa
+    >>> (pub_key, priv_key) = rsa.newkeys(256)
+
+    It works with strings:
+
+    >>> crypto = encryptUsePrivate(b'hello', priv_key)
+    >>> decryptUsePublic(crypto, pub_key)
+    b'hello'
+
+    And with binary data:
+
+    >>> crypto = encryptUsePrivate(b'\x00\x00\x00\x00\x01', priv_key)
+    >>> decryptUsePublic(crypto, pub_key)
+    b'\x00\x00\x00\x00\x01'
+
+    Altering the encrypted information will *likely* cause a
+    :py:class:`rsa.pkcs1.DecryptionError`. If you want to be *sure*, use
+    :py:func:`rsa.sign`.
+
+
+    .. warning::
+
+        Never display the stack trace of a
+        :py:class:`rsa.pkcs1.DecryptionError` exception. It shows where in the
+        code the exception occurred, and thus leaks information about the key.
+        It's only a tiny bit of information, but every bit makes cracking the
+        keys easier.
+
+    >>> crypto = encryptUsePrivate(b'hello', priv_key)
+    >>> crypto = crypto[0:5] + b'X' + crypto[6:] # change a byte
+    >>> decryptUsePublic(crypto, pub_key)
+    Traceback (most recent call last):
+    ...
+    rsa.pkcs1.DecryptionError: Decryption failed
+
+    """
+
+    blocksize = common.byte_size(pub_key.n)
+    encrypted = transform.bytes2int(crypto)
+    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
+    cleartext = transform.int2bytes(decrypted, blocksize)
+
+    # Detect leading zeroes in the crypto. These are not reflected in the
+    # encrypted value (as leading zeroes do not influence the value of an
+    # integer). This fixes CVE-2020-13757.
+    if len(crypto) > blocksize:
+        raise DecryptionError('Decryption failed')
+
+    # If we can't find the cleartext marker, decryption failed.
+    if cleartext[0:2] != b'\x00\x02':
+        raise DecryptionError('Decryption failed')
+
+    # Find the 00 separator between the padding and the message
+    try:
+        sep_idx = cleartext.index(b'\x00', 2)
+    except ValueError:
+        raise DecryptionError('Decryption failed')
+
+    return cleartext[sep_idx + 1:]    
+
+
 def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
