@@ -9,6 +9,7 @@
   [#164](https://github.com/sybrenstuvel/python-rsa/issues/164))
 - Reuse of blinding factors to speed up blinding operations.
   Fixes [#162](https://github.com/sybrenstuvel/python-rsa/issues/162).
+- Declare & test support for Python 3.9
 
 
 ## Version 4.4 & 4.6 - released 2020-06-12
