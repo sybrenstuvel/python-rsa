@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,14 +29,9 @@ import hashlib
 import os
 import sys
 import typing
+from hmac import compare_digest
 
 from . import common, core, key, transform
-
-if sys.version_info < (3, 6):
-    # Python 3.6 and newer have SHA-3 support. For Python 3.5 we need a third party library.
-    # This library monkey-patches the hashlib module so that it looks like Python actually
-    # supports SHA-3 natively.
-    import sha3  # noqa: F401
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
@@ -48,9 +41,6 @@ HASH_ASN1 = {
     'SHA-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20',
     'SHA-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30',
     'SHA-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40',
-    'SHA3-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20',
-    'SHA3-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30',
-    'SHA3-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40',
 }
 
 HASH_METHODS = {
@@ -60,10 +50,22 @@ HASH_METHODS = {
     'SHA-256': hashlib.sha256,
     'SHA-384': hashlib.sha384,
     'SHA-512': hashlib.sha512,
-    'SHA3-256': hashlib.sha3_256,
-    'SHA3-384': hashlib.sha3_384,
-    'SHA3-512': hashlib.sha3_512,
 }
+
+
+if sys.version_info >= (3, 6):
+    # Python 3.6 introduced SHA3 support.
+    HASH_ASN1.update({
+        'SHA3-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20',
+        'SHA3-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30',
+        'SHA3-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40',
+    })
+
+    HASH_METHODS.update({
+        'SHA3-256': hashlib.sha3_256,
+        'SHA3-384': hashlib.sha3_384,
+        'SHA3-512': hashlib.sha3_512,
+    })
 
 
 class CryptoError(Exception):
@@ -152,7 +154,9 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     return b''.join([b'\x00\x01', padding_length * b'\xff', b'\x00', message])
 
 
-def encrypt(message: bytes, pub_key: key.PublicKey, lowKey: bool= False):
+
+def encrypt(message: bytes, pub_key: key.PublicKey, lowKey: bool= False) -> bytes:
+
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
@@ -240,14 +244,28 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     decrypted = priv_key.blinded_decrypt(encrypted)
     cleartext = transform.int2bytes(decrypted, blocksize)
 
-    # If we can't find the cleartext marker, decryption failed.
-    if cleartext[0:2] != b'\x00\x02':
+    # Detect leading zeroes in the crypto. These are not reflected in the
+    # encrypted value (as leading zeroes do not influence the value of an
+    # integer). This fixes CVE-2020-13757.
+    if len(crypto) > blocksize:
+        # This is operating on public information, so doesn't need to be constant-time.
         raise DecryptionError('Decryption failed')
 
+    # If we can't find the cleartext marker, decryption failed.
+    cleartext_marker_bad = not compare_digest(cleartext[:2], b'\x00\x02')
+
     # Find the 00 separator between the padding and the message
-    try:
-        sep_idx = cleartext.index(b'\x00', 2)
-    except ValueError:
+    sep_idx = cleartext.find(b'\x00', 2)
+
+    # sep_idx indicates the position of the `\x00` separator that separates the
+    # padding from the actual message. The padding should be at least 8 bytes
+    # long (see https://tools.ietf.org/html/rfc8017#section-7.2.2 step 3), which
+    # means the separator should be at least at index 10 (because of the
+    # `\x00\x02` marker that preceeds it).
+    sep_idx_bad = sep_idx < 10
+
+    anything_bad = cleartext_marker_bad | sep_idx_bad
+    if anything_bad:
         raise DecryptionError('Decryption failed')
 
     return cleartext[sep_idx + 1:]
@@ -335,6 +353,9 @@ def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
     expected = _pad_for_signing(cleartext, keylength)
+
+    if len(signature) != keylength:
+        raise VerificationError('Verification failed')
 
     # Compare with the signed one
     if expected != clearsig:

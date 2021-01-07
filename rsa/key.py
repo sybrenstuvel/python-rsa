@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,11 +49,14 @@ DEFAULT_EXPONENT = 65537
 class AbstractKey:
     """Abstract superclass for private and public keys."""
 
-    __slots__ = ('n', 'e')
+    __slots__ = ('n', 'e', 'blindfac', 'blindfac_inverse')
 
     def __init__(self, n: int, e: int) -> None:
         self.n = n
         self.e = e
+
+        # These will be computed properly on the first call to blind().
+        self.blindfac = self.blindfac_inverse = -1
 
     @classmethod
     def _load_pkcs1_pem(cls, keyfile: bytes) -> 'AbstractKey':
@@ -96,7 +97,7 @@ class AbstractKey:
         """
 
     @classmethod
-    def load_pkcs1(cls, keyfile: bytes, format='PEM') -> 'AbstractKey':
+    def load_pkcs1(cls, keyfile: bytes, format: str = 'PEM') -> 'AbstractKey':
         """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
@@ -130,7 +131,7 @@ class AbstractKey:
             raise ValueError('Unsupported format: %r, try one of %s' % (file_format,
                                                                         formats))
 
-    def save_pkcs1(self, format='PEM') -> bytes:
+    def save_pkcs1(self, format: str = 'PEM') -> bytes:
         """Saves the key in PKCS#1 DER or PEM format.
 
         :param format: the format to save; 'PEM' or 'DER'
@@ -147,7 +148,7 @@ class AbstractKey:
         method = self._assert_format_exists(format, methods)
         return method()
 
-    def blind(self, message: int, r: int) -> int:
+    def blind(self, message: int) -> int:
         """Performs blinding on the message using random number 'r'.
 
         :param message: the message, as integer, to blind.
@@ -161,10 +162,10 @@ class AbstractKey:
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
+        self._update_blinding_factor()
+        return (message * pow(self.blindfac, self.e, self.n)) % self.n
 
-        return (message * pow(r, self.e, self.n)) % self.n
-
-    def unblind(self, blinded: int, r: int) -> int:
+    def unblind(self, blinded: int) -> int:
         """Performs blinding on the message using random number 'r'.
 
         :param blinded: the blinded message, as integer, to unblind.
@@ -176,8 +177,27 @@ class AbstractKey:
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
 
-        return (rsa.common.inverse(r, self.n) * blinded) % self.n
+        return (self.blindfac_inverse * blinded) % self.n
 
+    def _initial_blinding_factor(self) -> int:
+        for _ in range(1000):
+            blind_r = rsa.randnum.randint(self.n - 1)
+            if rsa.prime.are_relatively_prime(self.n, blind_r):
+                return blind_r
+        raise RuntimeError('unable to find blinding factor')
+
+    def _update_blinding_factor(self):
+        if self.blindfac < 0:
+            # Compute initial blinding factor, which is rather slow to do.
+            self.blindfac = self._initial_blinding_factor()
+            self.blindfac_inverse = rsa.common.inverse(self.blindfac, self.n)
+        else:
+            # Reuse previous blinding factor as per section 9 of 'A Timing
+            # Attack against RSA with the Chinese Remainder Theorem' by Werner
+            # Schindler.
+            # See https://tls.mbed.org/public/WSchindler-RSA_Timing_Attack.pdf
+            self.blindfac = pow(self.blindfac, 2, self.n)
+            self.blindfac_inverse = pow(self.blindfac_inverse, 2, self.n)
 
 class PublicKey(AbstractKey):
     """Represents a public RSA key.
@@ -205,7 +225,7 @@ class PublicKey(AbstractKey):
 
     __slots__ = ('n', 'e')
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
     def __repr__(self) -> str:
@@ -380,7 +400,7 @@ class PrivateKey(AbstractKey):
         self.exp2 = int(d % (q - 1))
         self.coef = rsa.common.inverse(q, p)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
     def __repr__(self) -> str:
@@ -390,7 +410,7 @@ class PrivateKey(AbstractKey):
         """Returns the key as tuple for pickling."""
         return self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef
 
-    def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]):
+    def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]) -> None:
         """Sets the key from tuple."""
         self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
 
@@ -426,11 +446,9 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
-        blinded = self.blind(encrypted, blind_r)  # blind before decrypting
+        blinded = self.blind(encrypted)  # blind before decrypting
         decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
-
-        return self.unblind(decrypted, blind_r)
+        return self.unblind(decrypted)
 
     def blinded_encrypt(self, message: int) -> int:
         """Encrypts the message using blinding to prevent side-channel attacks.
@@ -442,10 +460,9 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
-        blinded = self.blind(message, blind_r)  # blind before encrypting
+        blinded = self.blind(message)  # blind before encrypting
         encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
-        return self.unblind(encrypted, blind_r)
+        return self.unblind(encrypted)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile: bytes) -> 'PrivateKey':
@@ -569,7 +586,9 @@ class PrivateKey(AbstractKey):
         return rsa.pem.save_pem(der, b'RSA PRIVATE KEY')
 
 
-def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typing.Tuple[int, int]:
+def find_p_q(nbits: int,
+             getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+             accurate: bool = True) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
 
     The resulting p * q has exacty 2 * nbits bits, and the returned p and q
@@ -614,7 +633,7 @@ def find_p_q(nbits: int, getprime_func=rsa.prime.getprime, accurate=True) -> typ
     log.debug('find_p_q(%i): Finding q', nbits)
     q = getprime_func(qbits)
 
-    def is_acceptable(p, q):
+    def is_acceptable(p: int, q: int) -> bool:
         """Returns True iff p and q are acceptable:
 
             - p and q differ
@@ -692,8 +711,8 @@ def calculate_keys(p: int, q: int) -> typing.Tuple[int, int]:
 
 def gen_keys(nbits: int,
              getprime_func: typing.Callable[[int], int],
-             accurate=True,
-             exponent=DEFAULT_EXPONENT) -> typing.Tuple[int, int, int, int]:
+             accurate: bool = True,
+             exponent: int = DEFAULT_EXPONENT) -> typing.Tuple[int, int, int, int]:
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
@@ -721,8 +740,10 @@ def gen_keys(nbits: int,
     return p, q, e, d
 
 
-def newkeys(nbits: int, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT) \
-        -> typing.Tuple[PublicKey, PrivateKey]:
+def newkeys(nbits: int,
+            accurate: bool = True,
+            poolsize: int = 1,
+            exponent: int = DEFAULT_EXPONENT) -> typing.Tuple[PublicKey, PrivateKey]:
     """Generates public and private keys, and returns them as (pub, priv).
 
     The public key is also known as the 'encryption key', and is a
@@ -758,7 +779,7 @@ def newkeys(nbits: int, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT) \
     if poolsize > 1:
         from rsa import parallel
 
-        def getprime_func(nbits):
+        def getprime_func(nbits: int) -> int:
             return parallel.getprime(nbits, poolsize=poolsize)
     else:
         getprime_func = rsa.prime.getprime

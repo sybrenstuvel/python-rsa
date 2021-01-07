@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,8 +26,8 @@ from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
     VerificationError, find_signature_hash,  sign_hash, compute_hash
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
-__date__ = '2019-08-04'
-__version__ = '4.1-dev0'
+__date__ = '2020-06-12'
+__version__ = '4.7-dev0'
 
 # Do doctest if we're run directly
 if __name__ == "__main__":

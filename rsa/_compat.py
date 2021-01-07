@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +17,7 @@
 from struct import pack
 
 
-def byte(num: int):
+def byte(num: int) -> bytes:
     """
     Converts a number between 0 and 255 (both inclusive) to a base-256 (byte)
     representation.

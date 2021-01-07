@@ -1,8 +1,58 @@
 # Python-RSA changelog
 
+## Version 4.7 - in development
 
-## Version 4.1 - in development
+- Fix [#165](https://github.com/sybrenstuvel/python-rsa/issues/165]:
+  CVE-2020-25658 - Bleichenbacher-style timing oracle in PKCS#1 v1.5 decryption
+  code
+- Add padding length check as described by PKCS#1 v1.5 (Fixes
+  [#164](https://github.com/sybrenstuvel/python-rsa/issues/164))
+- Reuse of blinding factors to speed up blinding operations.
+  Fixes [#162](https://github.com/sybrenstuvel/python-rsa/issues/162).
 
+
+## Version 4.4 & 4.6 - released 2020-06-12
+
+Version 4.4 and 4.6 are almost a re-tagged release of version 4.2. It requires
+Python 3.5+. To avoid older Python installations from trying to upgrade to RSA
+4.4, this is now made explicit in the `python_requires` argument in `setup.py`.
+There was a mistake releasing 4.4 as "3.5+ only", which made it necessary to
+retag 4.4 as 4.6 as well.
+
+No functional changes compared to version 4.2.
+
+
+## Version 4.3 & 4.5 - released 2020-06-12
+
+Version 4.3 and 4.5 are almost a re-tagged release of version 4.0. It is the
+last to support Python 2.7. This is now made explicit in the `python_requires`
+argument in `setup.py`. Python 3.4 is not supported by this release. There was a
+mistake releasing 4.4 as "3.5+ only", which made it necessary to retag 4.3 as
+4.5 as well.
+
+Two security fixes have also been backported, so 4.3 = 4.0 + these two fixes.
+
+- Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
+- Reject cyphertexts (when decrypting) and signatures (when verifying) that have
+  been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
+  Carnil for pointing this out.
+
+
+## Version 4.2 - released 2020-06-10
+
+- Rolled back the switch to Poetry, and reverted back to using Pipenv + setup.py
+  for dependency management. There apparently is an issue no-binary installs of
+  packages build with Poetry. This fixes
+  [#148](https://github.com/sybrenstuvel/python-rsa/issues/148)
+- Limited SHA3 support to those Python versions (3.6+) that support it natively.
+  The third-party library that adds support for this to Python 3.5 is a binary
+  package, and thus breaks the pure-Python nature of Python-RSA.
+  This should fix [#147](https://github.com/sybrenstuvel/python-rsa/issues/147).
+
+
+## Version 4.1 - released 2020-06-10
+
+- Added support for Python 3.8.
 - Dropped support for Python 2 and 3.4.
 - Added type annotations to the source code. This will make Python-RSA easier to use in
   your IDE, and allows better type checking.
@@ -14,6 +64,10 @@
 - Added support for SHA3 hashing: SHA3-256, SHA3-384, SHA3-512. This
   is natively supported by Python 3.6+ and supported via a third-party
   library on Python 3.5.
+- Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
+- Reject cyphertexts (when decrypting) and signatures (when verifying) that have
+  been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
+  Adelapie for pointing this out.
 
 
 ## Version 4.0 - released 2018-09-16

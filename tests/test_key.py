@@ -21,11 +21,20 @@ class BlindingTest(unittest.TestCase):
         message = 12345
         encrypted = rsa.core.encrypt_int(message, pk.e, pk.n)
 
-        blinded = pk.blind(encrypted, 4134431)  # blind before decrypting
-        decrypted = rsa.core.decrypt_int(blinded, pk.d, pk.n)
-        unblinded = pk.unblind(decrypted, 4134431)
+        blinded_1 = pk.blind(encrypted)  # blind before decrypting
+        decrypted = rsa.core.decrypt_int(blinded_1, pk.d, pk.n)
+        unblinded_1 = pk.unblind(decrypted)
 
-        self.assertEqual(unblinded, message)
+        self.assertEqual(unblinded_1, message)
+
+        # Re-blinding should use a different blinding factor.
+        blinded_2 = pk.blind(encrypted)  # blind before decrypting
+        self.assertNotEqual(blinded_1, blinded_2)
+
+        # The unblinding should still work, though.
+        decrypted = rsa.core.decrypt_int(blinded_2, pk.d, pk.n)
+        unblinded_2 = pk.unblind(decrypted)
+        self.assertEqual(unblinded_2, message)
 
 
 class KeyGenTest(unittest.TestCase):

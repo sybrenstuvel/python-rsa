@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +25,7 @@ from rsa import (
 )
 
 
-def mgf1(seed: bytes, length: int, hasher='SHA-1') -> bytes:
+def mgf1(seed: bytes, length: int, hasher: str = 'SHA-1') -> bytes:
     """
     MGF1 is a Mask Generation Function based on a hash function.
 

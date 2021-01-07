@@ -9,6 +9,12 @@ Depending on your system you may need to use ``sudo pip`` if you want to install
 the library system-wide, or use ``pip install --user rsa`` to install the
 library in your home directory.
 
+Installation from source is also quite easy. Download the source and
+then type::
+
+    python setup.py install
+
+
 The sources are tracked in our `Git repository`_ at
 GitHub. It also hosts the `issue tracker`_.
 
@@ -36,10 +42,10 @@ the source::
 
     git clone https://github.com/sybrenstuvel/python-rsa.git
 
-Use Poetry_ to install the development requirements in a virtual environment::
+Use Pipenv_ to install the development requirements in a virtual environment::
 
     cd python-rsa
-    poetry install
+    pipenv install --dev
 
 .. _Git: https://git-scm.com/
-.. _Poetry: https://poetry.eustace.io/
+.. _Pipenv: https://pipenv.pypa.io/en/latest/
