@@ -170,7 +170,7 @@ You can create a detached signature for a message using the
 :py:func:`rsa.sign` function:
 
     >>> (pubkey, privkey) = rsa.newkeys(512)
-    >>> message = 'Go left at the blue tree'
+    >>> message = 'Go left at the blue tree'.encode()
     >>> signature = rsa.sign(message, privkey, 'SHA-1')
 
 This hashes the message using SHA-1. Other hash methods are also
@@ -182,21 +182,21 @@ It is possible to calculate the hash and signature in separate operations
 private key on remote server). To hash a message use the :py:func:`rsa.compute_hash`
 function and then use the :py:func:`rsa.sign_hash` function to sign the hash:
 
-    >>> message = 'Go left at the blue tree'
+    >>> message = 'Go left at the blue tree'.encode()
     >>> hash = rsa.compute_hash(message, 'SHA-1')
     >>> signature = rsa.sign_hash(hash, privkey, 'SHA-1')
 
 In order to verify the signature, use the :py:func:`rsa.verify`
 function. This function returns True if the verification is successful:
 
-    >>> message = 'Go left at the blue tree'
+    >>> message = 'Go left at the blue tree'.encode()
     >>> rsa.verify(message, signature, pubkey)
     True
 
 Modify the message, and the signature is no longer valid and a
 :py:class:`rsa.pkcs1.VerificationError` is thrown:
 
-    >>> message = 'Go right at the blue tree'
+    >>> message = 'Go right at the blue tree'.encode()
     >>> rsa.verify(message, signature, pubkey)
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
