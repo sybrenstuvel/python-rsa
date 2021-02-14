@@ -32,6 +32,7 @@ of pyasn1.
 """
 
 import logging
+import threading
 import typing
 import warnings
 
@@ -49,7 +50,7 @@ DEFAULT_EXPONENT = 65537
 class AbstractKey:
     """Abstract superclass for private and public keys."""
 
-    __slots__ = ('n', 'e', 'blindfac', 'blindfac_inverse')
+    __slots__ = ('n', 'e', 'blindfac', 'blindfac_inverse', 'mutex')
 
     def __init__(self, n: int, e: int) -> None:
         self.n = n
@@ -57,6 +58,10 @@ class AbstractKey:
 
         # These will be computed properly on the first call to blind().
         self.blindfac = self.blindfac_inverse = -1
+
+        # Used to protect updates to the blinding factor in multi-threaded
+        # environments.
+        self.mutex = threading.Lock()
 
     @classmethod
     def _load_pkcs1_pem(cls, keyfile: bytes) -> 'AbstractKey':
@@ -148,36 +153,33 @@ class AbstractKey:
         method = self._assert_format_exists(format, methods)
         return method()
 
-    def blind(self, message: int) -> int:
-        """Performs blinding on the message using random number 'r'.
+    def blind(self, message: int) -> typing.Tuple[int, int]:
+        """Performs blinding on the message.
 
         :param message: the message, as integer, to blind.
-        :type message: int
         :param r: the random number to blind with.
-        :type r: int
-        :return: the blinded message.
-        :rtype: int
+        :return: tuple (the blinded message, the inverse of the used blinding factor)
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
-        self._update_blinding_factor()
-        return (message * pow(self.blindfac, self.e, self.n)) % self.n
+        blindfac, blindfac_inverse = self._update_blinding_factor()
+        blinded = (message * pow(blindfac, self.e, self.n)) % self.n
+        return blinded, blindfac_inverse
 
-    def unblind(self, blinded: int) -> int:
-        """Performs blinding on the message using random number 'r'.
+    def unblind(self, blinded: int, blindfac_inverse: int) -> int:
+        """Performs blinding on the message using random number 'blindfac_inverse'.
 
         :param blinded: the blinded message, as integer, to unblind.
-        :param r: the random number to unblind with.
+        :param blindfac: the factor to unblind with.
         :return: the original message.
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
-
-        return (self.blindfac_inverse * blinded) % self.n
+        return (blindfac_inverse * blinded) % self.n
 
     def _initial_blinding_factor(self) -> int:
         for _ in range(1000):
@@ -186,18 +188,29 @@ class AbstractKey:
                 return blind_r
         raise RuntimeError('unable to find blinding factor')
 
-    def _update_blinding_factor(self):
-        if self.blindfac < 0:
-            # Compute initial blinding factor, which is rather slow to do.
-            self.blindfac = self._initial_blinding_factor()
-            self.blindfac_inverse = rsa.common.inverse(self.blindfac, self.n)
-        else:
-            # Reuse previous blinding factor as per section 9 of 'A Timing
-            # Attack against RSA with the Chinese Remainder Theorem' by Werner
-            # Schindler.
-            # See https://tls.mbed.org/public/WSchindler-RSA_Timing_Attack.pdf
-            self.blindfac = pow(self.blindfac, 2, self.n)
-            self.blindfac_inverse = pow(self.blindfac_inverse, 2, self.n)
+    def _update_blinding_factor(self) -> typing.Tuple[int, int]:
+        """Update blinding factors.
+
+        Computing a blinding factor is expensive, so instead this function
+        does this once, then updates the blinding factor as per section 9
+        of 'A Timing Attack against RSA with the Chinese Remainder Theorem'
+        by Werner Schindler.
+        See https://tls.mbed.org/public/WSchindler-RSA_Timing_Attack.pdf
+
+        :return: the new blinding factor and its inverse.
+        """
+
+        with self.mutex:
+            if self.blindfac < 0:
+                # Compute initial blinding factor, which is rather slow to do.
+                self.blindfac = self._initial_blinding_factor()
+                self.blindfac_inverse = rsa.common.inverse(self.blindfac, self.n)
+            else:
+                # Reuse previous blinding factor.
+                self.blindfac = pow(self.blindfac, 2, self.n)
+                self.blindfac_inverse = pow(self.blindfac_inverse, 2, self.n)
+
+            return self.blindfac, self.blindfac_inverse
 
 class PublicKey(AbstractKey):
     """Represents a public RSA key.
@@ -446,9 +459,10 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blinded = self.blind(encrypted)  # blind before decrypting
+        # Blinding and un-blinding should be using the same factor
+        blinded, blindfac_inverse = self.blind(encrypted)
         decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
-        return self.unblind(decrypted)
+        return self.unblind(decrypted, blindfac_inverse)
 
     def blinded_encrypt(self, message: int) -> int:
         """Encrypts the message using blinding to prevent side-channel attacks.
@@ -460,9 +474,9 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blinded = self.blind(message)  # blind before encrypting
+        blinded, blindfac_inverse = self.blind(message)
         encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
-        return self.unblind(encrypted)
+        return self.unblind(encrypted, blindfac_inverse)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile: bytes) -> 'PrivateKey':

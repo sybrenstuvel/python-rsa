@@ -1,5 +1,9 @@
 # Python-RSA changelog
 
+## Version 4.7.1 - in development
+
+- Fix threading issue introduced in 4.7 ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173)
+
 ## Version 4.7 - released 2021-01-10
 
 - Fix [#165](https://github.com/sybrenstuvel/python-rsa/issues/165):
