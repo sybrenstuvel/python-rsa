@@ -29,26 +29,3 @@ Security
 Because of how Python internally stores numbers, it is very hard (if not impossible) to make a pure-Python program secure against timing attacks. This library is no exception, so use it with care. See https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/ for more info.
 
 
-Major changes in 4.1
---------------------
-
-Version 4.0 was the last version to support Python 2 and 3.4. Version 4.1 is compatible with Python 3.5+ only.
-
-
-Major changes in 4.0
---------------------
-
-Version 3.4 was the last version in the 3.x range. Version 4.0 drops the following modules,
-as they are insecure:
-
-- `rsa._version133`
-- `rsa._version200`
-- `rsa.bigfile`
-- `rsa.varblock`
-
-Those modules were marked as deprecated in version 3.4.
-
-Furthermore, in 4.0 the I/O functions is streamlined to always work with bytes on all
-supported versions of Python.
-
-Version 4.0 drops support for Python 2.6 and 3.3.
