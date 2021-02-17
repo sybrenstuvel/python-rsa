@@ -29,7 +29,7 @@ class BinaryTest(unittest.TestCase):
 
     def test_enc_dec(self):
         message = struct.pack('>IIII', 0, 0, 0, 1)
-        print("\tMessage:   %r" % message)
+        print("\n\tMessage:   %r" % message)
 
         encrypted = pkcs1.encrypt(message, self.pub)
         print("\tEncrypted: %r" % encrypted)

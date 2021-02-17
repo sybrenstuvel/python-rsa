@@ -113,7 +113,7 @@ class AbstractCliTest(unittest.TestCase):
 
 class KeygenTest(AbstractCliTest):
     def test_keygen_no_args(self):
-        with cli_args():
+        with captured_output(), cli_args():
             self.assertExits(1, rsa.cli.keygen)
 
     def test_keygen_priv_stdout(self):
@@ -182,11 +182,11 @@ class KeygenTest(AbstractCliTest):
 
 class EncryptDecryptTest(AbstractCliTest):
     def test_empty_decrypt(self):
-        with cli_args():
+        with captured_output(), cli_args():
             self.assertExits(1, rsa.cli.decrypt)
 
     def test_empty_encrypt(self):
-        with cli_args():
+        with captured_output(), cli_args():
             self.assertExits(1, rsa.cli.encrypt)
 
     @cleanup_files('encrypted.txt', 'cleartext.txt')
@@ -227,11 +227,11 @@ class EncryptDecryptTest(AbstractCliTest):
 
 class SignVerifyTest(AbstractCliTest):
     def test_empty_verify(self):
-        with cli_args():
+        with captured_output(), cli_args():
             self.assertExits(1, rsa.cli.verify)
 
     def test_empty_sign(self):
-        with cli_args():
+        with captured_output(), cli_args():
             self.assertExits(1, rsa.cli.sign)
 
     @cleanup_files('signature.txt', 'cleartext.txt')

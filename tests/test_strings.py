@@ -29,7 +29,7 @@ class StringTest(unittest.TestCase):
 
     def test_enc_dec(self):
         message = unicode_string.encode('utf-8')
-        print("\tMessage:   %r" % message)
+        print("\n\tMessage:   %r" % message)
 
         encrypted = rsa.encrypt(message, self.pub)
         print("\tEncrypted: %r" % encrypted)
