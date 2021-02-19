@@ -187,11 +187,12 @@ function and then use the :py:func:`rsa.sign_hash` function to sign the hash:
     >>> signature = rsa.sign_hash(hash, privkey, 'SHA-1')
 
 In order to verify the signature, use the :py:func:`rsa.verify`
-function. This function returns True if the verification is successful:
+function. This function returns the name of the hash used. If the verification
+is no successful a 
 
     >>> message = 'Go left at the blue tree'.encode()
     >>> rsa.verify(message, signature, pubkey)
-    True
+    'SHA-1'
 
 Modify the message, and the signature is no longer valid and a
 :py:class:`rsa.pkcs1.VerificationError` is thrown:
