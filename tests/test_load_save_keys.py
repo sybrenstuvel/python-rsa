@@ -203,6 +203,9 @@ class PickleTest(unittest.TestCase):
         unpickled = pickle.loads(pickled)
         self.assertEqual(pk, unpickled)
 
+        for attr in rsa.key.AbstractKey.__slots__:
+            self.assertTrue(hasattr(unpickled, attr))
+
     def test_public_key(self):
         pk = rsa.key.PublicKey(3727264081, 65537)
 
@@ -210,3 +213,5 @@ class PickleTest(unittest.TestCase):
         unpickled = pickle.loads(pickled)
 
         self.assertEqual(pk, unpickled)
+        for attr in rsa.key.AbstractKey.__slots__:
+            self.assertTrue(hasattr(unpickled, attr))

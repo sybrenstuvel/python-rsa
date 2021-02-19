@@ -251,6 +251,7 @@ class PublicKey(AbstractKey):
     def __setstate__(self, state: typing.Tuple[int, int]) -> None:
         """Sets the key from tuple."""
         self.n, self.e = state
+        AbstractKey.__init__(self, self.n, self.e)
 
     def __eq__(self, other: typing.Any) -> bool:
         if other is None:
@@ -426,6 +427,7 @@ class PrivateKey(AbstractKey):
     def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]) -> None:
         """Sets the key from tuple."""
         self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
+        AbstractKey.__init__(self, self.n, self.e)
 
     def __eq__(self, other: typing.Any) -> bool:
         if other is None:
