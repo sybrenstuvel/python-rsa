@@ -12,11 +12,12 @@
 ## Version 4.7.2 - released 2021-02-24
 
 - Fix picking/unpickling issue introduced in 4.7
-  ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173)
+  ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173))
 
 ## Version 4.7.1 - released 2021-02-15
 
-- Fix threading issue introduced in 4.7 ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173)
+- Fix threading issue introduced in 4.7
+  ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173))
 
 ## Version 4.7 - released 2021-01-10
 
