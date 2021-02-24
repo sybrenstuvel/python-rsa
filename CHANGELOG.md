@@ -1,5 +1,10 @@
 # Python-RSA changelog
 
+## Version 4.7.2 - in development
+
+- Fix picking/unpickling issue introduced in 4.7
+  ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173)
+
 ## Version 4.7.1 - released 2021-02-15
 
 - Fix threading issue introduced in 4.7 ([#173](https://github.com/sybrenstuvel/python-rsa/issues/173)
