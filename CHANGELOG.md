@@ -1,5 +1,9 @@
 # Python-RSA changelog
 
+## Version 4.8 - in development
+
+- Switch to [Poetry](https://python-poetry.org/) for dependency and release management.
+
 ## Version 4.7.2 - released 2021-02-24
 
 - Fix picking/unpickling issue introduced in 4.7
