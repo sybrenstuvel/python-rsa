@@ -1,5 +1,4 @@
-Pure Python RSA implementation
-==============================
+# Pure Python RSA implementation
 
 [![PyPI](https://img.shields.io/pypi/v/rsa.svg)](https://pypi.org/project/rsa/)
 [![Build Status](https://travis-ci.org/sybrenstuvel/python-rsa.svg?branch=master)](https://travis-ci.org/sybrenstuvel/python-rsa)
@@ -23,8 +22,8 @@ or download it from the [Python Package Index](https://pypi.org/project/rsa/).
 The source code is maintained at [GitHub](https://github.com/sybrenstuvel/python-rsa/) and is
 licensed under the [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-Security
---------
+## Security
+
 
 Because of how Python internally stores numbers, it is very hard (if not impossible) to make a pure-Python program secure against timing attacks. This library is no exception, so use it with care. See https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/ for more info.
 
