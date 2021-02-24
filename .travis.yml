@@ -13,11 +13,11 @@ python:
 
 install:
   - pip install -U pip setuptools  # https://github.com/pypa/virtualenv/issues/1630
-  - pip install pipenv
-  - pipenv install --dev
+  - pip install poetry
+  - poetry install
 
 script:
-  - pipenv run py.test tests/
+  - poetry run py.test tests/
 
 after_success:
-  - pipenv run coveralls
+  - poetry run coveralls
