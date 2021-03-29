@@ -473,7 +473,16 @@ class PrivateKey(AbstractKey):
 
         # Blinding and un-blinding should be using the same factor
         blinded, blindfac_inverse = self.blind(encrypted)
-        decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
+
+        # Instead of using the core functionality, use the Chinese Remainder
+        # Theorem and be 2-4x faster. This the same as:
+        #
+        # decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
+        s1 = pow(blinded, self.exp1, self.p)
+        s2 = pow(blinded, self.exp2, self.q)
+        h = ((s1 - s2) * self.coef) % self.p
+        decrypted = s2 + self.q * h
+
         return self.unblind(decrypted, blindfac_inverse)
 
     def blinded_encrypt(self, message: int) -> int:
