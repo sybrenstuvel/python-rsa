@@ -18,7 +18,7 @@ import typing
 
 
 class NotRelativePrimeError(ValueError):
-    def __init__(self, a: int, b: int, d: int, msg: str = '') -> None:
+    def __init__(self, a: int, b: int, d: int, msg: str = "") -> None:
         super().__init__(msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
         self.a = a
         self.b = b
@@ -50,7 +50,7 @@ def bit_size(num: int) -> int:
     try:
         return num.bit_length()
     except AttributeError as ex:
-        raise TypeError('bit_size(num) only supports integers, not %r' % type(num)) from ex
+        raise TypeError("bit_size(num) only supports integers, not %r" % type(num)) from ex
 
 
 def byte_size(number: int) -> int:
@@ -103,8 +103,7 @@ def ceil_div(num: int, div: int) -> int:
 
 
 def extended_gcd(a: int, b: int) -> typing.Tuple[int, int, int]:
-    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
-    """
+    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb"""
     # r = gcd(a,b) i = multiplicitive inverse of a mod b
     #      or      j = multiplicitive inverse of b mod a
     # Neg return values for i or j are made positive mod b or a respectively
@@ -179,7 +178,7 @@ def crt(a_values: typing.Iterable[int], modulo_values: typing.Iterable[int]) -> 
     return x
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

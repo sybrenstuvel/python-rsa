@@ -21,7 +21,7 @@ Roberto Tamassia, 2002.
 import rsa.common
 import rsa.randnum
 
-__all__ = ['getprime', 'are_relatively_prime']
+__all__ = ["getprime", "are_relatively_prime"]
 
 
 def gcd(p: int, q: int) -> int:
@@ -183,8 +183,8 @@ def are_relatively_prime(a: int, b: int) -> bool:
     return d == 1
 
 
-if __name__ == '__main__':
-    print('Running doctests 1000x or until failure')
+if __name__ == "__main__":
+    print("Running doctests 1000x or until failure")
     import doctest
 
     for count in range(1000):
@@ -193,6 +193,6 @@ if __name__ == '__main__':
             break
 
         if count % 100 == 0 and count:
-            print('%i times' % count)
+            print("%i times" % count)
 
-    print('Doctests done')
+    print("Doctests done")

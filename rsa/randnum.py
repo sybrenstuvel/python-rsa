@@ -37,15 +37,14 @@ def read_random_bits(nbits: int) -> bytes:
     # Add the remaining random bits
     if rbits > 0:
         randomvalue = ord(os.urandom(1))
-        randomvalue >>= (8 - rbits)
+        randomvalue >>= 8 - rbits
         randomdata = struct.pack("B", randomvalue) + randomdata
 
     return randomdata
 
 
 def read_random_int(nbits: int) -> int:
-    """Reads a random integer of approximately nbits bits.
-    """
+    """Reads a random integer of approximately nbits bits."""
 
     randomdata = read_random_bits(nbits)
     value = transform.bytes2int(randomdata)

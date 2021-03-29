@@ -21,8 +21,8 @@ from rsa.common import byte_size, bit_size, inverse
 
 class TestByte(unittest.TestCase):
     def test_values(self):
-        self.assertEqual(byte(0), b'\x00')
-        self.assertEqual(byte(255), b'\xff')
+        self.assertEqual(byte(0), b"\x00")
+        self.assertEqual(byte(255), b"\xff")
 
     def test_struct_error_when_out_of_bounds(self):
         self.assertRaises(struct.error, byte, 256)
@@ -36,13 +36,13 @@ class TestByteSize(unittest.TestCase):
         self.assertEqual(byte_size(1 << 1024), 129)
         self.assertEqual(byte_size(255), 1)
         self.assertEqual(byte_size(256), 2)
-        self.assertEqual(byte_size(0xffff), 2)
-        self.assertEqual(byte_size(0xffffff), 3)
-        self.assertEqual(byte_size(0xffffffff), 4)
-        self.assertEqual(byte_size(0xffffffffff), 5)
-        self.assertEqual(byte_size(0xffffffffffff), 6)
-        self.assertEqual(byte_size(0xffffffffffffff), 7)
-        self.assertEqual(byte_size(0xffffffffffffffff), 8)
+        self.assertEqual(byte_size(0xFFFF), 2)
+        self.assertEqual(byte_size(0xFFFFFF), 3)
+        self.assertEqual(byte_size(0xFFFFFFFF), 4)
+        self.assertEqual(byte_size(0xFFFFFFFFFF), 5)
+        self.assertEqual(byte_size(0xFFFFFFFFFFFF), 6)
+        self.assertEqual(byte_size(0xFFFFFFFFFFFFFF), 7)
+        self.assertEqual(byte_size(0xFFFFFFFFFFFFFFFF), 8)
 
     def test_zero(self):
         self.assertEqual(byte_size(0), 1)

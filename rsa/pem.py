@@ -27,10 +27,12 @@ def _markers(pem_marker: FlexiText) -> typing.Tuple[bytes, bytes]:
     """
 
     if not isinstance(pem_marker, bytes):
-        pem_marker = pem_marker.encode('ascii')
+        pem_marker = pem_marker.encode("ascii")
 
-    return (b'-----BEGIN ' + pem_marker + b'-----',
-            b'-----END ' + pem_marker + b'-----')
+    return (
+        b"-----BEGIN " + pem_marker + b"-----",
+        b"-----END " + pem_marker + b"-----",
+    )
 
 
 def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iterator[bytes]:
@@ -65,7 +67,7 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
             break
 
         # Load fields
-        if b':' in line:
+        if b":" in line:
             continue
 
         yield line
@@ -95,13 +97,13 @@ def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
 
     # We want bytes, not text. If it's text, it can be converted to ASCII bytes.
     if not isinstance(contents, bytes):
-        contents = contents.encode('ascii')
+        contents = contents.encode("ascii")
 
     (pem_start, pem_end) = _markers(pem_marker)
     pem_lines = [line for line in _pem_lines(contents, pem_start, pem_end)]
 
     # Base64-decode the contents
-    pem = b''.join(pem_lines)
+    pem = b"".join(pem_lines)
     return base64.standard_b64decode(pem)
 
 
@@ -119,14 +121,14 @@ def save_pem(contents: bytes, pem_marker: FlexiText) -> bytes:
 
     (pem_start, pem_end) = _markers(pem_marker)
 
-    b64 = base64.standard_b64encode(contents).replace(b'\n', b'')
+    b64 = base64.standard_b64encode(contents).replace(b"\n", b"")
     pem_lines = [pem_start]
 
     for block_start in range(0, len(b64), 64):
-        block = b64[block_start:block_start + 64]
+        block = b64[block_start : block_start + 64]
         pem_lines.append(block)
 
     pem_lines.append(pem_end)
-    pem_lines.append(b'')
+    pem_lines.append(b"")
 
-    return b'\n'.join(pem_lines)
+    return b"\n".join(pem_lines)

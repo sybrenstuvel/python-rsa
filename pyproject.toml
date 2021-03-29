@@ -51,3 +51,6 @@ build-backend = "poetry.core.masonry.api"
 "pyrsa-decrypt" = "rsa.cli:decrypt"
 "pyrsa-sign" = "rsa.cli:sign"
 "pyrsa-verify" = "rsa.cli:verify"
+
+[tool.black]
+line-length = 100
