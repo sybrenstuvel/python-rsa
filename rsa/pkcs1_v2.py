@@ -18,6 +18,7 @@ This module implements certain functionality from PKCS#1 version 2. Main
 documentation is RFC 8017: https://tools.ietf.org/html/rfc8017
 """
 
+import os
 from hmac import compare_digest
 from rsa import (
     common,
@@ -25,6 +26,7 @@ from rsa import (
     pkcs1,
     transform,
 )
+from rsa._compat import xor_bytes
 
 
 def _constant_time_select(v, t, f):
@@ -242,8 +244,6 @@ def OAEP_decrypt(crypto, priv_key, label=b'', hash_method="SHA-1",
     index = invalid = 0
     looking_one = 1
 
-    if PY2:
-        rest = bytearray(rest)
     for i, c in enumerate(rest):
         iszero = c == 0
         isone = c == 1

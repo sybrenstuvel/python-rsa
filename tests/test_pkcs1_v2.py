@@ -23,7 +23,7 @@ import unittest
 
 import rsa
 from rsa import pkcs1_v2
-from rsa._compat import byte, is_bytes
+from rsa._compat import byte
 from rsa.pkcs1 import DecryptionError
 
 
@@ -105,8 +105,6 @@ class BinaryTest(unittest.TestCase):
 
         # Alter the encrypted stream
         a = encrypted[5]
-        if is_bytes(a):
-            a = ord(a)
         altered_a = (a + 1) % 256
         encrypted = encrypted[:5] + byte(altered_a) + encrypted[6:]
 
