@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,8 +28,8 @@ class StringTest(unittest.TestCase):
         (self.pub, self.priv) = rsa.newkeys(384)
 
     def test_enc_dec(self):
-        message = unicode_string.encode('utf-8')
-        print("\tMessage:   %r" % message)
+        message = unicode_string.encode("utf-8")
+        print("\n\tMessage:   %r" % message)
 
         encrypted = rsa.encrypt(message, self.pub)
         print("\tEncrypted: %r" % encrypted)

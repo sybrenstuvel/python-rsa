@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,14 +18,13 @@ Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
 """
 
-from rsa._compat import range
 import rsa.common
 import rsa.randnum
 
-__all__ = ['getprime', 'are_relatively_prime']
+__all__ = ["getprime", "are_relatively_prime"]
 
 
-def gcd(p, q):
+def gcd(p: int, q: int) -> int:
     """Returns the greatest common divisor of p and q
 
     >>> gcd(48, 180)
@@ -39,7 +36,7 @@ def gcd(p, q):
     return p
 
 
-def get_primality_testing_rounds(number):
+def get_primality_testing_rounds(number: int) -> int:
     """Returns minimum number of rounds for Miller-Rabing primality testing,
     based on number bitsize.
 
@@ -65,7 +62,7 @@ def get_primality_testing_rounds(number):
     return 10
 
 
-def miller_rabin_primality_testing(n, k):
+def miller_rabin_primality_testing(n: int, k: int) -> bool:
     """Calculates whether n is composite (which is always correct) or prime
     (which theoretically is incorrect with error probability 4**-k), by
     applying Miller-Rabin primality testing.
@@ -118,7 +115,7 @@ def miller_rabin_primality_testing(n, k):
     return True
 
 
-def is_prime(number):
+def is_prime(number: int) -> bool:
     """Returns True if the number is prime, and False otherwise.
 
     >>> is_prime(2)
@@ -144,7 +141,7 @@ def is_prime(number):
     return miller_rabin_primality_testing(number, k + 1)
 
 
-def getprime(nbits):
+def getprime(nbits: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
     >>> p = getprime(128)
@@ -172,7 +169,7 @@ def getprime(nbits):
             # Retry if not prime
 
 
-def are_relatively_prime(a, b):
+def are_relatively_prime(a: int, b: int) -> bool:
     """Returns True if a and b are relatively prime, and False if they
     are not.
 
@@ -186,8 +183,8 @@ def are_relatively_prime(a, b):
     return d == 1
 
 
-if __name__ == '__main__':
-    print('Running doctests 1000x or until failure')
+if __name__ == "__main__":
+    print("Running doctests 1000x or until failure")
     import doctest
 
     for count in range(1000):
@@ -196,6 +193,6 @@ if __name__ == '__main__':
             break
 
         if count % 100 == 0 and count:
-            print('%i times' % count)
+            print("%i times" % count)
 
-    print('Doctests done')
+    print("Doctests done")

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rsa._compat import zip
-
 """Common functionality shared by several modules."""
+
+import typing
 
 
 class NotRelativePrimeError(ValueError):
-    def __init__(self, a, b, d, msg=None):
-        super(NotRelativePrimeError, self).__init__(
-            msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
+    def __init__(self, a: int, b: int, d: int, msg: str = "") -> None:
+        super().__init__(msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
         self.a = a
         self.b = b
         self.d = d
 
 
-def bit_size(num):
+def bit_size(num: int) -> int:
     """
     Number of bits needed to represent a integer excluding any prefix
     0 bits.
@@ -52,11 +49,11 @@ def bit_size(num):
 
     try:
         return num.bit_length()
-    except AttributeError:
-        raise TypeError('bit_size(num) only supports integers, not %r' % type(num))
+    except AttributeError as ex:
+        raise TypeError("bit_size(num) only supports integers, not %r" % type(num)) from ex
 
 
-def byte_size(number):
+def byte_size(number: int) -> int:
     """
     Returns the number of bytes required to hold a specific long number.
 
@@ -81,7 +78,7 @@ def byte_size(number):
     return ceil_div(bit_size(number), 8)
 
 
-def ceil_div(num, div):
+def ceil_div(num: int, div: int) -> int:
     """
     Returns the ceiling function of a division between `num` and `div`.
 
@@ -105,9 +102,8 @@ def ceil_div(num, div):
     return quanta
 
 
-def extended_gcd(a, b):
-    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb
-    """
+def extended_gcd(a: int, b: int) -> typing.Tuple[int, int, int]:
+    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb"""
     # r = gcd(a,b) i = multiplicitive inverse of a mod b
     #      or      j = multiplicitive inverse of b mod a
     # Neg return values for i or j are made positive mod b or a respectively
@@ -130,7 +126,7 @@ def extended_gcd(a, b):
     return a, lx, ly  # Return only positive values
 
 
-def inverse(x, n):
+def inverse(x: int, n: int) -> int:
     """Returns the inverse of x % n under multiplication, a.k.a x^-1 (mod n)
 
     >>> inverse(7, 4)
@@ -147,7 +143,7 @@ def inverse(x, n):
     return inv
 
 
-def crt(a_values, modulo_values):
+def crt(a_values: typing.Iterable[int], modulo_values: typing.Iterable[int]) -> int:
     """Chinese Remainder Theorem.
 
     Calculates x such that x = a[i] (mod m[i]) for each i.
@@ -182,7 +178,7 @@ def crt(a_values, modulo_values):
     return x
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

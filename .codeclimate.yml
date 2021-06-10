@@ -15,3 +15,13 @@ ratings:
   - "**.py"
 exclude_paths:
 - tests/**/*
+checks:
+  argument-count:
+    config:
+      threshold: 5
+  file-lines:
+    config:
+      threshold: 1000
+  method-complexity:
+    config:
+      threshold: 17

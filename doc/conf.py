@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Python-RSA documentation build configuration file, created by
 # sphinx-quickstart on Sat Jul 30 23:11:07 2011.
 #
@@ -46,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Python-RSA'
-copyright = u'2011-2018, Sybren A. Stüvel'
+copyright = u'2011-2019, Sybren A. Stüvel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

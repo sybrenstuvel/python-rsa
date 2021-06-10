@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +17,12 @@
 # Source inspired by code by Yesudeep Mangalapilly <yesudeep@gmail.com>
 
 import os
+import struct
 
 from rsa import common, transform
-from rsa._compat import byte
 
 
-def read_random_bits(nbits):
+def read_random_bits(nbits: int) -> bytes:
     """Reads 'nbits' random bits.
 
     If nbits isn't a whole number of bytes, an extra byte will be appended with
@@ -39,15 +37,14 @@ def read_random_bits(nbits):
     # Add the remaining random bits
     if rbits > 0:
         randomvalue = ord(os.urandom(1))
-        randomvalue >>= (8 - rbits)
-        randomdata = byte(randomvalue) + randomdata
+        randomvalue >>= 8 - rbits
+        randomdata = struct.pack("B", randomvalue) + randomdata
 
     return randomdata
 
 
-def read_random_int(nbits):
-    """Reads a random integer of approximately nbits bits.
-    """
+def read_random_int(nbits: int) -> int:
+    """Reads a random integer of approximately nbits bits."""
 
     randomdata = read_random_bits(nbits)
     value = transform.bytes2int(randomdata)
@@ -59,7 +56,7 @@ def read_random_int(nbits):
     return value
 
 
-def read_random_odd_int(nbits):
+def read_random_odd_int(nbits: int) -> int:
     """Reads a random odd integer of approximately nbits bits.
 
     >>> read_random_odd_int(512) & 1
@@ -72,7 +69,7 @@ def read_random_odd_int(nbits):
     return value | 1
 
 
-def randint(maxvalue):
+def randint(maxvalue: int) -> int:
     """Returns a random integer x with 1 <= x <= maxvalue
 
     May take a very long time in specific situations. If maxvalue needs N bits

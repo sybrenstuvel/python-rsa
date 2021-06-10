@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,28 +28,54 @@ to your users.
 
 import hashlib
 import os
+import sys
+import typing
+from hmac import compare_digest
 
-from rsa._compat import range
-from rsa import common, transform, core
+from . import common, transform, core, key
+
+if typing.TYPE_CHECKING:
+    HashType = hashlib._Hash
+else:
+    HashType = typing.Any
 
 # ASN.1 codes that describe the hash algorithm used.
 HASH_ASN1 = {
-    'MD5': b'\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10',
-    'SHA-1': b'\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14',
-    'SHA-224': b'\x30\x2d\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x04\x05\x00\x04\x1c',
-    'SHA-256': b'\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20',
-    'SHA-384': b'\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30',
-    'SHA-512': b'\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40',
+    "MD5": b"\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10",
+    "SHA-1": b"\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14",
+    "SHA-224": b"\x30\x2d\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x04\x05\x00\x04\x1c",
+    "SHA-256": b"\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01\x05\x00\x04\x20",
+    "SHA-384": b"\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x02\x05\x00\x04\x30",
+    "SHA-512": b"\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x03\x05\x00\x04\x40",
 }
 
-HASH_METHODS = {
-    'MD5': hashlib.md5,
-    'SHA-1': hashlib.sha1,
-    'SHA-224': hashlib.sha224,
-    'SHA-256': hashlib.sha256,
-    'SHA-384': hashlib.sha384,
-    'SHA-512': hashlib.sha512,
+HASH_METHODS: typing.Dict[str, typing.Callable[[], HashType]] = {
+    "MD5": hashlib.md5,
+    "SHA-1": hashlib.sha1,
+    "SHA-224": hashlib.sha224,
+    "SHA-256": hashlib.sha256,
+    "SHA-384": hashlib.sha384,
+    "SHA-512": hashlib.sha512,
 }
+
+
+if sys.version_info >= (3, 6):
+    # Python 3.6 introduced SHA3 support.
+    HASH_ASN1.update(
+        {
+            "SHA3-256": b"\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20",
+            "SHA3-384": b"\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30",
+            "SHA3-512": b"\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40",
+        }
+    )
+
+    HASH_METHODS.update(
+        {
+            "SHA3-256": hashlib.sha3_256,
+            "SHA3-384": hashlib.sha3_384,
+            "SHA3-512": hashlib.sha3_512,
+        }
+    )
 
 
 class CryptoError(Exception):
@@ -66,7 +90,7 @@ class VerificationError(CryptoError):
     """Raised when verification fails."""
 
 
-def _pad_for_encryption(message, target_length):
+def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
     r"""Pads the message for encryption, returning the padded message.
 
     :return: 00 02 RANDOM_DATA 00 MESSAGE
@@ -85,11 +109,13 @@ def _pad_for_encryption(message, target_length):
     msglength = len(message)
 
     if msglength > max_msglength:
-        raise OverflowError('%i bytes needed for message, but there is only'
-                            ' space for %i' % (msglength, max_msglength))
+        raise OverflowError(
+            "%i bytes needed for message, but there is only"
+            " space for %i" % (msglength, max_msglength)
+        )
 
     # Get random padding
-    padding = b''
+    padding = b""
     padding_length = target_length - msglength - 3
 
     # We remove 0-bytes, so we'll end up with less padding than we've asked for,
@@ -101,18 +127,15 @@ def _pad_for_encryption(message, target_length):
         # after removing the 0-bytes. This increases the chance of getting
         # enough bytes, especially when needed_bytes is small
         new_padding = os.urandom(needed_bytes + 5)
-        new_padding = new_padding.replace(b'\x00', b'')
+        new_padding = new_padding.replace(b"\x00", b"")
         padding = padding + new_padding[:needed_bytes]
 
     assert len(padding) == padding_length
 
-    return b''.join([b'\x00\x02',
-                     padding,
-                     b'\x00',
-                     message])
+    return b"".join([b"\x00\x02", padding, b"\x00", message])
 
 
-def _pad_for_signing(message, target_length):
+def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     r"""Pads the message for signing, returning the padded message.
 
     The padding is always a repetition of FF bytes.
@@ -135,18 +158,17 @@ def _pad_for_signing(message, target_length):
     msglength = len(message)
 
     if msglength > max_msglength:
-        raise OverflowError('%i bytes needed for message, but there is only'
-                            ' space for %i' % (msglength, max_msglength))
+        raise OverflowError(
+            "%i bytes needed for message, but there is only"
+            " space for %i" % (msglength, max_msglength)
+        )
 
     padding_length = target_length - msglength - 3
 
-    return b''.join([b'\x00\x01',
-                     padding_length * b'\xff',
-                     b'\x00',
-                     message])
+    return b"".join([b"\x00\x01", padding_length * b"\xff", b"\x00", message])
 
 
-def encrypt(message, pub_key):
+def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
@@ -178,7 +200,7 @@ def encrypt(message, pub_key):
     return block
 
 
-def decrypt(crypto, priv_key):
+def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     r"""Decrypts the given message using PKCS#1 v1.5
 
     The decryption is considered 'failed' when the resulting cleartext doesn't
@@ -234,27 +256,40 @@ def decrypt(crypto, priv_key):
     decrypted = priv_key.blinded_decrypt(encrypted)
     cleartext = transform.int2bytes(decrypted, blocksize)
 
+    # Detect leading zeroes in the crypto. These are not reflected in the
+    # encrypted value (as leading zeroes do not influence the value of an
+    # integer). This fixes CVE-2020-13757.
+    if len(crypto) > blocksize:
+        # This is operating on public information, so doesn't need to be constant-time.
+        raise DecryptionError("Decryption failed")
+
     # If we can't find the cleartext marker, decryption failed.
-    if cleartext[0:2] != b'\x00\x02':
-        raise DecryptionError('Decryption failed')
+    cleartext_marker_bad = not compare_digest(cleartext[:2], b"\x00\x02")
 
     # Find the 00 separator between the padding and the message
-    try:
-        sep_idx = cleartext.index(b'\x00', 2)
-    except ValueError:
-        raise DecryptionError('Decryption failed')
+    sep_idx = cleartext.find(b"\x00", 2)
 
-    return cleartext[sep_idx + 1:]
+    # sep_idx indicates the position of the `\x00` separator that separates the
+    # padding from the actual message. The padding should be at least 8 bytes
+    # long (see https://tools.ietf.org/html/rfc8017#section-7.2.2 step 3), which
+    # means the separator should be at least at index 10 (because of the
+    # `\x00\x02` marker that preceeds it).
+    sep_idx_bad = sep_idx < 10
+
+    anything_bad = cleartext_marker_bad | sep_idx_bad
+    if anything_bad:
+        raise DecryptionError("Decryption failed")
+
+    return cleartext[sep_idx + 1 :]
 
 
-def sign_hash(hash_value, priv_key, hash_method):
+def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
     as a "detached signature", because the message itself isn't altered.
 
-    :param hash_value: A precomputed hash to sign (ignores message). Should be set to
-        None if needing to hash and sign message.
+    :param hash_value: A precomputed hash to sign (ignores message).
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
         'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
@@ -266,7 +301,7 @@ def sign_hash(hash_value, priv_key, hash_method):
 
     # Get the ASN1 code for this hash method
     if hash_method not in HASH_ASN1:
-        raise ValueError('Invalid hash method: %s' % hash_method)
+        raise ValueError("Invalid hash method: %s" % hash_method)
     asn1code = HASH_ASN1[hash_method]
 
     # Encrypt the hash with the private key
@@ -281,7 +316,7 @@ def sign_hash(hash_value, priv_key, hash_method):
     return block
 
 
-def sign(message, priv_key, hash_method):
+def sign(message: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
@@ -303,7 +338,7 @@ def sign(message, priv_key, hash_method):
     return sign_hash(msg_hash, priv_key, hash_method)
 
 
-def verify(message, signature, pub_key):
+def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
     """Verifies that the signature matches the message.
 
     The hash method is detected automatically from the signature.
@@ -331,14 +366,17 @@ def verify(message, signature, pub_key):
     cleartext = HASH_ASN1[method_name] + message_hash
     expected = _pad_for_signing(cleartext, keylength)
 
+    if len(signature) != keylength:
+        raise VerificationError("Verification failed")
+
     # Compare with the signed one
     if expected != clearsig:
-        raise VerificationError('Verification failed')
+        raise VerificationError("Verification failed")
 
     return method_name
 
 
-def find_signature_hash(signature, pub_key):
+def find_signature_hash(signature: bytes, pub_key: key.PublicKey) -> str:
     """Returns the hash name detected from the signature.
 
     If you also want to verify the message, use :py:func:`rsa.verify()` instead.
@@ -357,7 +395,7 @@ def find_signature_hash(signature, pub_key):
     return _find_method_hash(clearsig)
 
 
-def yield_fixedblocks(infile, blocksize):
+def yield_fixedblocks(infile: typing.BinaryIO, blocksize: int) -> typing.Iterator[bytes]:
     """Generator, yields each block of ``blocksize`` bytes in the input file.
 
     :param infile: file to read and separate in blocks.
@@ -378,7 +416,7 @@ def yield_fixedblocks(infile, blocksize):
             break
 
 
-def compute_hash(message, method_name):
+def compute_hash(message: typing.Union[bytes, typing.BinaryIO], method_name: str) -> bytes:
     """Returns the message digest.
 
     :param message: the signed message. Can be an 8-bit string or a file-like
@@ -390,23 +428,23 @@ def compute_hash(message, method_name):
     """
 
     if method_name not in HASH_METHODS:
-        raise ValueError('Invalid hash method: %s' % method_name)
+        raise ValueError("Invalid hash method: %s" % method_name)
 
     method = HASH_METHODS[method_name]
     hasher = method()
 
-    if hasattr(message, 'read') and hasattr(message.read, '__call__'):
+    if isinstance(message, bytes):
+        hasher.update(message)
+    else:
+        assert hasattr(message, "read") and hasattr(message.read, "__call__")
         # read as 1K blocks
         for block in yield_fixedblocks(message, 1024):
             hasher.update(block)
-    else:
-        # hash the message object itself.
-        hasher.update(message)
 
     return hasher.digest()
 
 
-def _find_method_hash(clearsig):
+def _find_method_hash(clearsig: bytes) -> str:
     """Finds the hash method.
 
     :param clearsig: full padded ASN1 and hash.
@@ -418,14 +456,21 @@ def _find_method_hash(clearsig):
         if asn1code in clearsig:
             return hashname
 
-    raise VerificationError('Verification failed')
+    raise VerificationError("Verification failed")
 
 
-__all__ = ['encrypt', 'decrypt', 'sign', 'verify',
-           'DecryptionError', 'VerificationError', 'CryptoError']
+__all__ = [
+    "encrypt",
+    "decrypt",
+    "sign",
+    "verify",
+    "DecryptionError",
+    "VerificationError",
+    "CryptoError",
+]
 
-if __name__ == '__main__':
-    print('Running doctests 1000x or until failure')
+if __name__ == "__main__":
+    print("Running doctests 1000x or until failure")
     import doctest
 
     for count in range(1000):
@@ -434,6 +479,6 @@ if __name__ == '__main__':
             break
 
         if count % 100 == 0 and count:
-            print('%i times' % count)
+            print("%i times" % count)
 
-    print('Doctests done')
+    print("Doctests done")

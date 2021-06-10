@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +22,21 @@ prevent repetitions, or other common security improvements. Use with care.
 """
 
 from rsa.key import newkeys, PrivateKey, PublicKey
-from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
-    VerificationError, find_signature_hash,  sign_hash, compute_hash
+from rsa.pkcs1 import (
+    encrypt,
+    decrypt,
+    sign,
+    verify,
+    DecryptionError,
+    VerificationError,
+    find_signature_hash,
+    sign_hash,
+    compute_hash,
+)
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
-__date__ = "2018-09-16"
-__version__ = '4.0'
+__date__ = "2021-02-24"
+__version__ = "4.8-dev0"
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
@@ -37,6 +44,17 @@ if __name__ == "__main__":
 
     doctest.testmod()
 
-__all__ = ["newkeys", "encrypt", "decrypt", "sign", "verify", 'PublicKey',
-           'PrivateKey', 'DecryptionError', 'VerificationError',
-           'compute_hash', 'sign_hash']
+__all__ = [
+    "newkeys",
+    "encrypt",
+    "decrypt",
+    "sign",
+    "verify",
+    "PublicKey",
+    "PrivateKey",
+    "DecryptionError",
+    "VerificationError",
+    "find_signature_hash",
+    "compute_hash",
+    "sign_hash",
+]

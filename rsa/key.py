@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +32,10 @@ of pyasn1.
 """
 
 import logging
+import threading
+import typing
 import warnings
 
-from rsa._compat import range
 import rsa.prime
 import rsa.pem
 import rsa.common
@@ -48,17 +47,24 @@ log = logging.getLogger(__name__)
 DEFAULT_EXPONENT = 65537
 
 
-class AbstractKey(object):
+class AbstractKey:
     """Abstract superclass for private and public keys."""
 
-    __slots__ = ('n', 'e')
+    __slots__ = ("n", "e", "blindfac", "blindfac_inverse", "mutex")
 
-    def __init__(self, n, e):
+    def __init__(self, n: int, e: int) -> None:
         self.n = n
         self.e = e
 
+        # These will be computed properly on the first call to blind().
+        self.blindfac = self.blindfac_inverse = -1
+
+        # Used to protect updates to the blinding factor in multi-threaded
+        # environments.
+        self.mutex = threading.Lock()
+
     @classmethod
-    def _load_pkcs1_pem(cls, keyfile):
+    def _load_pkcs1_pem(cls, keyfile: bytes) -> "AbstractKey":
         """Loads a key in PKCS#1 PEM format, implement in a subclass.
 
         :param keyfile: contents of a PEM-encoded file that contains
@@ -70,7 +76,7 @@ class AbstractKey(object):
         """
 
     @classmethod
-    def _load_pkcs1_der(cls, keyfile):
+    def _load_pkcs1_der(cls, keyfile: bytes) -> "AbstractKey":
         """Loads a key in PKCS#1 PEM format, implement in a subclass.
 
         :param keyfile: contents of a DER-encoded file that contains
@@ -81,14 +87,14 @@ class AbstractKey(object):
         :rtype: AbstractKey
         """
 
-    def _save_pkcs1_pem(self):
+    def _save_pkcs1_pem(self) -> bytes:
         """Saves the key in PKCS#1 PEM format, implement in a subclass.
 
         :returns: the PEM-encoded key.
         :rtype: bytes
         """
 
-    def _save_pkcs1_der(self):
+    def _save_pkcs1_der(self) -> bytes:
         """Saves the key in PKCS#1 DER format, implement in a subclass.
 
         :returns: the DER-encoded key.
@@ -96,7 +102,7 @@ class AbstractKey(object):
         """
 
     @classmethod
-    def load_pkcs1(cls, keyfile, format='PEM'):
+    def load_pkcs1(cls, keyfile: bytes, format: str = "PEM") -> "AbstractKey":
         """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
@@ -110,26 +116,28 @@ class AbstractKey(object):
         """
 
         methods = {
-            'PEM': cls._load_pkcs1_pem,
-            'DER': cls._load_pkcs1_der,
+            "PEM": cls._load_pkcs1_pem,
+            "DER": cls._load_pkcs1_der,
         }
 
         method = cls._assert_format_exists(format, methods)
         return method(keyfile)
 
     @staticmethod
-    def _assert_format_exists(file_format, methods):
-        """Checks whether the given file format exists in 'methods'.
-        """
+    def _assert_format_exists(
+        file_format: str, methods: typing.Mapping[str, typing.Callable]
+    ) -> typing.Callable:
+        """Checks whether the given file format exists in 'methods'."""
 
         try:
             return methods[file_format]
-        except KeyError:
-            formats = ', '.join(sorted(methods.keys()))
-            raise ValueError('Unsupported format: %r, try one of %s' % (file_format,
-                                                                        formats))
+        except KeyError as ex:
+            formats = ", ".join(sorted(methods.keys()))
+            raise ValueError(
+                "Unsupported format: %r, try one of %s" % (file_format, formats)
+            ) from ex
 
-    def save_pkcs1(self, format='PEM'):
+    def save_pkcs1(self, format: str = "PEM") -> bytes:
         """Saves the key in PKCS#1 DER or PEM format.
 
         :param format: the format to save; 'PEM' or 'DER'
@@ -139,43 +147,71 @@ class AbstractKey(object):
         """
 
         methods = {
-            'PEM': self._save_pkcs1_pem,
-            'DER': self._save_pkcs1_der,
+            "PEM": self._save_pkcs1_pem,
+            "DER": self._save_pkcs1_der,
         }
 
         method = self._assert_format_exists(format, methods)
         return method()
 
-    def blind(self, message, r):
-        """Performs blinding on the message using random number 'r'.
+    def blind(self, message: int) -> typing.Tuple[int, int]:
+        """Performs blinding on the message.
 
         :param message: the message, as integer, to blind.
-        :type message: int
         :param r: the random number to blind with.
-        :type r: int
-        :return: the blinded message.
-        :rtype: int
+        :return: tuple (the blinded message, the inverse of the used blinding factor)
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
+        blindfac, blindfac_inverse = self._update_blinding_factor()
+        blinded = (message * pow(blindfac, self.e, self.n)) % self.n
+        return blinded, blindfac_inverse
 
-        return (message * pow(r, self.e, self.n)) % self.n
-
-    def unblind(self, blinded, r):
-        """Performs blinding on the message using random number 'r'.
+    def unblind(self, blinded: int, blindfac_inverse: int) -> int:
+        """Performs blinding on the message using random number 'blindfac_inverse'.
 
         :param blinded: the blinded message, as integer, to unblind.
-        :param r: the random number to unblind with.
+        :param blindfac: the factor to unblind with.
         :return: the original message.
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
+        return (blindfac_inverse * blinded) % self.n
 
-        return (rsa.common.inverse(r, self.n) * blinded) % self.n
+    def _initial_blinding_factor(self) -> int:
+        for _ in range(1000):
+            blind_r = rsa.randnum.randint(self.n - 1)
+            if rsa.prime.are_relatively_prime(self.n, blind_r):
+                return blind_r
+        raise RuntimeError("unable to find blinding factor")
+
+    def _update_blinding_factor(self) -> typing.Tuple[int, int]:
+        """Update blinding factors.
+
+        Computing a blinding factor is expensive, so instead this function
+        does this once, then updates the blinding factor as per section 9
+        of 'A Timing Attack against RSA with the Chinese Remainder Theorem'
+        by Werner Schindler.
+        See https://tls.mbed.org/public/WSchindler-RSA_Timing_Attack.pdf
+
+        :return: the new blinding factor and its inverse.
+        """
+
+        with self.mutex:
+            if self.blindfac < 0:
+                # Compute initial blinding factor, which is rather slow to do.
+                self.blindfac = self._initial_blinding_factor()
+                self.blindfac_inverse = rsa.common.inverse(self.blindfac, self.n)
+            else:
+                # Reuse previous blinding factor.
+                self.blindfac = pow(self.blindfac, 2, self.n)
+                self.blindfac_inverse = pow(self.blindfac_inverse, 2, self.n)
+
+            return self.blindfac, self.blindfac_inverse
 
 
 class PublicKey(AbstractKey):
@@ -202,23 +238,24 @@ class PublicKey(AbstractKey):
 
     """
 
-    __slots__ = ('n', 'e')
+    __slots__ = ("n", "e")
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
-    def __repr__(self):
-        return 'PublicKey(%i, %i)' % (self.n, self.e)
+    def __repr__(self) -> str:
+        return "PublicKey(%i, %i)" % (self.n, self.e)
 
-    def __getstate__(self):
+    def __getstate__(self) -> typing.Tuple[int, int]:
         """Returns the key as tuple for pickling."""
         return self.n, self.e
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: typing.Tuple[int, int]) -> None:
         """Sets the key from tuple."""
         self.n, self.e = state
+        AbstractKey.__init__(self, self.n, self.e)
 
-    def __eq__(self, other):
+    def __eq__(self, other: typing.Any) -> bool:
         if other is None:
             return False
 
@@ -227,14 +264,14 @@ class PublicKey(AbstractKey):
 
         return self.n == other.n and self.e == other.e
 
-    def __ne__(self, other):
+    def __ne__(self, other: typing.Any) -> bool:
         return not (self == other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.n, self.e))
 
     @classmethod
-    def _load_pkcs1_der(cls, keyfile):
+    def _load_pkcs1_der(cls, keyfile: bytes) -> "PublicKey":
         """Loads a key in PKCS#1 DER format.
 
         :param keyfile: contents of a DER-encoded file that contains the public
@@ -258,9 +295,9 @@ class PublicKey(AbstractKey):
         from rsa.asn1 import AsnPubKey
 
         (priv, _) = decoder.decode(keyfile, asn1Spec=AsnPubKey())
-        return cls(n=int(priv['modulus']), e=int(priv['publicExponent']))
+        return cls(n=int(priv["modulus"]), e=int(priv["publicExponent"]))
 
-    def _save_pkcs1_der(self):
+    def _save_pkcs1_der(self) -> bytes:
         """Saves the public key in PKCS#1 DER format.
 
         :returns: the DER-encoded public key.
@@ -272,13 +309,13 @@ class PublicKey(AbstractKey):
 
         # Create the ASN object
         asn_key = AsnPubKey()
-        asn_key.setComponentByName('modulus', self.n)
-        asn_key.setComponentByName('publicExponent', self.e)
+        asn_key.setComponentByName("modulus", self.n)
+        asn_key.setComponentByName("publicExponent", self.e)
 
         return encoder.encode(asn_key)
 
     @classmethod
-    def _load_pkcs1_pem(cls, keyfile):
+    def _load_pkcs1_pem(cls, keyfile: bytes) -> "PublicKey":
         """Loads a PKCS#1 PEM-encoded public key file.
 
         The contents of the file before the "-----BEGIN RSA PUBLIC KEY-----" and
@@ -289,10 +326,10 @@ class PublicKey(AbstractKey):
         :return: a PublicKey object
         """
 
-        der = rsa.pem.load_pem(keyfile, 'RSA PUBLIC KEY')
+        der = rsa.pem.load_pem(keyfile, "RSA PUBLIC KEY")
         return cls._load_pkcs1_der(der)
 
-    def _save_pkcs1_pem(self):
+    def _save_pkcs1_pem(self) -> bytes:
         """Saves a PKCS#1 PEM-encoded public key file.
 
         :return: contents of a PEM-encoded file that contains the public key.
@@ -300,10 +337,10 @@ class PublicKey(AbstractKey):
         """
 
         der = self._save_pkcs1_der()
-        return rsa.pem.save_pem(der, 'RSA PUBLIC KEY')
+        return rsa.pem.save_pem(der, "RSA PUBLIC KEY")
 
     @classmethod
-    def load_pkcs1_openssl_pem(cls, keyfile):
+    def load_pkcs1_openssl_pem(cls, keyfile: bytes) -> "PublicKey":
         """Loads a PKCS#1.5 PEM-encoded public key file from OpenSSL.
 
         These files can be recognised in that they start with BEGIN PUBLIC KEY
@@ -318,18 +355,16 @@ class PublicKey(AbstractKey):
         :return: a PublicKey object
         """
 
-        der = rsa.pem.load_pem(keyfile, 'PUBLIC KEY')
+        der = rsa.pem.load_pem(keyfile, "PUBLIC KEY")
         return cls.load_pkcs1_openssl_der(der)
 
     @classmethod
-    def load_pkcs1_openssl_der(cls, keyfile):
+    def load_pkcs1_openssl_der(cls, keyfile: bytes) -> "PublicKey":
         """Loads a PKCS#1 DER-encoded public key file from OpenSSL.
 
         :param keyfile: contents of a DER-encoded file that contains the public
             key, from OpenSSL.
         :return: a PublicKey object
-        :rtype: bytes
-
         """
 
         from rsa.asn1 import OpenSSLPubKey
@@ -338,10 +373,10 @@ class PublicKey(AbstractKey):
 
         (keyinfo, _) = decoder.decode(keyfile, asn1Spec=OpenSSLPubKey())
 
-        if keyinfo['header']['oid'] != univ.ObjectIdentifier('1.2.840.113549.1.1.1'):
+        if keyinfo["header"]["oid"] != univ.ObjectIdentifier("1.2.840.113549.1.1.1"):
             raise TypeError("This is not a DER-encoded OpenSSL-compatible public key")
 
-        return cls._load_pkcs1_der(keyinfo['key'][1:])
+        return cls._load_pkcs1_der(keyinfo["key"][1:])
 
 
 class PrivateKey(AbstractKey):
@@ -368,9 +403,9 @@ class PrivateKey(AbstractKey):
 
     """
 
-    __slots__ = ('n', 'e', 'd', 'p', 'q', 'exp1', 'exp2', 'coef')
+    __slots__ = ("n", "e", "d", "p", "q", "exp1", "exp2", "coef")
 
-    def __init__(self, n, e, d, p, q):
+    def __init__(self, n: int, e: int, d: int, p: int, q: int) -> None:
         AbstractKey.__init__(self, n, e)
         self.d = d
         self.p = p
@@ -381,43 +416,52 @@ class PrivateKey(AbstractKey):
         self.exp2 = int(d % (q - 1))
         self.coef = rsa.common.inverse(q, p)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
-    def __repr__(self):
-        return 'PrivateKey(%(n)i, %(e)i, %(d)i, %(p)i, %(q)i)' % self
+    def __repr__(self) -> str:
+        return "PrivateKey(%i, %i, %i, %i, %i)" % (
+            self.n,
+            self.e,
+            self.d,
+            self.p,
+            self.q,
+        )
 
-    def __getstate__(self):
+    def __getstate__(self) -> typing.Tuple[int, int, int, int, int, int, int, int]:
         """Returns the key as tuple for pickling."""
         return self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]) -> None:
         """Sets the key from tuple."""
         self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
+        AbstractKey.__init__(self, self.n, self.e)
 
-    def __eq__(self, other):
+    def __eq__(self, other: typing.Any) -> bool:
         if other is None:
             return False
 
         if not isinstance(other, PrivateKey):
             return False
 
-        return (self.n == other.n and
-                self.e == other.e and
-                self.d == other.d and
-                self.p == other.p and
-                self.q == other.q and
-                self.exp1 == other.exp1 and
-                self.exp2 == other.exp2 and
-                self.coef == other.coef)
+        return (
+            self.n == other.n
+            and self.e == other.e
+            and self.d == other.d
+            and self.p == other.p
+            and self.q == other.q
+            and self.exp1 == other.exp1
+            and self.exp2 == other.exp2
+            and self.coef == other.coef
+        )
 
-    def __ne__(self, other):
+    def __ne__(self, other: typing.Any) -> bool:
         return not (self == other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef))
 
-    def blinded_decrypt(self, encrypted):
+    def blinded_decrypt(self, encrypted: int) -> int:
         """Decrypts the message using blinding to prevent side-channel attacks.
 
         :param encrypted: the encrypted message
@@ -427,13 +471,21 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
-        blinded = self.blind(encrypted, blind_r)  # blind before decrypting
-        decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
+        # Blinding and un-blinding should be using the same factor
+        blinded, blindfac_inverse = self.blind(encrypted)
 
-        return self.unblind(decrypted, blind_r)
+        # Instead of using the core functionality, use the Chinese Remainder
+        # Theorem and be 2-4x faster. This the same as:
+        #
+        # decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
+        s1 = pow(blinded, self.exp1, self.p)
+        s2 = pow(blinded, self.exp2, self.q)
+        h = ((s1 - s2) * self.coef) % self.p
+        decrypted = s2 + self.q * h
 
-    def blinded_encrypt(self, message):
+        return self.unblind(decrypted, blindfac_inverse)
+
+    def blinded_encrypt(self, message: int) -> int:
         """Encrypts the message using blinding to prevent side-channel attacks.
 
         :param message: the message to encrypt
@@ -443,13 +495,12 @@ class PrivateKey(AbstractKey):
         :rtype: int
         """
 
-        blind_r = rsa.randnum.randint(self.n - 1)
-        blinded = self.blind(message, blind_r)  # blind before encrypting
+        blinded, blindfac_inverse = self.blind(message)
         encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
-        return self.unblind(encrypted, blind_r)
+        return self.unblind(encrypted, blindfac_inverse)
 
     @classmethod
-    def _load_pkcs1_der(cls, keyfile):
+    def _load_pkcs1_der(cls, keyfile: bytes) -> "PrivateKey":
         """Loads a key in PKCS#1 DER format.
 
         :param keyfile: contents of a DER-encoded file that contains the private
@@ -471,6 +522,7 @@ class PrivateKey(AbstractKey):
         """
 
         from pyasn1.codec.der import decoder
+
         (priv, _) = decoder.decode(keyfile)
 
         # ASN.1 contents of DER encoded private key:
@@ -489,7 +541,7 @@ class PrivateKey(AbstractKey):
         # }
 
         if priv[0] != 0:
-            raise ValueError('Unable to read this file, version %s != 0' % priv[0])
+            raise ValueError("Unable to read this file, version %s != 0" % priv[0])
 
         as_ints = map(int, priv[1:6])
         key = cls(*as_ints)
@@ -498,15 +550,15 @@ class PrivateKey(AbstractKey):
 
         if (key.exp1, key.exp2, key.coef) != (exp1, exp2, coef):
             warnings.warn(
-                'You have provided a malformed keyfile. Either the exponents '
-                'or the coefficient are incorrect. Using the correct values '
-                'instead.',
+                "You have provided a malformed keyfile. Either the exponents "
+                "or the coefficient are incorrect. Using the correct values "
+                "instead.",
                 UserWarning,
             )
 
         return key
 
-    def _save_pkcs1_der(self):
+    def _save_pkcs1_der(self) -> bytes:
         """Saves the private key in PKCS#1 DER format.
 
         :returns: the DER-encoded private key.
@@ -518,33 +570,33 @@ class PrivateKey(AbstractKey):
 
         class AsnPrivKey(univ.Sequence):
             componentType = namedtype.NamedTypes(
-                namedtype.NamedType('version', univ.Integer()),
-                namedtype.NamedType('modulus', univ.Integer()),
-                namedtype.NamedType('publicExponent', univ.Integer()),
-                namedtype.NamedType('privateExponent', univ.Integer()),
-                namedtype.NamedType('prime1', univ.Integer()),
-                namedtype.NamedType('prime2', univ.Integer()),
-                namedtype.NamedType('exponent1', univ.Integer()),
-                namedtype.NamedType('exponent2', univ.Integer()),
-                namedtype.NamedType('coefficient', univ.Integer()),
+                namedtype.NamedType("version", univ.Integer()),
+                namedtype.NamedType("modulus", univ.Integer()),
+                namedtype.NamedType("publicExponent", univ.Integer()),
+                namedtype.NamedType("privateExponent", univ.Integer()),
+                namedtype.NamedType("prime1", univ.Integer()),
+                namedtype.NamedType("prime2", univ.Integer()),
+                namedtype.NamedType("exponent1", univ.Integer()),
+                namedtype.NamedType("exponent2", univ.Integer()),
+                namedtype.NamedType("coefficient", univ.Integer()),
             )
 
         # Create the ASN object
         asn_key = AsnPrivKey()
-        asn_key.setComponentByName('version', 0)
-        asn_key.setComponentByName('modulus', self.n)
-        asn_key.setComponentByName('publicExponent', self.e)
-        asn_key.setComponentByName('privateExponent', self.d)
-        asn_key.setComponentByName('prime1', self.p)
-        asn_key.setComponentByName('prime2', self.q)
-        asn_key.setComponentByName('exponent1', self.exp1)
-        asn_key.setComponentByName('exponent2', self.exp2)
-        asn_key.setComponentByName('coefficient', self.coef)
+        asn_key.setComponentByName("version", 0)
+        asn_key.setComponentByName("modulus", self.n)
+        asn_key.setComponentByName("publicExponent", self.e)
+        asn_key.setComponentByName("privateExponent", self.d)
+        asn_key.setComponentByName("prime1", self.p)
+        asn_key.setComponentByName("prime2", self.q)
+        asn_key.setComponentByName("exponent1", self.exp1)
+        asn_key.setComponentByName("exponent2", self.exp2)
+        asn_key.setComponentByName("coefficient", self.coef)
 
         return encoder.encode(asn_key)
 
     @classmethod
-    def _load_pkcs1_pem(cls, keyfile):
+    def _load_pkcs1_pem(cls, keyfile: bytes) -> "PrivateKey":
         """Loads a PKCS#1 PEM-encoded private key file.
 
         The contents of the file before the "-----BEGIN RSA PRIVATE KEY-----" and
@@ -556,10 +608,10 @@ class PrivateKey(AbstractKey):
         :return: a PrivateKey object
         """
 
-        der = rsa.pem.load_pem(keyfile, b'RSA PRIVATE KEY')
+        der = rsa.pem.load_pem(keyfile, b"RSA PRIVATE KEY")
         return cls._load_pkcs1_der(der)
 
-    def _save_pkcs1_pem(self):
+    def _save_pkcs1_pem(self) -> bytes:
         """Saves a PKCS#1 PEM-encoded private key file.
 
         :return: contents of a PEM-encoded file that contains the private key.
@@ -567,10 +619,14 @@ class PrivateKey(AbstractKey):
         """
 
         der = self._save_pkcs1_der()
-        return rsa.pem.save_pem(der, b'RSA PRIVATE KEY')
+        return rsa.pem.save_pem(der, b"RSA PRIVATE KEY")
 
 
-def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
+def find_p_q(
+    nbits: int,
+    getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+    accurate: bool = True,
+) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
 
     The resulting p * q has exacty 2 * nbits bits, and the returned p and q
@@ -610,16 +666,16 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     qbits = nbits - shift
 
     # Choose the two initial primes
-    log.debug('find_p_q(%i): Finding p', nbits)
+    log.debug("find_p_q(%i): Finding p", nbits)
     p = getprime_func(pbits)
-    log.debug('find_p_q(%i): Finding q', nbits)
+    log.debug("find_p_q(%i): Finding q", nbits)
     q = getprime_func(qbits)
 
-    def is_acceptable(p, q):
+    def is_acceptable(p: int, q: int) -> bool:
         """Returns True iff p and q are acceptable:
 
-            - p and q differ
-            - (p * q) has the right nr of bits (when accurate=True)
+        - p and q differ
+        - (p * q) has the right nr of bits (when accurate=True)
         """
 
         if p == q:
@@ -648,7 +704,7 @@ def find_p_q(nbits, getprime_func=rsa.prime.getprime, accurate=True):
     return max(p, q), min(p, q)
 
 
-def calculate_keys_custom_exponent(p, q, exponent):
+def calculate_keys_custom_exponent(p: int, q: int, exponent: int) -> typing.Tuple[int, int]:
     """Calculates an encryption and a decryption key given p, q and an exponent,
     and returns them as a tuple (e, d)
 
@@ -667,18 +723,22 @@ def calculate_keys_custom_exponent(p, q, exponent):
         d = rsa.common.inverse(exponent, phi_n)
     except rsa.common.NotRelativePrimeError as ex:
         raise rsa.common.NotRelativePrimeError(
-            exponent, phi_n, ex.d,
-            msg="e (%d) and phi_n (%d) are not relatively prime (divider=%i)" %
-                (exponent, phi_n, ex.d))
+            exponent,
+            phi_n,
+            ex.d,
+            msg="e (%d) and phi_n (%d) are not relatively prime (divider=%i)"
+            % (exponent, phi_n, ex.d),
+        ) from ex
 
     if (exponent * d) % phi_n != 1:
-        raise ValueError("e (%d) and d (%d) are not mult. inv. modulo "
-                         "phi_n (%d)" % (exponent, d, phi_n))
+        raise ValueError(
+            "e (%d) and d (%d) are not mult. inv. modulo " "phi_n (%d)" % (exponent, d, phi_n)
+        )
 
     return exponent, d
 
 
-def calculate_keys(p, q):
+def calculate_keys(p: int, q: int) -> typing.Tuple[int, int]:
     """Calculates an encryption and a decryption key given p and q, and
     returns them as a tuple (e, d)
 
@@ -691,7 +751,12 @@ def calculate_keys(p, q):
     return calculate_keys_custom_exponent(p, q, DEFAULT_EXPONENT)
 
 
-def gen_keys(nbits, getprime_func, accurate=True, exponent=DEFAULT_EXPONENT):
+def gen_keys(
+    nbits: int,
+    getprime_func: typing.Callable[[int], int],
+    accurate: bool = True,
+    exponent: int = DEFAULT_EXPONENT,
+) -> typing.Tuple[int, int, int, int]:
     """Generate RSA keys of nbits bits. Returns (p, q, e, d).
 
     Note: this can take a long time, depending on the key size.
@@ -719,7 +784,12 @@ def gen_keys(nbits, getprime_func, accurate=True, exponent=DEFAULT_EXPONENT):
     return p, q, e, d
 
 
-def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
+def newkeys(
+    nbits: int,
+    accurate: bool = True,
+    poolsize: int = 1,
+    exponent: int = DEFAULT_EXPONENT,
+) -> typing.Tuple[PublicKey, PrivateKey]:
     """Generates public and private keys, and returns them as (pub, priv).
 
     The public key is also known as the 'encryption key', and is a
@@ -746,17 +816,18 @@ def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
     """
 
     if nbits < 16:
-        raise ValueError('Key too small')
+        raise ValueError("Key too small")
 
     if poolsize < 1:
-        raise ValueError('Pool size (%i) should be >= 1' % poolsize)
+        raise ValueError("Pool size (%i) should be >= 1" % poolsize)
 
     # Determine which getprime function to use
     if poolsize > 1:
         from rsa import parallel
-        import functools
 
-        getprime_func = functools.partial(parallel.getprime, poolsize=poolsize)
+        def getprime_func(nbits: int) -> int:
+            return parallel.getprime(nbits, poolsize=poolsize)
+
     else:
         getprime_func = rsa.prime.getprime
 
@@ -766,15 +837,12 @@ def newkeys(nbits, accurate=True, poolsize=1, exponent=DEFAULT_EXPONENT):
     # Create the key objects
     n = p * q
 
-    return (
-        PublicKey(n, e),
-        PrivateKey(n, e, d, p, q)
-    )
+    return (PublicKey(n, e), PrivateKey(n, e, d, p, q))
 
 
-__all__ = ['PublicKey', 'PrivateKey', 'newkeys']
+__all__ = ["PublicKey", "PrivateKey", "newkeys"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     try:
@@ -784,8 +852,8 @@ if __name__ == '__main__':
                 break
 
             if (count % 10 == 0 and count) or count == 1:
-                print('%i times' % count)
+                print("%i times" % count)
     except KeyboardInterrupt:
-        print('Aborted')
+        print("Aborted")
     else:
-        print('Doctests done')
+        print("Doctests done")
