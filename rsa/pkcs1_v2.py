@@ -127,7 +127,7 @@ def _OAEP_encode(message, keylength, label, hash_method, mgf1_hash_method):
     return em
 
 
-def OAEP_encrypt(message, pub_key, label=b'', hash_method="SHA-1",
+def encrypt_OAEP(message, pub_key, label=b'', hash_method="SHA-1",
                  mgf1_hash_method=None):
     """Encrypts the given message using PKCS#1 v2 RSA-OEAP.
 
@@ -152,7 +152,7 @@ def OAEP_encrypt(message, pub_key, label=b'', hash_method="SHA-1",
     return c
 
 
-def OAEP_decrypt(crypto, priv_key, label=b'', hash_method="SHA-1",
+def decrypt_OAEP(crypto, priv_key, label=b'', hash_method="SHA-1",
                  mgf1_hash_method=None):
     """Decrypts the givem crypto using PKCS#1 v2 RSA-OAEP.
 
@@ -173,30 +173,30 @@ def OAEP_decrypt(crypto, priv_key, label=b'', hash_method="SHA-1",
 
     It works with binary data:
 
-    >>> crypto = OAEP_encrypt(b'hello', pub_key)
-    >>> OAEP_decrypt(crypto, priv_key)
+    >>> crypto = encrypt_OAEP(b'hello', pub_key)
+    >>> decrypt_OAEP(crypto, priv_key)
     b'hello'
 
     You can pass optional label data too:
 
-    >>> crypto = OAEP_encrypt(b'hello', pub_key, label=b'world')
-    >>> OAEP_decrypt(crypto, priv_key, label=b'world')
+    >>> crypto = encrypt_OAEP(b'hello', pub_key, label=b'world')
+    >>> decrypt_OAEP(crypto, priv_key, label=b'world')
     b'hello'
 
     Altering the encrypted information will cause a
     :py:class:`rsa.pkcs1.DecryptionError`.
 
-    >>> crypto = OAEP_encrypt(b'hello', pub_key)
+    >>> crypto = encrypt_OAEP(b'hello', pub_key)
     >>> crypto = crypto[0:5] + bytes([(ord(crypto[5:6])+1)%256]) + crypto[6:] # change a byte
-    >>> OAEP_decrypt(crypto, priv_key)
+    >>> decrypt_OAEP(crypto, priv_key)
     Traceback (most recent call last):
     ...
     rsa.pkcs1.DecryptionError: Decryption failed
 
     Changing label will also cause the error.
 
-    >>> crypto = OAEP_encrypt(b'hello', pub_key, label=b'world')
-    >>> OAEP_decrypt(crypto, priv_key, label=b'universe')
+    >>> crypto = encrypt_OAEP(b'hello', pub_key, label=b'world')
+    >>> decrypt_OAEP(crypto, priv_key, label=b'universe')
     Traceback (most recent call last):
     ...
     rsa.pkcs1.DecryptionError: Decryption failed
@@ -259,7 +259,7 @@ def OAEP_decrypt(crypto, priv_key, label=b'', hash_method="SHA-1",
 
 
 __all__ = [
-    'mgf1', 'OAEP_encrypt', 'OAEP_decrypt',
+    'mgf1', 'encrypt_OAEP', 'decrypt_OAEP',
 ]
 
 if __name__ == "__main__":

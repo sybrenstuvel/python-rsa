@@ -91,24 +91,24 @@ class BinaryTest(unittest.TestCase):
         message = struct.pack('>IIII', 0, 0, 0, 1)
         print("\tMessage:   %r" % message)
 
-        encrypted = pkcs1_v2.OAEP_encrypt(message, self.pub)
+        encrypted = pkcs1_v2.encrypt_OAEP(message, self.pub)
         print("\tEncrypted: %r" % encrypted)
 
-        decrypted = pkcs1_v2.OAEP_decrypt(encrypted, self.priv)
+        decrypted = pkcs1_v2.decrypt_OAEP(encrypted, self.priv)
         print("\tDecrypted: %r" % decrypted)
 
         self.assertEqual(message, decrypted)
 
     def test_decoding_failure(self):
         message = struct.pack('>IIII', 0, 0, 0, 1)
-        encrypted = pkcs1_v2.OAEP_encrypt(message, self.pub)
+        encrypted = pkcs1_v2.encrypt_OAEP(message, self.pub)
 
         # Alter the encrypted stream
         a = encrypted[5]
         altered_a = (a + 1) % 256
         encrypted = encrypted[:5] + byte(altered_a) + encrypted[6:]
 
-        self.assertRaises(DecryptionError, pkcs1_v2.OAEP_decrypt,
+        self.assertRaises(DecryptionError, pkcs1_v2.decrypt_OAEP,
                           encrypted, self.priv)
 
     def test_randomness(self):
@@ -117,7 +117,7 @@ class BinaryTest(unittest.TestCase):
         """
 
         message = struct.pack('>IIII', 0, 0, 0, 1)
-        encrypted1 = pkcs1_v2.OAEP_encrypt(message, self.pub)
-        encrypted2 = pkcs1_v2.OAEP_encrypt(message, self.pub)
+        encrypted1 = pkcs1_v2.encrypt_OAEP(message, self.pub)
+        encrypted2 = pkcs1_v2.encrypt_OAEP(message, self.pub)
 
         self.assertNotEqual(encrypted1, encrypted2)
