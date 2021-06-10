@@ -100,21 +100,27 @@ def _OAEP_encode(message, keylength, label, hash_method, mgf1_hash_method):
         hasher = pkcs1.HASH_METHODS[hash_method](label)
     except KeyError:
         raise ValueError(
-            'Invalid `hash_method` specified. Please select one of: {hash_list}'.format(
-                hash_list=', '.join(sorted(pkcs1.HASH_METHODS.keys()))
+            "Invalid `hash_method` specified. Please select one of: {hash_list}".format(
+                hash_list=", ".join(sorted(pkcs1.HASH_METHODS.keys()))
             )
         )
     hash_length = hasher.digest_size
-    max_message_length = keylength - 2*hash_length - 2
+    max_message_length = keylength - 2 * hash_length - 2
     message_length = len(message)
     if message_length > max_message_length:
-        raise OverflowError("message is too long; at most %s bytes, given %s bytes" %
-                            (max_message_length, len(message)))
+        raise OverflowError(
+            "message is too long; at most %s bytes, given %s bytes"
+            % (max_message_length, len(message))
+        )
 
     lhash = hasher.digest()
-    ps = bytearray(keylength - message_length - 2*hash_length -2)
-    db = hasher.digest() + b'\0' * (keylength - message_length - 2*hash_length - 2) \
-            + b'\x01' + message
+    ps = bytearray(keylength - message_length - 2 * hash_length - 2)
+    db = (
+        hasher.digest()
+        + b"\0" * (keylength - message_length - 2 * hash_length - 2)
+        + b"\x01"
+        + message
+    )
 
     seed = os.urandom(hash_length)
     db_mask = mgf1(seed, keylength - hash_length - 1, mgf1_hash_method)
@@ -123,12 +129,11 @@ def _OAEP_encode(message, keylength, label, hash_method, mgf1_hash_method):
     seed_mask = mgf1(masked_db, hash_length, mgf1_hash_method)
     masked_seed = xor_bytes(seed, seed_mask)
 
-    em = b'\x00' + masked_seed + masked_db
+    em = b"\x00" + masked_seed + masked_db
     return em
 
 
-def encrypt_OAEP(message, pub_key, label=b'', hash_method="SHA-1",
-                 mgf1_hash_method=None):
+def encrypt_OAEP(message, pub_key, label=b"", hash_method="SHA-1", mgf1_hash_method=None):
     """Encrypts the given message using PKCS#1 v2 RSA-OEAP.
 
     :param bytes message: the message to encrypt.
@@ -152,8 +157,7 @@ def encrypt_OAEP(message, pub_key, label=b'', hash_method="SHA-1",
     return c
 
 
-def decrypt_OAEP(crypto, priv_key, label=b'', hash_method="SHA-1",
-                 mgf1_hash_method=None):
+def decrypt_OAEP(crypto, priv_key, label=b"", hash_method="SHA-1", mgf1_hash_method=None):
     """Decrypts the givem crypto using PKCS#1 v2 RSA-OAEP.
 
     :param bytes crypto: the crypto text as returned by :py:func:`rsa.encrypt`
@@ -207,7 +211,7 @@ def decrypt_OAEP(crypto, priv_key, label=b'', hash_method="SHA-1",
     # todo: Step 1: length checking
     k = common.byte_size(priv_key.n)
     if k != len(crypto):
-        raise pkcs1.DecryptionError('Decryption failed')
+        raise pkcs1.DecryptionError("Decryption failed")
 
     # Step 2: RSA Decryption
     c = transform.bytes2int(crypto)
@@ -219,20 +223,20 @@ def decrypt_OAEP(crypto, priv_key, label=b'', hash_method="SHA-1",
         hasher = pkcs1.HASH_METHODS[hash_method](label)
     except KeyError:
         raise ValueError(
-            'Invalid `hash_method` specified. Please select one of: {hash_list}'.format(
-                hash_list=', '.join(sorted(pkcs1.HASH_METHODS.keys()))
+            "Invalid `hash_method` specified. Please select one of: {hash_list}".format(
+                hash_list=", ".join(sorted(pkcs1.HASH_METHODS.keys()))
             )
         )
     hash_length = hasher.digest_size
     lhash = hasher.digest()
     Y = em[0:1]
-    masked_seed = em[1:1+hash_length]
-    masked_db = em[1+hash_length:]
+    masked_seed = em[1 : 1 + hash_length]
+    masked_db = em[1 + hash_length :]
 
     seed_mask = mgf1(masked_db, hash_length, mgf1_hash_method)
     seed = xor_bytes(masked_seed, seed_mask)
 
-    db_mask = mgf1(seed, k-hash_length-1, mgf1_hash_method)
+    db_mask = mgf1(seed, k - hash_length - 1, mgf1_hash_method)
     db = xor_bytes(masked_db, db_mask)
 
     lhash_ = db[:hash_length]
@@ -253,13 +257,15 @@ def decrypt_OAEP(crypto, priv_key, label=b'', hash_method="SHA-1",
         invalid = _constant_time_select(looking_one & ~iszero, 1, invalid)
 
     if invalid | looking_one | (not hash_is_good):
-        raise pkcs1.DecryptionError('Decryption failed')
+        raise pkcs1.DecryptionError("Decryption failed")
 
-    return rest[index+1:]
+    return rest[index + 1 :]
 
 
 __all__ = [
-    'mgf1', 'encrypt_OAEP', 'decrypt_OAEP',
+    "mgf1",
+    "encrypt_OAEP",
+    "decrypt_OAEP",
 ]
 
 if __name__ == "__main__":

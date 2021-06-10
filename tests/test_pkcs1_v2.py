@@ -80,7 +80,7 @@ class MGFTest(unittest.TestCase):
 
     def test_invalid_length(self):
         with self.assertRaises(OverflowError):
-            pkcs1_v2.mgf1(b"\x06\xe1\xde\xb2", length=2**50)
+            pkcs1_v2.mgf1(b"\x06\xe1\xde\xb2", length=2 ** 50)
 
 
 class BinaryTest(unittest.TestCase):
@@ -88,7 +88,7 @@ class BinaryTest(unittest.TestCase):
         (self.pub, self.priv) = rsa.newkeys(512)
 
     def test_enc_dec(self):
-        message = struct.pack('>IIII', 0, 0, 0, 1)
+        message = struct.pack(">IIII", 0, 0, 0, 1)
         print("\tMessage:   %r" % message)
 
         encrypted = pkcs1_v2.encrypt_OAEP(message, self.pub)
@@ -100,7 +100,7 @@ class BinaryTest(unittest.TestCase):
         self.assertEqual(message, decrypted)
 
     def test_decoding_failure(self):
-        message = struct.pack('>IIII', 0, 0, 0, 1)
+        message = struct.pack(">IIII", 0, 0, 0, 1)
         encrypted = pkcs1_v2.encrypt_OAEP(message, self.pub)
 
         # Alter the encrypted stream
@@ -108,15 +108,14 @@ class BinaryTest(unittest.TestCase):
         altered_a = (a + 1) % 256
         encrypted = encrypted[:5] + byte(altered_a) + encrypted[6:]
 
-        self.assertRaises(DecryptionError, pkcs1_v2.decrypt_OAEP,
-                          encrypted, self.priv)
+        self.assertRaises(DecryptionError, pkcs1_v2.decrypt_OAEP, encrypted, self.priv)
 
     def test_randomness(self):
         """Encrypting the same message twice should result in different
         cryptos.
         """
 
-        message = struct.pack('>IIII', 0, 0, 0, 1)
+        message = struct.pack(">IIII", 0, 0, 0, 1)
         encrypted1 = pkcs1_v2.encrypt_OAEP(message, self.pub)
         encrypted2 = pkcs1_v2.encrypt_OAEP(message, self.pub)
 
