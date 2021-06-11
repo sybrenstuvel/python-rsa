@@ -20,16 +20,12 @@ documentation is RFC 8017: https://tools.ietf.org/html/rfc8017
 
 import os
 from hmac import compare_digest
-from rsa import (
-    common,
-    core,
-    pkcs1,
-    transform,
-)
-from rsa._compat import xor_bytes
+
+from . import common, transform, core, key, pkcs1
+from ._compat import xor_bytes
 
 
-def _constant_time_select(v, t, f):
+def _constant_time_select(v: int, t: int, f: int) -> int:
     """Return t if v else f.
 
     v must be 0 or 1. (False and True are allowed)
@@ -95,7 +91,9 @@ def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:
     return output[:length]
 
 
-def _OAEP_encode(message, keylength, label, hash_method, mgf1_hash_method):
+def _OAEP_encode(
+    message: bytes, keylength: int, label, hash_method: str, mgf1_hash_method: str
+) -> bytes:
     try:
         hasher = pkcs1.HASH_METHODS[hash_method](label)
     except KeyError:
@@ -133,14 +131,22 @@ def _OAEP_encode(message, keylength, label, hash_method, mgf1_hash_method):
     return em
 
 
-def encrypt_OAEP(message, pub_key, label=b"", hash_method="SHA-1", mgf1_hash_method=None):
+def encrypt_OAEP(
+    message: bytes,
+    pub_key: key.PublicKey,
+    label: bytes = b"",
+    hash_method: str = "SHA-1",
+    mgf1_hash_method: str = None,
+) -> bytes:
     """Encrypts the given message using PKCS#1 v2 RSA-OEAP.
 
-    :param bytes message: the message to encrypt.
-    :param rsa.PublicKey pub_key: the public key to encrypt with.
-    :param bytes label: optional RSA-OAEP label.
-    :param str hash_method: hash function to be used.  'SHA-1' (default),
+    :param message: the message to encrypt.
+    :param pub_key: the public key to encrypt with.
+    :param label: optional RSA-OAEP label.
+    :param hash_method: hash function to be used.  'SHA-1' (default),
         'SHA-256', 'SHA-384', and 'SHA-512' can be used.
+    :param mgf1_hash_method: hash function to be used by MGF1 function.
+        If it is None (default), *hash_method* is used.
     """
     # NOTE: Some hash method other than listed in the docstring can be used
     # for hash_method.  But the RFC 8017 recommends only them.
@@ -157,15 +163,21 @@ def encrypt_OAEP(message, pub_key, label=b"", hash_method="SHA-1", mgf1_hash_met
     return c
 
 
-def decrypt_OAEP(crypto, priv_key, label=b"", hash_method="SHA-1", mgf1_hash_method=None):
+def decrypt_OAEP(
+    crypto: bytes,
+    priv_key: key.PrivateKey,
+    label: bytes = b"",
+    hash_method: str = "SHA-1",
+    mgf1_hash_method: str = None,
+) -> bytes:
     """Decrypts the givem crypto using PKCS#1 v2 RSA-OAEP.
 
-    :param bytes crypto: the crypto text as returned by :py:func:`rsa.encrypt`
-    :param rsa.PrivateKey priv_key: the private key to decrypt with.
-    :param bytes label: optional RSA-OAEP label.
-    :param str hash_method: hash function to be used.  'SHA-1' (default),
+    :param crypto: the crypto text as returned by :py:func:`rsa.encrypt`
+    :param priv_key: the private key to decrypt with.
+    :param label: optional RSA-OAEP label.
+    :param hash_method: hash function to be used.  'SHA-1' (default),
         'SHA-256', 'SHA-384', and 'SHA-512' can be used.
-    :param str mgf1_hash_method: hash function to be used by MGF1 function.
+    :param mgf1_hash_method: hash function to be used by MGF1 function.
         If it is None (default), *hash_method* is used.
 
     :raise rsa.pkcs1.DecryptionError: when the decryption fails. No details are given as
