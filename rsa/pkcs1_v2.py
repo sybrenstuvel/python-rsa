@@ -18,6 +18,8 @@ This module implements certain functionality from PKCS#1 version 2. Main
 documentation is RFC 2437: https://tools.ietf.org/html/rfc2437
 """
 
+import math
+
 from rsa import (
     common,
     pkcs1,
@@ -74,7 +76,7 @@ def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:
             seed + transform.int2bytes(counter, fill_size=4),
             method_name=hasher,
         )
-        for counter in range(common.ceil_div(length, hash_length) + 1)
+        for counter in range(math.ceil(length / hash_length) + 1)
     )
 
     # Output the leading `length` octets of `output` as the octet string mask.

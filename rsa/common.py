@@ -15,7 +15,7 @@
 """Common functionality shared by several modules."""
 
 import typing
-
+import math
 
 class NotRelativePrimeError(ValueError):
     def __init__(self, a: int, b: int, d: int, msg: str = "") -> None:
@@ -75,31 +75,7 @@ def byte_size(number: int) -> int:
     """
     if number == 0:
         return 1
-    return ceil_div(bit_size(number), 8)
-
-
-def ceil_div(num: int, div: int) -> int:
-    """
-    Returns the ceiling function of a division between `num` and `div`.
-
-    Usage::
-
-        >>> ceil_div(100, 7)
-        15
-        >>> ceil_div(100, 10)
-        10
-        >>> ceil_div(1, 4)
-        1
-
-    :param num: Division's numerator, a number
-    :param div: Division's divisor, a number
-
-    :return: Rounded up result of the division between the parameters.
-    """
-    quanta, mod = divmod(num, div)
-    if mod:
-        quanta += 1
-    return quanta
+    return math.ceil(bit_size(number) / 8)
 
 
 def extended_gcd(a: int, b: int) -> typing.Tuple[int, int, int]:
@@ -108,22 +84,12 @@ def extended_gcd(a: int, b: int) -> typing.Tuple[int, int, int]:
     #      or      j = multiplicitive inverse of b mod a
     # Neg return values for i or j are made positive mod b or a respectively
     # Iterateive Version is faster and uses much less stack space
-    x = 0
-    y = 1
-    lx = 1
-    ly = 0
-    oa = a  # Remember original a/b to remove
-    ob = b  # negative values from return results
-    while b != 0:
-        q = a // b
-        (a, b) = (b, a % b)
-        (x, lx) = ((lx - (q * x)), x)
-        (y, ly) = ((ly - (q * y)), y)
-    if lx < 0:
-        lx += ob  # If neg wrap modulo orignal b
-    if ly < 0:
-        ly += oa  # If neg wrap modulo orignal a
-    return a, lx, ly  # Return only positive values
+    x0, x1, y0, y1 = 0, 1, 1, 0
+    while a != 0:
+        (q, a), b = divmod(b, a), a
+        y0, y1 = y1, y0 - q * y1
+        x0, x1 = x1, x0 - q * x1
+    return b, x0, y0
 
 
 def inverse(x: int, n: int) -> int:
@@ -140,7 +106,7 @@ def inverse(x: int, n: int) -> int:
     if divider != 1:
         raise NotRelativePrimeError(x, n, divider)
 
-    return inv
+    return inv % n
 
 
 def crt(a_values: typing.Iterable[int], modulo_values: typing.Iterable[int]) -> int:

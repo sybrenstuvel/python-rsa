@@ -18,23 +18,12 @@ Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
 """
 
+import math
+
 import rsa.common
 import rsa.randnum
 
 __all__ = ["getprime", "are_relatively_prime"]
-
-
-def gcd(p: int, q: int) -> int:
-    """Returns the greatest common divisor of p and q
-
-    >>> gcd(48, 180)
-    12
-    """
-
-    while q != 0:
-        (p, q) = (q, p % q)
-    return p
-
 
 def get_primality_testing_rounds(number: int) -> int:
     """Returns minimum number of rounds for Miller-Rabing primality testing,
@@ -179,8 +168,7 @@ def are_relatively_prime(a: int, b: int) -> bool:
     False
     """
 
-    d = gcd(a, b)
-    return d == 1
+    return math.gcd(a, b) == 1
 
 
 if __name__ == "__main__":

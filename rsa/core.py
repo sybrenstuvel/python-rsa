@@ -49,5 +49,4 @@ def decrypt_int(cyphertext: int, dkey: int, n: int) -> int:
     assert_int(dkey, "dkey")
     assert_int(n, "n")
 
-    message = pow(cyphertext, dkey, n)
-    return message
+    return pow(cyphertext, dkey, n)
