@@ -36,7 +36,7 @@ def keygen() -> None:
     # Parse the CLI options
     parser = optparse.OptionParser(
         usage="usage: %prog [options] keysize",
-        description='Generates a new RSA keypair of "keysize" bits.',
+        description='Generates a new RSA key pair of "keysize" bits.',
     )
 
     parser.add_option(

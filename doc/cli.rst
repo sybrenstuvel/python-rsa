@@ -16,7 +16,7 @@ on how to use them. Here is a short overview:
 +-------------------------+--------------------------------------------------+-----------------------------------------+
 | Command                 | Usage                                            | Core function                           |
 +=========================+==================================================+=========================================+
-| pyrsa-keygen            | Generates a new RSA keypair in PEM or DER format | :py:func:`rsa.newkeys`                  |
+| pyrsa-keygen            | Generates a new RSA key pair in PEM or DER format | :py:func:`rsa.newkeys`                  |
 +-------------------------+--------------------------------------------------+-----------------------------------------+
 | pyrsa-encrypt           | Encrypts a file. The file must be shorter than   | :py:func:`rsa.encrypt`                  |
 |                         | the key length in order to be encrypted.         |                                         |

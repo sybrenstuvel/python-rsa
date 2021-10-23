@@ -27,7 +27,7 @@ after signing.
 Generating keys
 ---------------
 
-You can use the :py:func:`rsa.newkeys` function to create a keypair:
+You can use the :py:func:`rsa.newkeys` function to create a key pair:
 
     >>> import rsa
     >>> (pubkey, privkey) = rsa.newkeys(512)
@@ -44,7 +44,7 @@ Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
 Time to generate a key
 ++++++++++++++++++++++
 
-Generating a keypair may take a long time, depending on the number of
+Generating a key pair may take a long time, depending on the number of
 bits required. The number of bits determines the cryptographic
 strength of the key, as well as the size of the message you can
 encrypt. If you don't mind having a slightly smaller key than you
@@ -98,7 +98,7 @@ To encrypt or decrypt a message, use :py:func:`rsa.encrypt` resp.
 :py:func:`rsa.decrypt`. Let's say that Alice wants to send a message
 that only Bob can read.
 
-#. Bob generates a keypair, and gives the public key to Alice. This is
+#. Bob generates a key pair, and gives the public key to Alice. This is
    done such that Alice knows for sure that the key is really Bob's
    (for example by handing over a USB stick that contains the key).
 

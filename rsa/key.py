@@ -629,7 +629,7 @@ def find_p_q(
 ) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
 
-    The resulting p * q has exacty 2 * nbits bits, and the returned p and q
+    The resulting p * q has exactly 2 * nbits bits, and the returned p and q
     will not be equal.
 
     :param nbits: the number of bits in each of p and q.

@@ -157,7 +157,7 @@ def getprime(nbits: int) -> int:
     True
     """
 
-    assert nbits > 3  # the loop wil hang on too small numbers
+    assert nbits > 3  # the loop will hang on too small numbers
 
     while True:
         integer = rsa.randnum.read_random_odd_int(nbits)
