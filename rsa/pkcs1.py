@@ -273,7 +273,7 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     # padding from the actual message. The padding should be at least 8 bytes
     # long (see https://tools.ietf.org/html/rfc8017#section-7.2.2 step 3), which
     # means the separator should be at least at index 10 (because of the
-    # `\x00\x02` marker that preceeds it).
+    # `\x00\x02` marker that precedes it).
     sep_idx_bad = sep_idx < 10
 
     anything_bad = cleartext_marker_bad | sep_idx_bad

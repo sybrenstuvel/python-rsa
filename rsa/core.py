@@ -42,12 +42,12 @@ def encrypt_int(message: int, ekey: int, n: int) -> int:
     return pow(message, ekey, n)
 
 
-def decrypt_int(cyphertext: int, dkey: int, n: int) -> int:
+def decrypt_int(ciphertext: int, dkey: int, n: int) -> int:
     """Decrypts a cypher text using the decryption key 'dkey', working modulo n"""
 
-    assert_int(cyphertext, "cyphertext")
+    assert_int(ciphertext, "ciphertext")
     assert_int(dkey, "dkey")
     assert_int(n, "n")
 
-    message = pow(cyphertext, dkey, n)
+    message = pow(ciphertext, dkey, n)
     return message

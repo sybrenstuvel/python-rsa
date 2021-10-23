@@ -56,7 +56,7 @@ mistake releasing 4.4 as "3.5+ only", which made it necessary to retag 4.3 as
 Two security fixes have also been backported, so 4.3 = 4.0 + these two fixes.
 
 - Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
-- Reject cyphertexts (when decrypting) and signatures (when verifying) that have
+- Reject ciphertexts (when decrypting) and signatures (when verifying) that have
   been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
   Carnil for pointing this out.
 
@@ -88,7 +88,7 @@ Two security fixes have also been backported, so 4.3 = 4.0 + these two fixes.
   is natively supported by Python 3.6+ and supported via a third-party
   library on Python 3.5.
 - Choose blinding factor relatively prime to N. Thanks Christian Heimes for pointing this out.
-- Reject cyphertexts (when decrypting) and signatures (when verifying) that have
+- Reject ciphertexts (when decrypting) and signatures (when verifying) that have
   been modified by prepending zero bytes. This resolves CVE-2020-13757. Thanks
   Adelapie for pointing this out.
 
