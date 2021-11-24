@@ -34,7 +34,7 @@ pyasn1 = ">=0.1.3"
 
 [tool.poetry.dev-dependencies]
 coveralls = "^3.0.0"
-Sphinx = "^3.5.1"
+Sphinx = "^4.3.0"
 pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
 tox = "^3.22.0"
