@@ -47,6 +47,9 @@ log = logging.getLogger(__name__)
 DEFAULT_EXPONENT = 65537
 
 
+T = typing.TypeVar("T", bound="AbstractKey")
+
+
 class AbstractKey:
     """Abstract superclass for private and public keys."""
 
@@ -64,7 +67,7 @@ class AbstractKey:
         self.mutex = threading.Lock()
 
     @classmethod
-    def _load_pkcs1_pem(cls, keyfile: bytes) -> "AbstractKey":
+    def _load_pkcs1_pem(cls: typing.Type[T], keyfile: bytes) -> T:
         """Loads a key in PKCS#1 PEM format, implement in a subclass.
 
         :param keyfile: contents of a PEM-encoded file that contains
@@ -76,7 +79,7 @@ class AbstractKey:
         """
 
     @classmethod
-    def _load_pkcs1_der(cls, keyfile: bytes) -> "AbstractKey":
+    def _load_pkcs1_der(cls: typing.Type[T], keyfile: bytes) -> T:
         """Loads a key in PKCS#1 PEM format, implement in a subclass.
 
         :param keyfile: contents of a DER-encoded file that contains
@@ -102,7 +105,7 @@ class AbstractKey:
         """
 
     @classmethod
-    def load_pkcs1(cls, keyfile: bytes, format: str = "PEM") -> "AbstractKey":
+    def load_pkcs1(cls: typing.Type[T], keyfile: bytes, format: str = "PEM") -> T:
         """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
