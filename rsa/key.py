@@ -499,6 +499,18 @@ class PrivateKey(AbstractKey):
         encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
         return self.unblind(encrypted, blindfac_inverse)
 
+    def public_key(self) -> PublicKey:
+        """Generates the corresponding PublicKey from the PrivateKey.
+
+        Equivalent to
+        >>> pubkey = PublicKey(privkey.n, privkey.e)
+
+        :returns: the public key that belongs to the private key
+        :rtype: PublicKey
+        """
+
+        return PublicKey(self.n, self.e)
+
     @classmethod
     def _load_pkcs1_der(cls, keyfile: bytes) -> "PrivateKey":
         """Loads a key in PKCS#1 DER format.

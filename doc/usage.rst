@@ -40,6 +40,19 @@ Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
     ...     keydata = privatefile.read()
     >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
 
+As public keys can be derived from private keys it is sufficient to
+have only the private one. The :py:class:`rsa.PrivateKey` class
+has the dedicated method :py:meth:`rsa.PrivateKey.public_key` to
+retrieve the corresponding :py:class:`rsa.PublicKey` from it:
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+    >>> pubkey = privkey.public_key()
+
+
+
 
 Time to generate a key
 ++++++++++++++++++++++
