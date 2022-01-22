@@ -239,7 +239,7 @@ class PublicKey(AbstractKey):
 
     """
 
-    __slots__ = ("n", "e")
+    __slots__ = ()
 
     def __getitem__(self, key: str) -> int:
         return getattr(self, key)
@@ -404,7 +404,7 @@ class PrivateKey(AbstractKey):
 
     """
 
-    __slots__ = ("n", "e", "d", "p", "q", "exp1", "exp2", "coef")
+    __slots__ = ("d", "p", "q", "exp1", "exp2", "coef")
 
     def __init__(self, n: int, e: int, d: int, p: int, q: int) -> None:
         AbstractKey.__init__(self, n, e)
