@@ -3,9 +3,11 @@
 ## Version 4.9 - in development
 
 - Remove debug logging from `rsa/key.py`
-  ([#194](https://github.com/sybrenstuvel/python-rsa/pull/194)).
+  ([#194](https://github.com/sybrenstuvel/python-rsa/issues/194)).
 - Remove overlapping slots in `PrivateKey` and `PublicKey`.
   ([#189](https://github.com/sybrenstuvel/python-rsa/pull/189)).
+- Do not include CHANGELOG/LICENSE/README.md in wheel
+  ([#191](https://github.com/sybrenstuvel/python-rsa/pull/191)).
 
 ## Version 4.8 - released 2021-11-24
 
