@@ -6,6 +6,7 @@ description = "Pure-Python RSA implementation"
 readme = "README.md"
 authors = ["Sybren A. Stüvel <sybren@stuvel.eu>"]
 homepage = "https://stuvel.eu/rsa"
+repository = "https://github.com/sybrenstuvel/python-rsa"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
