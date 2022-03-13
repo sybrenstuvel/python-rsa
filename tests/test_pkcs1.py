@@ -144,7 +144,7 @@ class SignatureTest(unittest.TestCase):
         self.assertEqual(signature1, signature2)
 
     def test_split_hash_sign(self):
-        """Hashing and then signing should match with directly signing the message. """
+        """Hashing and then signing should match with directly signing the message."""
 
         message = b"je moeder"
         msg_hash = pkcs1.compute_hash(message, "SHA-256")
