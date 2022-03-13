@@ -35,8 +35,8 @@ from rsa.pkcs1 import (
 )
 
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
-__date__ = "2021-11-24"
-__version__ = "4.8"
+__date__ = "2022-03-13"
+__version__ = "4.9-dev0"
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
