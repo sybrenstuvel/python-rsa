@@ -20,7 +20,6 @@ import unittest
 
 import rsa
 from rsa import pkcs1
-from rsa._compat import byte
 
 
 class BinaryTest(unittest.TestCase):
@@ -48,7 +47,7 @@ class BinaryTest(unittest.TestCase):
         self.assertIsInstance(a, int)
 
         altered_a = (a + 1) % 256
-        encrypted = encrypted[:5] + byte(altered_a) + encrypted[6:]
+        encrypted = encrypted[:5] + bytes([altered_a]) + encrypted[6:]
 
         self.assertRaises(pkcs1.DecryptionError, pkcs1.decrypt, encrypted, self.priv)
 
