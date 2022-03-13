@@ -1,6 +1,13 @@
 # Python-RSA changelog
 
-## Version 4.8 - in development
+## Version 4.9 - in development
+
+- Remove debug logging from `rsa/key.py`
+  ([#194](https://github.com/sybrenstuvel/python-rsa/pull/194)).
+- Remove overlapping slots in `PrivateKey` and `PublicKey`.
+  ([#189](https://github.com/sybrenstuvel/python-rsa/pull/189)).
+
+## Version 4.8 - released 2021-11-24
 
 - Switch to [Poetry](https://python-poetry.org/) for dependency and release management.
 - Compatibility with Python 3.10.
@@ -12,8 +19,6 @@
 - Use the Chinese Remainder Theorem when decrypting with a private key. This
   makes decryption 2-4x faster
   ([#163](https://github.com/sybrenstuvel/python-rsa/pull/163)).
-- Remove debug logging from `rsa/key.py`
-  ([#194](https://github.com/sybrenstuvel/python-rsa/pull/194)).
 
 ## Version 4.7.2 - released 2021-02-24
 
