@@ -31,7 +31,6 @@ of pyasn1.
 
 """
 
-import logging
 import threading
 import typing
 import warnings
@@ -43,7 +42,6 @@ import rsa.randnum
 import rsa.core
 
 
-log = logging.getLogger(__name__)
 DEFAULT_EXPONENT = 65537
 
 
@@ -669,9 +667,7 @@ def find_p_q(
     qbits = nbits - shift
 
     # Choose the two initial primes
-    log.debug("find_p_q(%i): Finding p", nbits)
     p = getprime_func(pbits)
-    log.debug("find_p_q(%i): Finding q", nbits)
     q = getprime_func(qbits)
 
     def is_acceptable(p: int, q: int) -> bool:

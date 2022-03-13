@@ -12,6 +12,8 @@
 - Use the Chinese Remainder Theorem when decrypting with a private key. This
   makes decryption 2-4x faster
   ([#163](https://github.com/sybrenstuvel/python-rsa/pull/163)).
+- Remove debug logging from `rsa/key.py`
+  ([#194](https://github.com/sybrenstuvel/python-rsa/pull/194)).
 
 ## Version 4.7.2 - released 2021-02-24
 
