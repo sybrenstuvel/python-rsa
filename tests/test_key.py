@@ -39,13 +39,13 @@ class BlindingTest(unittest.TestCase):
 
 class KeyGenTest(unittest.TestCase):
     def test_custom_exponent(self):
-        priv, pub = rsa.key.newkeys(16, exponent=3)
+        pub, priv = rsa.key.newkeys(16, exponent=3)
 
         self.assertEqual(3, priv.e)
         self.assertEqual(3, pub.e)
 
     def test_default_exponent(self):
-        priv, pub = rsa.key.newkeys(16)
+        pub, priv = rsa.key.newkeys(16)
 
         self.assertEqual(0x10001, priv.e)
         self.assertEqual(0x10001, pub.e)
@@ -80,7 +80,7 @@ class HashTest(unittest.TestCase):
     """Test hashing of keys"""
 
     def test_hash_possible(self):
-        priv, pub = rsa.key.newkeys(16)
+        pub, priv = rsa.key.newkeys(16)
 
         # This raises a TypeError when hashing isn't possible.
         hash(priv)
