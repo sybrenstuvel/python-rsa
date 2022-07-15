@@ -37,6 +37,18 @@ poetry install
 
 ## Publishing a New Release
 
+Since this project is considered critical on the Python Package Index,
+two-factor authentication is required. For uploading packages to PyPi, an API
+key is required; username+password will not work.
+
+First, generate an API token at https://pypi.org/manage/account/token/. Then,
+use this token when publishing instead of your username and password.
+
+As username, use `__token__`.
+As password, use the token itself, including the `pypi-` prefix.
+
+See https://pypi.org/help/#apitoken for help using API tokens to publish.
+
 ```
 . ./.venv/bin/activate
 poetry publish --build
