@@ -1,6 +1,6 @@
 # Python-RSA changelog
 
-## Version 4.9 - almost released
+## Version 4.9 - release 2022-07-20
 
 - Remove debug logging from `rsa/key.py`
   ([#194](https://github.com/sybrenstuvel/python-rsa/issues/194)).
