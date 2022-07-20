@@ -47,7 +47,8 @@ use this token when publishing instead of your username and password.
 As username, use `__token__`.
 As password, use the token itself, including the `pypi-` prefix.
 
-See https://pypi.org/help/#apitoken for help using API tokens to publish. This is what I have in `~/.pypirc`:
+See https://pypi.org/help/#apitoken for help using API tokens to publish. This
+is what I have in `~/.pypirc`:
 
 ```
 [distutils]
@@ -56,6 +57,7 @@ index-servers =
 
 # Use `twine upload -r rsa` to upload with this token.
 [rsa]
+  repository = https://upload.pypi.org/legacy/
   username = __token__
   password = pypi-token
 ```
