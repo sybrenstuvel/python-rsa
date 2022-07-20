@@ -15,5 +15,5 @@ poetry version "$1"
 git diff
 echo
 echo "Don't forget to commit and tag:"
-echo git commit -m \'Bumped version to $1\' rsa/__init__.py pyproject.toml
+echo git commit -m \'Bumped version to $1\' rsa/__init__.py pyproject.toml README.md
 echo git tag -a version-$1 -m \'Tagged version $1\'
