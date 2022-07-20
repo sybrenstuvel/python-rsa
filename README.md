@@ -47,9 +47,28 @@ use this token when publishing instead of your username and password.
 As username, use `__token__`.
 As password, use the token itself, including the `pypi-` prefix.
 
-See https://pypi.org/help/#apitoken for help using API tokens to publish.
+See https://pypi.org/help/#apitoken for help using API tokens to publish. This is what I have in `~/.pypirc`:
+
+```
+[distutils]
+index-servers =
+    rsa
+
+# Use `twine upload -r rsa` to upload with this token.
+[rsa]
+  username = __token__
+  password = pypi-token
+```
 
 ```
 . ./.venv/bin/activate
-poetry publish --build
+pip install twine
+
+poetry build
+twine check dist/rsa-4.9.tar.gz dist/rsa-4.9-*.whl
+twine upload -r rsa dist/rsa-4.9.tar.gz dist/rsa-4.9-*.whl
 ```
+
+The `pip install twine` is necessary as Python-RSA requires Python >= 3.6, and
+Twine requires at least version 3.7. This means Poetry refuses to add it as
+dependency.

@@ -9,6 +9,7 @@ DATE=$(date +'%Y-%m-%d')
 
 sed "s/__date__\s=\s\"[^\"]*\"/__date__ = \"$DATE\"/" -i rsa/__init__.py
 sed "s/__version__\s=\s\"[^\"]*\"/__version__ = \"$1\"/" -i rsa/__init__.py
+sed "s+dist/rsa-[\d.]+.tar.gz+__version__ = \"$1\"/" -i README.md
 poetry version "$1"
 
 git diff
