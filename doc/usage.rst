@@ -214,7 +214,7 @@ Modify the message, and the signature is no longer valid and a
     makes cracking the keys easier.
 
 Instead of a message you can also call :py:func:`rsa.sign` and
-:py:func:`rsa.verify` with a :py:class:`file`-like object. If the
+:py:func:`rsa.verify` with a `file`-like object. If the
 message object has a ``read(int)`` method it is assumed to be a file.
 In that case the file is hashed in 1024-byte blocks at the time.
 

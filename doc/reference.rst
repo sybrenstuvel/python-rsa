@@ -17,7 +17,13 @@ Functions
 
 .. autofunction:: rsa.find_signature_hash
 
-.. autofunction:: rsa.newkeys(keysize)
+.. autofunction:: rsa.newkeys
+
+.. autofunction:: rsa.sign_hash
+
+.. autofunction:: rsa.compute_hash
+
+.. autodata:: rsa.pkcs1.HASH_METHODS
 
 
 Classes
@@ -30,6 +36,8 @@ Classes
     The pickle module is not secure against erroneous or maliciously
     constructed data. Never unpickle data received from an untrusted
     or unauthenticated source.
+
+.. autoclass:: rsa.key.AbstractKey
 
 .. autoclass:: rsa.PublicKey
     :members:

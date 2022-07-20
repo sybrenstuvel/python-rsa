@@ -57,6 +57,7 @@ HASH_METHODS: typing.Dict[str, typing.Callable[[], HashType]] = {
     "SHA-384": hashlib.sha384,
     "SHA-512": hashlib.sha512,
 }
+"""Hash methods supported by this library."""
 
 
 if sys.version_info >= (3, 6):
@@ -423,7 +424,7 @@ def compute_hash(message: typing.Union[bytes, typing.BinaryIO], method_name: str
         object. If ``message`` has a ``read()`` method, it is assumed to be a
         file-like object.
     :param method_name: the hash method, must be a key of
-        :py:const:`HASH_METHODS`.
+        :py:const:`rsa.pkcs1.HASH_METHODS`.
 
     """
 
