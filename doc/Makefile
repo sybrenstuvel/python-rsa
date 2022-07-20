@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -n
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
@@ -136,4 +136,3 @@ upload: html
 	@echo "UPLOADING to webserver"
 	@echo
 	rsync _build/html/* stuvel@stuvel.eu:site-stuvel.eu/htdocs/python-rsa-doc/ -va --delete
-
