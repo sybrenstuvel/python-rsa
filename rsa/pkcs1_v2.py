@@ -12,17 +12,67 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Functions for PKCS#1 version 2 encryption and signing
+"""Functions for PKCS#1 version 2.2 encryption and signing
 
-This module implements certain functionality from PKCS#1 version 2. Main
-documentation is RFC 2437: https://tools.ietf.org/html/rfc2437
+Main reference documentation is RFC 8017:
+    * https://tools.ietf.org/html/rfc8017
+
+This module adds certain elements from PKCS#1 version 2.2:
+    * implements RSASSA-PSS (v2.1)
+    * allows SHA-224 (v2.2)
+
+RFC 8017 also recommends the following hash functions:
+    * SHA512/224 
+    * SHA512/256
+
+However, neither of these are provided by the hashlib module. OpenSSL 1.1.1 ships with
+sha512_224 and sha256, and there is talk to incorporate these in a future version of
+of hashlib:
+   * https://github.com/python/cpython/issues/71021
+
 """
 
-from rsa import (
-    common,
-    pkcs1,
-    transform,
-)
+import hashlib
+import math
+import os
+import sys
+import typing
+
+from . import common, core, key, pkcs1, transform
+
+if typing.TYPE_CHECKING:
+    HashType = hashlib._Hash
+else:
+    HashType = typing.Any
+
+HASH_METHODS: typing.Dict[str, typing.Callable[[], HashType]] = {
+    "SHA-1": hashlib.sha1,
+    "SHA-224": hashlib.sha224,
+    "SHA-256": hashlib.sha256,
+    "SHA-384": hashlib.sha384,
+    "SHA-512": hashlib.sha512,
+}
+"""Hash methods supported by this library."""
+
+
+if sys.version_info >= (3, 6):
+    # Python 3.6 introduced SHA3 support.
+    HASH_METHODS.update(
+        {
+            "SHA3-224": hashlib.sha3_224,
+            "SHA3-256": hashlib.sha3_256,
+            "SHA3-384": hashlib.sha3_384,
+            "SHA3-512": hashlib.sha3_512,
+        }
+    )
+
+
+class CryptoError(Exception):
+    """Base class for all exceptions in this module."""
+
+
+class VerificationError(CryptoError):
+    """Raised when verification fails."""
 
 
 def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:
@@ -81,9 +131,411 @@ def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:
     return output[:length]
 
 
+def _xor_bytes(
+    lhs: bytes,
+    rhs: bytes,
+)->bytes:
+    """XORs two byte strings."""
+
+    lhs_int = transform.bytes2int(lhs)
+    rhs_int = transform.bytes2int(rhs)
+    fill_size = max(len(lhs), len(rhs))
+    return transform.int2bytes(lhs_int ^ rhs_int, fill_size)
+
+
+def _make_mask(
+    target_length_bits: int,
+    target_length: int,
+)->int:
+    """Creates a mask used to clear the left-most bits of masked_db and db.
+    
+    :param target_length_bits: The length of the encoded message in bits.
+    :param target_length: The length of the encoded message in bytes, computed as
+        math.ceil(target_length_bits/8).
+    :return: A byte-sized bitmask.
+
+    """
+
+    masklength = 8 - (8*target_length - target_length_bits)
+    mask = (1 << masklength) - 1
+    return mask
+
+
+def _validate_message_size(
+    message_length: int,
+    target_length: int,
+    salt_length: int,
+)->None:
+    """Validates that a hashed message and salt fit within an encoded message.
+
+    :param message: The hashed message, to fit within the encoded message.
+    :param target_length: The length of the encoded message in bytes.
+    :param salt_length: The length of the salt, to fit within the encoded message.
+    :raise OverflowError: if the private key is too small to contain the requested
+        hashed message and salt.
+
+    """
+
+    max_message_length = target_length - salt_length - 2
+
+    if message_length > max_message_length:
+        raise OverflowError(
+            "%i bytes needed for message, but there isresult only"
+            " space for %i" % (message_length, max_message_length)
+        )
+
+
+def _split_signature(
+    mask: int,
+    masked_db_length: int,
+    signature: bytes,
+)->typing.Tuple[bytes, bytes]:
+    """Splits a signature into the masked_db and hash value that compose it.
+
+    :param mask: Bitmask to check value of the left-most bits of masked_db.
+    :param masked_db_length: The length of the signature's masked_db component.
+    :param signature: The signature to split.
+    :raise VerificationError: when the trailing byte is not 0xBC, or when any left-most
+        bits of the masked_db are set.
+    :return: masked_db and the hash value composing the signature.
+
+    """
+
+    masked_db = signature[:-masked_db_length - 1]
+    hash_value = signature[-masked_db_length - 1:-1]
+    trailing_byte = signature[-1:]
+
+    if trailing_byte != b"\xBC":
+        raise VerificationError("Verification failed")
+
+    masked_db_byte = masked_db[0] & mask
+    if masked_db_byte != masked_db[0]:
+        raise VerificationError("Verification failed")
+
+    return (masked_db, hash_value)
+
+
+def _join_signature(
+    mask: int,
+    masked_db: bytes,
+    hash_value: bytes,
+)->bytes:
+    """Joins masked_db and a hash value into a message signature.
+
+    Clears the left-most bits of masked_db before joining it with hash_value and the
+    trailing byte 0xBC to create a message signature.
+
+    :param mask: Bitmask to clear the left-most bits of masked_db.
+    :param masked_db: First signature component.
+    :param hash_value: Second signature component.
+    :return: A message signature.
+
+    """
+
+    masked_db_byte = masked_db[0] & mask
+    masked_db = b"".join([transform.int2bytes(masked_db_byte), masked_db[1:]])
+
+    trailing_byte = b"\xBC"
+    return b"".join([masked_db, hash_value, trailing_byte])
+
+
+def _pad_and_hash(
+    message: bytes,
+    salt: bytes,
+    hash_method: str,
+)->bytes:
+    """Pads a hashed message and salt, and then hashes the result.
+
+    Prepends a message with eight bytes of padding and appends it with the salt to
+    create a padded, salted hash, and then hashes this result.
+
+    :param message: A hashed message.
+    :param salt: A random byte string.
+    :param hash_method: The hash method used on the salted hash.
+    :return: The hash of a padded, salted hash.
+
+    """
+
+    padding = bytes(8)
+    salted_hash = b"".join([padding, message, salt])
+    hash_value = pkcs1.compute_hash(salted_hash, hash_method)
+    return hash_value
+
+
+def _make_db_padding(
+    message_length: int,
+    target_length: int,
+    salt_length: int,
+)->bytes:
+    """Creates db padding."""
+
+    padding_length = target_length - salt_length - message_length - 2
+    padding = bytes(padding_length)
+    return padding
+
+
+def _db_to_salt(
+    db: bytes,
+    message_length: int,
+    target_length: int,
+    salt_length: int,
+)->bytes:
+    """Extracts salt from db bytes.
+
+    Splits db bytes into its three components: padding, a separator byte 0x01, and salt,
+    returning the last item.
+
+    :param db: The db bytes from which to extract the salt.
+    :param message_length: The length of the hashed message.
+    :param target_length: The length of the encoded message.
+    :param salt_length: The expected length of the salt to extract.
+    :raise VerificationError: when the padding is not as expected, or when the separator
+        byte is not 0x01.
+    :return: The salt extracted from db.
+
+    """
+    
+    expected_padding = _make_db_padding(message_length, target_length, salt_length)
+    padding = db[:len(expected_padding)]
+    if expected_padding != padding:
+        raise VerificationError("Verification failed")
+
+    expected_separator = 0x01
+    separator = db[len(padding)]
+    if expected_separator != separator:
+        raise VerificationError("Verification failed")
+
+    salt = db[len(padding) + 1:]
+    return salt
+
+
+def _salt_to_db(
+    salt: bytes,
+    message_length: int,
+    target_length: int,
+    salt_length: int,
+)->bytes:
+    """Creates db bytes with inserted salt.
+
+    db bytes comprises padding bytes, a separator byte 0x01, and salt.
+
+    :param salt: The random bytes to insert.
+    :param message_length: The length of the hashed message.
+    :param target_length: The length of the encoded message.
+    :param salt_length: The expected length of the salt.
+    :return: db bytes.
+
+    """
+
+    padding = _make_db_padding(message_length, target_length, salt_length)
+    separator = b"\x01"
+
+    db = b"".join([padding, separator, salt])
+    return db
+
+
+def _apply_db_mask(
+    unmasked_value: bytes,
+    hash_value: bytes,
+    message_length: int,
+    target_length: int,
+    hash_method: str,
+)->bytes:
+    """Applies a db mask to an unmasked value.
+
+    The unmasked value may either be db or masked_db.
+
+    :param unmasked_value: The value to which the mask is applied.
+    :param hash_value: The seed for MGF which generates the db mask.
+    :param message_length: The length of the hashed message.
+    :param target_length: The length of the encoded message.
+    :param hash_method: The hash method used in the MGF to generate the db mask.
+    :return: A masked value.
+
+    """
+
+    length = target_length - message_length - 1
+    db_mask = mgf1(hash_value, length, hash_method)
+    masked_value = _xor_bytes(unmasked_value, db_mask)
+
+    return masked_value
+
+
+def _make_signature(
+    message: bytes,
+    target_length_bits: int,
+    hash_method: str,
+    salt_length: int,
+) -> bytes:
+    """Creates a message signature.
+
+    :param message: A hashed message.
+    :param target_length bits: The length of the encoded message, in bits.
+    :param hash_method: The hash method used in signature construction.
+    :param salt_length: The length of the salt to put in the signature.
+    :return: A message signature.
+    :raise OverflowError: if the private key is too small to contain the
+        requested hash.
+
+    """
+
+    target_length = math.ceil(target_length_bits/8)
+    _validate_message_size(len(message), target_length, salt_length)
+    
+    salt = os.urandom(salt_length)
+    hash_value = _pad_and_hash(message, salt, hash_method)
+    db = _salt_to_db(salt, len(message), target_length, salt_length)
+    masked_db = _apply_db_mask(db, hash_value, len(message), target_length, hash_method)
+
+    mask = _make_mask(target_length_bits, target_length)
+    return _join_signature(mask, masked_db, hash_value)
+
+
+def _dissect_signature(
+    message: bytes,
+    signature: bytes,
+    target_length_bits: int,
+    hash_method: str,
+    salt_length: int,
+) -> None:
+    """Dissects a message signature for verification.
+
+    :param message: The hashed method purported to generate the signature.
+    :param signature: The signature to verify.
+    :param target_length_bits: The length of the encoded message, in bits.
+    :param hash_method: The hash method used in signature construction.
+    :param salt_length: The length of the salt to put in the signature.
+    :raise OverflowError: if the private key is too small to contain the
+        requested hash.
+    :raise VerificationError: when the signature doesn't match the message.
+    """
+
+    target_length = math.ceil(target_length_bits/8)
+    _validate_message_size(len(message), target_length, salt_length)
+    
+    mask = _make_mask(target_length_bits, target_length)
+    masked_db, hash_value = _split_signature(mask, len(message), signature)
+
+    db = _apply_db_mask(masked_db, hash_value, len(message), target_length, hash_method)
+    db = transform.int2bytes(db[0] & mask) + db[1:]
+
+    salt = _db_to_salt(db, len(message), target_length, salt_length)
+    expected_hash_value = _pad_and_hash(message, salt, hash_method)
+    if hash_value != expected_hash_value:
+        raise VerificationError("Verification failed")
+
+
+def sign_hash(
+    hash_value: bytes,
+    priv_key: key.PrivateKey,
+    hash_method: str,
+    salt_length: int,
+ ) -> bytes:
+    """Signs a precomputed hash with the private key.
+
+    Hashes the message, then signs the hash with the given key. This is known
+    as a "detached signature", because the message itself isn't altered.
+
+    :param hash_value: A precomputed hash to sign (ignores message).
+    :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
+    :param hash_method: the hash method used on the message. Use 'SHA-1',
+        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
+    :param salt_length: the length of the salt in the signature.
+    :return: a message signature block.
+    :raise OverflowError: if the private key is too small to contain the
+        requested hash.
+
+    """
+
+    keylength_bits = common.bit_size(priv_key.n)
+    keylength = common.byte_size(priv_key.n)
+    clearsig = _make_signature(hash_value, keylength_bits - 1, hash_method, salt_length)
+
+    # Encrypt the hash with the private key
+    payload = transform.bytes2int(clearsig)
+    encrypted = priv_key.blinded_encrypt(payload)
+    block = transform.int2bytes(encrypted, keylength)
+
+    return block
+
+
+def sign(
+    message: bytes,
+    priv_key: key.PrivateKey,
+    hash_method: str,
+    salt_length: int = 20,
+) -> bytes:
+    """Signs the message with the private key.
+
+    Hashes the message, then signs the hash with the given key. This is known
+    as a "detached signature", because the message itself isn't altered.
+
+    :param message: the message to sign. Can be an 8-bit string or a file-like
+        object. If ``message`` has a ``read()`` method, it is assumed to be a
+        file-like object.
+    :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
+    :param hash_method: the hash method used on the message. Use 'SHA-1',
+        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
+    :param salt_length: the length of the salt in the signature.
+    :return: a message signature block.
+    :raise OverflowError: if the private key is too small to contain the
+        requested hash.
+
+    """
+    msg_hash = pkcs1.compute_hash(message, hash_method)
+    return sign_hash(msg_hash, priv_key, hash_method, salt_length)
+
+
+def verify(
+    message: bytes,
+    signature: bytes,
+    pub_key: key.PublicKey,
+    hash_method: str,
+    salt_length: int = 20,
+) -> str:
+    """Verifies that the signature matches the message.
+    
+    The hash method must be specified and the salt length may be specified, and both
+    parameter values must match the corresponding ones used for the rsa.pkcs1_v2.sign
+    that generated the signature.
+
+    :param message: the signed message. Can be an 8-bit string or a file-like
+        object. If ``message`` has a ``read()`` method, it is assumed to be a
+        file-like object.
+    :param signature: the signature block, as created with :py:func:`rsa.pkcs1_v2.sign`.
+    :param pub_key: the :py:class:`rsa.PublicKey` of the person signing the message.
+    :param hash_method: the hash method used on the message. Use 'SHA-1',
+        'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
+    :param salt_length: the length of the salt in the signature.
+    :raise VerificationError: when the signature doesn't match the message.
+    :returns: the name of the used hash.
+
+    """
+
+    keylength_bits = common.bit_size(pub_key.n)
+    keylength = common.byte_size(pub_key.n)
+    
+    encrypted = transform.bytes2int(signature)
+    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
+    clearsig = transform.int2bytes(decrypted, math.ceil((keylength_bits - 1)/8))
+
+    # Reconstruct the expected salted, padded hash
+    msg_hash = pkcs1.compute_hash(message, hash_method)
+    _dissect_signature(msg_hash, clearsig, keylength_bits - 1, hash_method, salt_length)
+
+    if len(signature) != keylength:
+        raise VerificationError("Verification failed")
+
+    return hash_method
+
+
 __all__ = [
     "mgf1",
+    "sign",
+    "verify",
+    "VerificationError",
 ]
+
 
 if __name__ == "__main__":
     print("Running doctests 1000x or until failure")
