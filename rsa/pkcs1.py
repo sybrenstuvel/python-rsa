@@ -311,7 +311,7 @@ def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> 
     padded = _pad_for_signing(cleartext, keylength)
 
     payload = transform.bytes2int(padded)
-    encrypted = priv_key.blinded_encrypt(payload)
+    encrypted = priv_key.blinded_decrypt(payload)
     block = transform.int2bytes(encrypted, keylength)
 
     return block
@@ -355,8 +355,11 @@ def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
     """
 
     keylength = common.byte_size(pub_key.n)
+    if len(signature) != keylength:
+        raise VerificationError("Verification failed")
+    
     encrypted = transform.bytes2int(signature)
-    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
+    decrypted = core.encrypt_int(encrypted, pub_key.e, pub_key.n)
     clearsig = transform.int2bytes(decrypted, keylength)
 
     # Get the hash method
@@ -366,9 +369,6 @@ def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
     expected = _pad_for_signing(cleartext, keylength)
-
-    if len(signature) != keylength:
-        raise VerificationError("Verification failed")
 
     # Compare with the signed one
     if expected != clearsig:

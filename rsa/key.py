@@ -486,19 +486,6 @@ class PrivateKey(AbstractKey):
 
         return self.unblind(decrypted, blindfac_inverse)
 
-    def blinded_encrypt(self, message: int) -> int:
-        """Encrypts the message using blinding to prevent side-channel attacks.
-
-        :param message: the message to encrypt
-        :type message: int
-
-        :returns: the encrypted message
-        :rtype: int
-        """
-
-        blinded, blindfac_inverse = self.blind(message)
-        encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
-        return self.unblind(encrypted, blindfac_inverse)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile: bytes) -> "PrivateKey":
