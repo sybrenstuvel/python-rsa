@@ -31,9 +31,11 @@ of pyasn1.
 
 """
 
+import math
 import threading
 import typing
 import warnings
+import itertools
 
 import rsa.prime
 import rsa.pem
@@ -384,7 +386,9 @@ class PrivateKey(AbstractKey):
     """Represents a private RSA key.
 
     This key is also known as the 'decryption key'. It contains the 'n', 'e',
-    'd', 'p', 'q' and other values.
+    'd', 'p', 'q' and other values. For example ,in the case of multiprime RSA,
+    it additionally contains the lists 'rs', 'ds', and 'ts' which contain the
+    factors, exponents, and coefficients for the other primes.
 
     Supports attributes as well as dictionary-like access. Attribute access is
     faster, though.
@@ -404,9 +408,19 @@ class PrivateKey(AbstractKey):
 
     """
 
-    __slots__ = ("d", "p", "q", "exp1", "exp2", "coef")
+    __slots__ = ("d", "p", "q", "exp1", "exp2", "coef", "rs", "ds", "ts")
 
-    def __init__(self, n: int, e: int, d: int, p: int, q: int) -> None:
+    def __init__(
+        self,
+        n: int,
+        e: int,
+        d: int,
+        p: int,
+        q: int,
+        rs: typing.Optional[typing.List[int]] = None,
+    ) -> None:
+        rs = [] if rs is None else rs
+
         AbstractKey.__init__(self, n, e)
         self.d = d
         self.p = p
@@ -417,25 +431,72 @@ class PrivateKey(AbstractKey):
         self.exp2 = int(d % (q - 1))
         self.coef = rsa.common.inverse(q, p)
 
+        # Calculate other primes' exponents and coefficients.
+        self.rs = rs
+        self.ds = [int(d % (r - 1)) for r in rs]
+        Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x*y))
+        self.ts = [pow(R, -1, r) for R, r in zip(Rs[1:], rs)]
+
     def __getitem__(self, key: str) -> int:
         return getattr(self, key)
 
     def __repr__(self) -> str:
-        return "PrivateKey(%i, %i, %i, %i, %i)" % (
-            self.n,
-            self.e,
-            self.d,
-            self.p,
-            self.q,
-        )
+        if self.rs:
+            return "PrivateKey(%i, %i, %i, %i, %i, %s)" % (
+                self.n,
+                self.e,
+                self.d,
+                self.p,
+                self.q,
+                self.rs,
+            )
+        else:
+            return "PrivateKey(%i, %i, %i, %i, %i)" % (
+                self.n,
+                self.e,
+                self.d,
+                self.p,
+                self.q,
+            )
 
-    def __getstate__(self) -> typing.Tuple[int, int, int, int, int, int, int, int]:
+    def __getstate__(self) -> typing.Tuple:
         """Returns the key as tuple for pickling."""
-        return self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef
+        if self.rs:
+            return (
+                self.n,
+                self.e,
+                self.d,
+                self.p,
+                self.q,
+                self.exp1,
+                self.exp2,
+                self.coef,
+                self.rs,
+                self.ds,
+                self.ts,
+            )
+        else:
+            return self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef
 
-    def __setstate__(self, state: typing.Tuple[int, int, int, int, int, int, int, int]) -> None:
+    def __setstate__(self, state: typing.Tuple) -> None:
         """Sets the key from tuple."""
-        self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
+        if len(state) != 8:
+            (
+                self.n,
+                self.e,
+                self.d,
+                self.p,
+                self.q,
+                self.exp1,
+                self.exp2,
+                self.coef,
+                self.rs,
+                self.ds,
+                self.ts,
+             ) = state
+        else:
+            self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
+            self.rs = self.ds = self.ts = []
         AbstractKey.__init__(self, self.n, self.e)
 
     def __eq__(self, other: typing.Any) -> bool:
@@ -445,22 +506,28 @@ class PrivateKey(AbstractKey):
         if not isinstance(other, PrivateKey):
             return False
 
-        return (
-            self.n == other.n
-            and self.e == other.e
-            and self.d == other.d
-            and self.p == other.p
-            and self.q == other.q
-            and self.exp1 == other.exp1
-            and self.exp2 == other.exp2
-            and self.coef == other.coef
-        )
+        return all([getattr(self, k) == getattr(other, k) for k in self.__slots__])
 
     def __ne__(self, other: typing.Any) -> bool:
         return not (self == other)
 
     def __hash__(self) -> int:
-        return hash((self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef))
+        if self.rs:
+            return hash((
+                self.n,
+                self.e,
+                self.d,
+                self.p,
+                self.q,
+                self.exp1,
+                self.exp2,
+                self.coef,
+                *self.rs,
+                *self.ds,
+                *self.ts
+            ))
+        else:
+            return hash((self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef))
 
     def blinded_decrypt(self, encrypted: int) -> int:
         """Decrypts the message using blinding to prevent side-channel attacks.
@@ -474,31 +541,13 @@ class PrivateKey(AbstractKey):
 
         # Blinding and un-blinding should be using the same factor
         blinded, blindfac_inverse = self.blind(encrypted)
-
-        # Instead of using the core functionality, use the Chinese Remainder
-        # Theorem and be 2-4x faster. This the same as:
-        #
-        # decrypted = rsa.core.decrypt_int(blinded, self.d, self.n)
-        s1 = pow(blinded, self.exp1, self.p)
-        s2 = pow(blinded, self.exp2, self.q)
-        h = ((s1 - s2) * self.coef) % self.p
-        decrypted = s2 + self.q * h
-
+        decrypted = rsa.core.decrypt_int_fast(
+            blinded,
+            [self.p, self.q] + self.rs,
+            [self.exp1, self.exp2] + self.ds,
+            [self.coef] + self.ts,
+        )
         return self.unblind(decrypted, blindfac_inverse)
-
-    def blinded_encrypt(self, message: int) -> int:
-        """Encrypts the message using blinding to prevent side-channel attacks.
-
-        :param message: the message to encrypt
-        :type message: int
-
-        :returns: the encrypted message
-        :rtype: int
-        """
-
-        blinded, blindfac_inverse = self.blind(message)
-        encrypted = rsa.core.encrypt_int(blinded, self.d, self.n)
-        return self.unblind(encrypted, blindfac_inverse)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile: bytes) -> "PrivateKey":
@@ -544,12 +593,15 @@ class PrivateKey(AbstractKey):
         if priv[0] != 0:
             raise ValueError("Unable to read this file, version %s != 0" % priv[0])
 
-        as_ints = map(int, priv[1:6])
-        key = cls(*as_ints)
-
+        n, e, d, p, q = map(int, priv[1:6])
         exp1, exp2, coef = map(int, priv[6:9])
+        rs = map(int, priv[9::3])
+        ds = map(int, priv[10::3])
+        ts = map(int, priv[11::3])
 
-        if (key.exp1, key.exp2, key.coef) != (exp1, exp2, coef):
+        key = cls(n, e, d, p, q, list(rs))
+
+        if (key.exp1, key.exp2, key.coef, key.rs, key.ds, key.ts) != (exp1, exp2, coef, rs, ds, ts):
             warnings.warn(
                 "You have provided a malformed keyfile. Either the exponents "
                 "or the coefficient are incorrect. Using the correct values "
@@ -569,6 +621,14 @@ class PrivateKey(AbstractKey):
         from pyasn1.type import univ, namedtype
         from pyasn1.codec.der import encoder
 
+        other_fields = [
+            (
+                namedtype.NamedType("prime%d" % (i + 3), univ.Integer()),
+                namedtype.NamedType("exponent%d" % (i + 3), univ.Integer()),
+                namedtype.NamedType("coefficient%d" % (i + 3), univ.Integer()),
+            ) for i in range(len(self.rs))
+        ]
+        
         class AsnPrivKey(univ.Sequence):
             componentType = namedtype.NamedTypes(
                 namedtype.NamedType("version", univ.Integer()),
@@ -580,6 +640,7 @@ class PrivateKey(AbstractKey):
                 namedtype.NamedType("exponent1", univ.Integer()),
                 namedtype.NamedType("exponent2", univ.Integer()),
                 namedtype.NamedType("coefficient", univ.Integer()),
+                *list(itertools.chain(*other_fields))
             )
 
         # Create the ASN object
@@ -593,6 +654,10 @@ class PrivateKey(AbstractKey):
         asn_key.setComponentByName("exponent1", self.exp1)
         asn_key.setComponentByName("exponent2", self.exp2)
         asn_key.setComponentByName("coefficient", self.coef)
+        for i, (r, d, t) in enumerate(zip(self.rs, self.ds, self.ts), start=3):
+            asn_key.setComponentByName("prime%d" % i, r)
+            asn_key.setComponentByName("exponent%d" % i, d)
+            asn_key.setComponentByName("coefficient%d" % i, t)
 
         return encoder.encode(asn_key)
 
@@ -621,6 +686,35 @@ class PrivateKey(AbstractKey):
 
         der = self._save_pkcs1_der()
         return rsa.pem.save_pem(der, b"RSA PRIVATE KEY")
+
+
+def find_primes(
+    nbits: int,
+    getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+    accurate: bool = True,
+    nprimes: int = 2,
+) -> typing.List[int]:
+    """Returns a list of different primes with nbits divided evenly among them.
+
+    :param nbits: the number of bits for the primes to sum to.
+    :param getprime_func: the getprime function, defaults to
+        :py:func:`rsa.prime.getprime`.
+    :param accurate: whether to enable accurate mode or not.
+    :returns: list of primes in descending order.
+
+    """
+    if nprimes == 2:
+        return list(find_p_q(nbits // 2, getprime_func, accurate))
+
+    quo, rem = divmod(nbits, nprimes)
+    factor_lengths = [quo + 1]*rem + [quo] * (nprimes - rem)
+
+    while True:
+        primes = [getprime_func(length) for length in factor_lengths]
+        if len(set(primes)) == len(primes):
+            break
+
+    return list(reversed(sorted(primes)))
 
 
 def find_p_q(
@@ -703,7 +797,12 @@ def find_p_q(
     return max(p, q), min(p, q)
 
 
-def calculate_keys_custom_exponent(p: int, q: int, exponent: int) -> typing.Tuple[int, int]:
+def calculate_keys_custom_exponent(
+    p: int,
+    q: int,
+    exponent: int,
+    rs: typing.Optional[typing.List[int]] = None,
+) -> typing.Tuple[int, int]:
     """Calculates an encryption and a decryption key given p, q and an exponent,
     and returns them as a tuple (e, d)
 
@@ -713,10 +812,11 @@ def calculate_keys_custom_exponent(p: int, q: int, exponent: int) -> typing.Tupl
         what you're doing, as the exponent influences how difficult your
         private key can be cracked. A very common choice for e is 65537.
     :type exponent: int
+    :param rs: the list of other large primes
 
     """
 
-    phi_n = (p - 1) * (q - 1)
+    phi_n = math.prod([x - 1 for x in [p, q] + ([] if rs is None else rs)])
 
     try:
         d = rsa.common.inverse(exponent, phi_n)
@@ -755,8 +855,9 @@ def gen_keys(
     getprime_func: typing.Callable[[int], int],
     accurate: bool = True,
     exponent: int = DEFAULT_EXPONENT,
-) -> typing.Tuple[int, int, int, int]:
-    """Generate RSA keys of nbits bits. Returns (p, q, e, d).
+    nprimes: int = 2,
+) -> typing.Tuple:
+    """Generate RSA keys of nbits bits. Returns (p, q, e, d) or (p, q, e, d, rs).
 
     Note: this can take a long time, depending on the key size.
 
@@ -768,19 +869,24 @@ def gen_keys(
         what you're doing, as the exponent influences how difficult your
         private key can be cracked. A very common choice for e is 65537.
     :type exponent: int
+    :param nprimes: the number of prime factors comprising the modulus.
     """
 
-    # Regenerate p and q values, until calculate_keys doesn't raise a
+    # Regenerate prime values, until calculate_keys_custom_exponent doesn't raise a
     # ValueError.
     while True:
-        (p, q) = find_p_q(nbits // 2, getprime_func, accurate)
+        primes = find_primes(nbits, getprime_func, accurate, nprimes)
+        p, q, rs = primes[0], primes[1], primes[2:]
         try:
-            (e, d) = calculate_keys_custom_exponent(p, q, exponent=exponent)
+            (e, d) = calculate_keys_custom_exponent(p, q, exponent=exponent, rs=rs)
             break
         except ValueError:
             pass
 
-    return p, q, e, d
+    if rs:
+        return p, q, e, d, rs
+    else:
+        return p, q, e, d
 
 
 def newkeys(
@@ -788,6 +894,7 @@ def newkeys(
     accurate: bool = True,
     poolsize: int = 1,
     exponent: int = DEFAULT_EXPONENT,
+    nprimes: int = 2,
 ) -> typing.Tuple[PublicKey, PrivateKey]:
     """Generates public and private keys, and returns them as (pub, priv).
 
@@ -795,7 +902,7 @@ def newkeys(
     :py:class:`rsa.PublicKey` object. The private key is also known as the
     'decryption key' and is a :py:class:`rsa.PrivateKey` object.
 
-    :param nbits: the number of bits required to store ``n = p*q``.
+    :param nbits: the number of bits required to store the modulus ``n``.
     :param accurate: when True, ``n`` will have exactly the number of bits you
         asked for. However, this makes key generation much slower. When False,
         `n`` may have slightly less bits.
@@ -806,6 +913,7 @@ def newkeys(
         what you're doing, as the exponent influences how difficult your
         private key can be cracked. A very common choice for e is 65537.
     :type exponent: int
+    :param nprimes: the number of prime factors comprising the modulus.
 
     :returns: a tuple (:py:class:`rsa.PublicKey`, :py:class:`rsa.PrivateKey`)
 
@@ -820,6 +928,9 @@ def newkeys(
     if poolsize < 1:
         raise ValueError("Pool size (%i) should be >= 1" % poolsize)
 
+    if nprimes < 2:
+        raise ValueError("Number of primes (%i) should be >= 2" % nprimes)
+
     # Determine which getprime function to use
     if poolsize > 1:
         from rsa import parallel
@@ -831,12 +942,17 @@ def newkeys(
         getprime_func = rsa.prime.getprime
 
     # Generate the key components
-    (p, q, e, d) = gen_keys(nbits, getprime_func, accurate=accurate, exponent=exponent)
+    result = gen_keys(nbits, getprime_func, accurate=accurate, exponent=exponent, nprimes=nprimes)
+    if len(result) == 4:
+        p, q, e, d = result
+        rs = []
+    else:
+        p, q, e, d, rs = result
 
     # Create the key objects
-    n = p * q
+    n = math.prod([p, q] + rs)
 
-    return (PublicKey(n, e), PrivateKey(n, e, d, p, q))
+    return (PublicKey(n, e), PrivateKey(n, e, d, p, q, rs))
 
 
 __all__ = ["PublicKey", "PrivateKey", "newkeys"]
