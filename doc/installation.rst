@@ -25,7 +25,7 @@ GitHub. It also hosts the `issue tracker`_.
 Dependencies
 ------------
 
-Python-RSA is compatible with Python versions 3.5 and newer. The last
+Python-RSA is compatible with Python versions 3.7 and newer. The last
 version with Python 2.7 support was Python-RSA 4.0.
 
 Python-RSA has very few dependencies. As a matter of fact, to use it
