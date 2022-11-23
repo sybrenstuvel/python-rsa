@@ -287,8 +287,8 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
 def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
-    Hashes the message, then signs the hash with the given key. This is known
-    as a "detached signature", because the message itself isn't altered.
+    Signs the hash with the given key. This is known as a "detached signature",
+    because the message itself isn't altered.
 
     :param hash_value: A precomputed hash to sign (ignores message).
     :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
