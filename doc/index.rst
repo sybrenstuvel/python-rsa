@@ -8,7 +8,10 @@ Welcome to Python-RSA's documentation!
 
 Python-RSA is a pure-Python RSA implementation. It supports
 encryption and decryption, signing and verifying signatures, and key
-generation according to PKCS#1 version 1.5.
+generation according to PKCS#1 version 1.5. Additionally, Python-RSA 
+implements signatures according to PKCS#1 version 2.1 and supports the
+hashes of PKCS#1 version 2.2 (excluding SHA-512/224 or SHA-512/256, as
+these are not provided by the ``hashlib`` module)
 
 If you have the time and skill to improve the implementation, by all
 means be my guest. The best way is to clone the `Git

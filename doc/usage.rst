@@ -163,8 +163,72 @@ are considered low-level and are supported by the
 :py:func:`rsa.core.encrypt_int` and :py:func:`rsa.core.decrypt_int`
 functions.
 
-Signing and verification
-------------------------
+Signing and verification (PKCS#1 v2.2)
+--------------------------------------
+
+You can create a detached PSS signature for a message using the
+:py:func:`rsa.sign` function:
+
+    >>> (pubkey, privkey) = rsa.newkeys(512)
+    >>> message = 'Go left at the blue tree'.encode()
+    >>> signature = rsa.pkcs1_v2.sign(message, privkey, 'SHA-1')
+
+This hashes the message using SHA-1. Other hash methods are also
+possible, check the :py:func:`rsa.pkcs1_v2.sign` function documentation for
+details. The hash is then signed with the private key. A fourth argument
+may be provided to override the default signature salt length of 20.
+
+It is possible to calculate the hash and signature in separate operations
+(i.e for generating the hash on a client machine and then sign with a
+private key on remote server). To hash a message use the :py:func:`rsa.compute_hash`
+function and then use the :py:func:`rsa.pkcs1_v2.sign_hash` function to sign the hash:
+
+    >>> message = 'Go left at the blue tree'.encode()
+    >>> hash = rsa.compute_hash(message, 'SHA-1')
+    >>> signature = rsa.pkcs1_v2.sign_hash(hash, privkey, 'SHA-1', 20)
+
+In order to verify the signature, use the :py:func:`rsa.pkcs1_v2.verify`
+function. A fourth argument may be provided to override the default signature
+salt length of 20; this value must match the one used when signing or verification
+will fail. If the verification is successful, this function returns
+the hash algorithm used as a string:
+
+    >>> message = 'Go left at the blue tree'.encode()
+    >>> rsa.verify(message, signature, pubkey)
+    'SHA-1'
+
+Modify the message, and the signature is no longer valid and a
+:py:class:`rsa.pkcs1_v2.VerificationError` is thrown:
+
+    >>> message = 'Go right at the blue tree'.encode()
+    >>> rsa.pkcs1_v2.verify(message, signature, pubkey)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/home/sybren/workspace/python-rsa/rsa/pkcs1_v2.py", line 289, in verify
+        raise VerificationError('Verification failed')
+    rsa.pkcs1_v2.VerificationError: Verification failed
+
+.. warning::
+
+    Never display the stack trace of a
+    :py:class:`rsa.pkcs1_v2.VerificationError` exception. It shows where
+    in the code the exception occurred, and thus leaks information
+    about the key. It's only a tiny bit of information, but every bit
+    makes cracking the keys easier.
+
+Instead of a message you can also call :py:func:`rsa.pkcs1_v2.sign` and
+:py:func:`rsa.pkcs1_v2.verify` with a `file`-like object. If the
+message object has a ``read(int)`` method it is assumed to be a file.
+In that case the file is hashed in 1024-byte blocks at the time.
+
+    >>> with open('somefile', 'rb') as msgfile:
+    ...     signature = rsa.pkcs1_v2.sign(msgfile, privkey, 'SHA-1')
+
+    >>> with open('somefile', 'rb') as msgfile:
+    ...     rsa.pkcs1_v2.verify(msgfile, signature, pubkey)
+
+Signing and verification (PKCS#1 v1.5)
+--------------------------------------
 
 You can create a detached signature for a message using the
 :py:func:`rsa.sign` function:
