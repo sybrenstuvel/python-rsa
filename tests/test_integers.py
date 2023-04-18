@@ -46,3 +46,31 @@ class IntegerTest(unittest.TestCase):
         print("\tVerified:  %d" % verified)
 
         self.assertEqual(message, verified)
+
+    def test_extreme_values(self):
+        # message < 0
+        message = -1
+        print("\n\tMessage:   %d" % message)
+
+        with self.assertRaises(ValueError):
+            rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
+
+        # message == 0
+        message = 0
+        print("\n\tMessage:   %d" % message)
+
+        encrypted = rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
+        print("\tEncrypted: %d" % encrypted)
+
+        decrypted = rsa.core.decrypt_int(encrypted, self.priv.d, self.pub.n)
+        print("\tDecrypted: %d" % decrypted)
+
+        self.assertEqual(message, decrypted)
+
+        # message >= n
+        message = self.pub.n
+        print("\n\tMessage:   %d" % message)
+
+        with self.assertRaises(OverflowError):
+            rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
+
