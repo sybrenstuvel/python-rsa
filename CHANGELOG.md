@@ -6,7 +6,7 @@
   and declare support for 3.11 ([#208](https://github.com/sybrenstuvel/python-rsa/pull/208)).
 - Upgrade `pytest` dependency to fix a [security issue](https://github.com/pytest-dev/py/issues/287#issuecomment-1290407715).
 - Upgrade `pytest-cov` as well, for good measure.
-
+- Upgrade MyPy ([#211](https://github.com/sybrenstuvel/python-rsa/issues/211)).
 
 ## Version 4.9 - release 2022-07-20
 
