@@ -66,6 +66,6 @@ index-servers =
 . ./.venv/bin/activate
 
 poetry build
-twine check dist/rsa-4.9.tar.gz dist/rsa-4.9-*.whl
-twine upload -r rsa dist/rsa-4.9.tar.gz dist/rsa-4.9-*.whl
+twine check dist/rsa-4.10-dev0.tar.gz dist/rsa-4.10-dev0-*.whl
+twine upload -r rsa dist/rsa-4.10-dev0.tar.gz dist/rsa-4.10-dev0-*.whl
 ```
