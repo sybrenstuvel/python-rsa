@@ -31,6 +31,7 @@ of pyasn1.
 
 """
 
+import abc
 import threading
 import typing
 import warnings
@@ -48,7 +49,7 @@ DEFAULT_EXPONENT = 65537
 T = typing.TypeVar("T", bound="AbstractKey")
 
 
-class AbstractKey:
+class AbstractKey(metaclass=abc.ABCMeta):
     """Abstract superclass for private and public keys."""
 
     __slots__ = ("n", "e", "blindfac", "blindfac_inverse", "mutex")
@@ -65,6 +66,7 @@ class AbstractKey:
         self.mutex = threading.Lock()
 
     @classmethod
+    @abc.abstractmethod
     def _load_pkcs1_pem(cls: typing.Type[T], keyfile: bytes) -> T:
         """Loads a key in PKCS#1 PEM format, implement in a subclass.
 
@@ -77,6 +79,7 @@ class AbstractKey:
         """
 
     @classmethod
+    @abc.abstractmethod
     def _load_pkcs1_der(cls: typing.Type[T], keyfile: bytes) -> T:
         """Loads a key in PKCS#1 PEM format, implement in a subclass.
 
@@ -88,6 +91,7 @@ class AbstractKey:
         :rtype: AbstractKey
         """
 
+    @abc.abstractmethod
     def _save_pkcs1_pem(self) -> bytes:
         """Saves the key in PKCS#1 PEM format, implement in a subclass.
 
@@ -95,6 +99,7 @@ class AbstractKey:
         :rtype: bytes
         """
 
+    @abc.abstractmethod
     def _save_pkcs1_der(self) -> bytes:
         """Saves the key in PKCS#1 DER format, implement in a subclass.
 
