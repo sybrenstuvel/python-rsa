@@ -205,29 +205,31 @@ python-versions = "*"
 
 [[package]]
 name = "mypy"
-version = "0.910"
+version = "1.2.0"
 description = "Optional static typing for Python"
 category = "dev"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.7"
 
 [package.dependencies]
-mypy-extensions = ">=0.4.3,<0.5.0"
-toml = "*"
-typed-ast = {version = ">=1.4.0,<1.5.0", markers = "python_version < \"3.8\""}
-typing-extensions = ">=3.7.4"
+mypy-extensions = ">=1.0.0"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+typed-ast = {version = ">=1.4.0,<2", markers = "python_version < \"3.8\""}
+typing-extensions = ">=3.10"
 
 [package.extras]
 dmypy = ["psutil (>=4.0)"]
-python2 = ["typed-ast (>=1.4.0,<1.5.0)"]
+install-types = ["pip"]
+python2 = ["typed-ast (>=1.4.0,<2)"]
+reports = ["lxml"]
 
 [[package]]
 name = "mypy-extensions"
-version = "0.4.4"
-description = "Experimental type system extensions for programs checked with the mypy typechecker."
+version = "1.0.0"
+description = "Type system extensions for programs checked with the mypy type checker."
 category = "dev"
 optional = false
-python-versions = ">=2.7"
+python-versions = ">=3.5"
 
 [[package]]
 name = "packaging"
@@ -491,14 +493,6 @@ lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
 
 [[package]]
-name = "toml"
-version = "0.10.2"
-description = "Python Library for Tom's Obvious, Minimal Language"
-category = "dev"
-optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-
-[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -531,11 +525,11 @@ testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "pytest (>=4.0.0)", "pytes
 
 [[package]]
 name = "typed-ast"
-version = "1.4.3"
+version = "1.5.4"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [[package]]
 name = "typing-extensions"
@@ -591,7 +585,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <4"
-content-hash = "ceb9e294dac0a9e4dde84b5951d6c6b4a40ce4ce9f0e875bec2d4a466b332eab"
+content-hash = "ececf77cb546c444aa5d801d9f1432b62ac0dd86ef282560804af5845fb079a3"
 
 [metadata.files]
 alabaster = []
@@ -640,7 +634,6 @@ sphinxcontrib-htmlhelp = []
 sphinxcontrib-jsmath = []
 sphinxcontrib-qthelp = []
 sphinxcontrib-serializinghtml = []
-toml = []
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
