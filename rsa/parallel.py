@@ -22,24 +22,16 @@ Introduced in Python-RSA 3.1.
 
 """
 
+import typing
 import multiprocessing as mp
 from multiprocessing.connection import Connection
 
 import rsa.prime
-import rsa.randnum
 
-
-def _find_prime(nbits: int, pipe: Connection) -> None:
-    while True:
-        integer = rsa.randnum.read_random_odd_int(nbits)
-
-        # Test for primeness
-        if rsa.prime.is_prime(integer):
-            pipe.send(integer)
-            return
-
-
-def getprime(nbits: int, poolsize: int) -> int:
+def getprime(nbits: int,
+             poolsize: int,
+             getprime_func: typing.Callable[[int], int] = rsa.prime.getprime_FIPS
+    ) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
     Works in multiple threads at the same time.
@@ -62,7 +54,9 @@ def getprime(nbits: int, poolsize: int) -> int:
 
     # Create processes
     try:
-        procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send)) for _ in range(poolsize)]
+        #target function
+        target=lambda:pipe_send.send(getprime_func(nbits))
+        procs = [mp.Process(target=target) for _ in range(poolsize)]
         # Start processes
         for p in procs:
             p.start()
@@ -85,7 +79,7 @@ if __name__ == "__main__":
     print("Running doctests 1000x or until failure")
     import doctest
 
-    for count in range(100):
+    for count in range(1000):
         (failures, tests) = doctest.testmod()
         if failures:
             break

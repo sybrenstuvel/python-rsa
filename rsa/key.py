@@ -617,7 +617,7 @@ class PrivateKey(AbstractKey):
 
 def find_p_q(
     nbits: int,
-    getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+    getprime_func: typing.Callable[[int], int] = rsa.prime.getprime_FIPS,
     accurate: bool = True,
 ) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
@@ -627,7 +627,7 @@ def find_p_q(
 
     :param nbits: the number of bits in each of p and q.
     :param getprime_func: the getprime function, defaults to
-        :py:func:`rsa.prime.getprime`.
+        :py:func:`rsa.prime.getprime`.#TODO:update
 
         *Introduced in Python-RSA 3.1*
 
@@ -650,45 +650,38 @@ def find_p_q(
 
     """
 
-    total_bits = nbits * 2
-
-    # Make sure that p and q aren't too close or the factoring programs can
-    # factor n.
-    shift = nbits // 16
-    pbits = nbits + shift
-    qbits = nbits - shift
-
-    # Choose the two initial primes
-    p = getprime_func(pbits)
-    q = getprime_func(qbits)
+    total_bits = nbits * 2    
 
     def is_acceptable(p: int, q: int) -> bool:
         """Returns True iff p and q are acceptable:
-
-        - p and q differ
-        - (p * q) has the right nr of bits (when accurate=True)
+        
+        NIST.FIPS.186-4 acceptance criteria:
+        - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf#%5B%7B%22num%22%3A127%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C70%2C223%2C0%5D
+        - p and q are in the range [2**(nbits+0.5),2**nbits]
+        - abs(p-q)>2**(nbits-100)
+        - the strong prime requirements are ignored
+          - http://people.csail.mit.edu/rivest/RivestSilverman-AreStrongPrimesNeededForRSA.pdf
+          - (the paper argues they're not needed)
+        - provable prime requirements for smaller key sizes are ignored
         """
-
-        if p == q:
-            return False
-
-        if not accurate:
-            return True
-
-        # Make sure we have just the right amount of bits
+        end=2**nbits
+        start=rsa.prime._bigint_divide_by_sqrt_2(end)
+        if not start<=p<end:return False
+        if not start<=q<end:return False
+        if not abs(p-q)>2**(nbits-100):return False
         found_size = rsa.common.bit_size(p * q)
-        return total_bits == found_size
 
-    # Keep choosing other primes until they match our requirements.
-    change_p = False
-    while not is_acceptable(p, q):
-        # Change p on one iteration and q on the other
-        if change_p:
-            p = getprime_func(pbits)
-        else:
-            q = getprime_func(qbits)
-
-        change_p = not change_p
+        #this should be guaranteed by the previous range checks
+        assert found_size==total_bits
+        
+        return True
+    
+    while 1:
+        # Keep generating primes if there's a failure.
+        p = getprime_func(nbits)
+        q = getprime_func(nbits)
+        #note:failure has negligible probability
+        if is_acceptable(p, q):break
 
     # We want p > q as described on
     # http://www.di-mgt.com.au/rsa_alg.html#crt
