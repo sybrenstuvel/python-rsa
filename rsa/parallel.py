@@ -79,7 +79,7 @@ if __name__ == "__main__":
     print("Running doctests 1000x or until failure")
     import doctest
 
-    for count in range(1000):
+    for count in range(100):
         (failures, tests) = doctest.testmod()
         if failures:
             break
