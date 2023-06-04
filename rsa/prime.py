@@ -182,7 +182,7 @@ def are_relatively_prime(a: int, b: int) -> bool:
     d = gcd(a, b)
     return d == 1
 
-def _bigint_divide_by_sqrt_2(n):
+def _bigint_divide_by_sqrt_2(n: int) -> int:
     """returns math.ceil(n/sqrt(2))
     result is exact
     :param n: integer to divide by sqrt(2).
@@ -204,7 +204,7 @@ def _bigint_divide_by_sqrt_2(n):
     assert (x-1)**2<target
     return x
 
-def getprimebyrange(start,end,initial=None):
+def getprimebyrange(start: int,end: int,initial: int=None) -> int:
     """Returns a prime number randomly chosen from range(start,end)
 
     randomly chooses an initial point within the range
@@ -250,7 +250,7 @@ def getprimebyrange(start,end,initial=None):
     #nothing the bottom half either
     raise ValueError("no primes in range")
 
-def getprime_FIPS(nbits):
+def getprime_FIPS(nbits: int) -> int:
     """Returns a prime number  in the range ceil(2**n/sqrt(2)) <= x < 2**n
     the product of two such primes will always be between [2**(2*n),2**(2*n-1))]
 

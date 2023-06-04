@@ -24,7 +24,6 @@ Introduced in Python-RSA 3.1.
 
 import typing
 import multiprocessing as mp
-from multiprocessing.connection import Connection
 
 import rsa.prime
 
