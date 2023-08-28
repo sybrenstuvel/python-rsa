@@ -1,6 +1,6 @@
 name: Test Python-RSA
 
-on: [push]
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
