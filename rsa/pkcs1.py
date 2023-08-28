@@ -60,23 +60,21 @@ HASH_METHODS: typing.Dict[str, typing.Callable[[], HashType]] = {
 """Hash methods supported by this library."""
 
 
-if sys.version_info >= (3, 6):
-    # Python 3.6 introduced SHA3 support.
-    HASH_ASN1.update(
-        {
-            "SHA3-256": b"\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20",
-            "SHA3-384": b"\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30",
-            "SHA3-512": b"\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40",
-        }
-    )
+HASH_ASN1.update(
+    {
+        "SHA3-256": b"\x30\x31\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x08\x05\x00\x04\x20",
+        "SHA3-384": b"\x30\x41\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x09\x05\x00\x04\x30",
+        "SHA3-512": b"\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40",
+    }
+)
 
-    HASH_METHODS.update(
-        {
-            "SHA3-256": hashlib.sha3_256,
-            "SHA3-384": hashlib.sha3_384,
-            "SHA3-512": hashlib.sha3_512,
-        }
-    )
+HASH_METHODS.update(
+    {
+        "SHA3-256": hashlib.sha3_256,
+        "SHA3-384": hashlib.sha3_384,
+        "SHA3-512": hashlib.sha3_512,
+    }
+)
 
 
 class CryptoError(Exception):
