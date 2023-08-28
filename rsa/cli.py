@@ -178,7 +178,7 @@ class CryptoOperation(metaclass=abc.ABCMeta):
     def read_key(self, filename: str, keyform: str) -> rsa.key.AbstractKey:
         """Reads a public or private key."""
 
-        print("Reading %s key from %s" % (self.keyname, filename), file=sys.stderr)
+        print("Reading {} key from {}".format(self.keyname, filename), file=sys.stderr)
         with open(filename, "rb") as keyfile:
             keydata = keyfile.read()
 

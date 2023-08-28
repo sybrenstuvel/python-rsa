@@ -23,7 +23,7 @@ def assert_int(var: int, name: str) -> None:
     if isinstance(var, int):
         return
 
-    raise TypeError("%s should be an integer, not %s" % (name, var.__class__))
+    raise TypeError("{} should be an integer, not {}".format(name, var.__class__))
 
 
 def encrypt_int(message: int, ekey: int, n: int) -> int:

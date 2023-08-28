@@ -67,7 +67,7 @@ def private_to_public() -> None:
     # Read the input data
     if cli.infilename:
         print(
-            "Reading private key from %s in %s format" % (cli.infilename, cli.inform),
+            "Reading private key from {} in {} format".format(cli.infilename, cli.inform),
             file=sys.stderr,
         )
         with open(cli.infilename, "rb") as infile:
@@ -87,7 +87,7 @@ def private_to_public() -> None:
 
     if cli.outfilename:
         print(
-            "Writing public key to %s in %s format" % (cli.outfilename, cli.outform),
+            "Writing public key to {} in {} format".format(cli.outfilename, cli.outform),
             file=sys.stderr,
         )
         with open(cli.outfilename, "wb") as outfile:

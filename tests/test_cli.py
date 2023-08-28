@@ -2,7 +2,6 @@
 Unit tests for CLI entry points.
 """
 
-from __future__ import print_function
 
 import functools
 import io
