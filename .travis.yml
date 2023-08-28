@@ -6,7 +6,6 @@ cache: pip
 # See: https://github.com/travis-ci/travis-ci/issues/3024
 
 python:
-  - "3.7"
   - "3.8"
   - "3.9"
   - "3.10"
