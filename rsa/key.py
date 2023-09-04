@@ -140,7 +140,7 @@ class AbstractKey(metaclass=abc.ABCMeta):
         except KeyError as ex:
             formats = ", ".join(sorted(methods.keys()))
             raise ValueError(
-                "Unsupported format: {!r}, try one of {}".format(file_format, formats)
+                "Unsupported format: %r, try one of %s" % (file_format, formats)
             ) from ex
 
     def save_pkcs1(self, format: str = "PEM") -> bytes:
