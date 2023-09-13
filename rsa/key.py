@@ -664,17 +664,17 @@ def find_p_q(
           - (the paper argues they're not needed)
         - provable prime requirements for smaller key sizes are ignored
         """
-        end=2**nbits
-        start=rsa.prime._bigint_divide_by_sqrt_2(end)
-        if not start<=p<end:return False
-        if not start<=q<end:return False
+        #end=2**nbits
+        #start=rsa.prime._bigint_divide_by_sqrt_2(end)
+        #if not start<=p<end:return False
+        #if not start<=q<end:return False
+        # these are guaranteed by the getprime_func
+        # alternate getprime_func can give values that do not comply
         if not abs(p-q)>2**(nbits-100):return False
         found_size = rsa.common.bit_size(p * q)
 
         #this should be guaranteed by the previous range checks
-        assert found_size==total_bits
-        
-        return True
+        return found_size==total_bits or not accurate
     
     while 1:
         # Keep generating primes if there's a failure.

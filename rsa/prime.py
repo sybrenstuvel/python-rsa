@@ -20,6 +20,7 @@ Roberto Tamassia, 2002.
 
 import rsa.common
 import rsa.randnum
+from typing import Union
 
 __all__ = ["getprime", "are_relatively_prime"]
 
@@ -204,7 +205,7 @@ def _bigint_divide_by_sqrt_2(n: int) -> int:
     assert (x-1)**2<target
     return x
 
-def getprimebyrange(start: int,end: int,initial: int=None) -> int:
+def getprimebyrange(start: int,end: int,initial: Union[int,None]=None) -> int:
     """Returns a prime number randomly chosen from range(start,end)
 
     randomly chooses an initial point within the range
