@@ -50,9 +50,7 @@ def int2bytes(number: int, fill_size: int = 0) -> bytes:
         Raw bytes (base-256 representation).
     :raises:
         ``OverflowError`` when fill_size is given and the number takes up more
-        bytes than fit into the block. This requires the ``overflow``
-        argument to this function to be set to ``False`` otherwise, no
-        error will be raised.
+        bytes than fit into the block.
     """
 
     if number < 0:
