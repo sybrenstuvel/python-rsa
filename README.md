@@ -24,7 +24,7 @@ licensed under the [Apache License, version 2.0](https://www.apache.org/licenses
 
 ## Security
 
-Because of how Python internally stores numbers, it is very hard (if not impossible) to make a pure-Python program secure against timing attacks. This library is no exception, so use it with care. See https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/ for more info.
+Because of how Python internally stores numbers, it is not possible to make a pure-Python program secure against timing attacks. This library is no exception, so use it with care. See https://github.com/sybrenstuvel/python-rsa/issues/230 and https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/ for more info.
 
 For instructions on how to best report security issues, see our [Security Policy](https://github.com/sybrenstuvel/python-rsa/blob/main/SECURITY.md).
 
