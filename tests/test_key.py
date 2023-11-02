@@ -74,6 +74,12 @@ class KeyGenTest(unittest.TestCase):
         )
         self.assertEqual(39317, p)
         self.assertEqual(33107, q)
+    
+    def test_generate_public_from_private(self):
+        pub, priv = rsa.key.newkeys(16)
+        pub_generated = priv.public_key()
+
+        self.assertEqual(pub, pub_generated)
 
 
 class HashTest(unittest.TestCase):
