@@ -25,6 +25,13 @@ Functions
 
 .. autodata:: rsa.pkcs1.HASH_METHODS
 
+.. autofunction:: rsa.pkcs1_v2.sign
+
+.. autofunction:: rsa.pkcs1_v2.verify
+
+.. autofunction:: rsa.pkcs1_v2.sign_hash
+
+.. autodata:: rsa.pkcs1_v2.HASH_METHODS
 
 Classes
 -------
@@ -55,6 +62,8 @@ Exceptions
 .. autoclass:: rsa.pkcs1.DecryptionError(CryptoError)
 
 .. autoclass:: rsa.pkcs1.VerificationError(CryptoError)
+
+.. autoclass:: rsa.pkcs1_v2.VerificationError(CryptoError)
 
 
 .. index:: VARBLOCK (file format)

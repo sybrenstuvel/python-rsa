@@ -5,7 +5,10 @@ Compatibility with standards
 .. index:: compatibility
 
 Python-RSA implements encryption and signatures according to PKCS#1
-version 1.5. This makes it compatible with the OpenSSL RSA module.
+version 1.5. Additionally, Python-RSA implements signatures according to PKCS#1
+version 2.1 and supports the hashes of PKCS#1 version 2.2 (excluding SHA-512/224
+or SHA-512/256, as these are not provided by the ``hashlib`` module).
+This makes it largely compatible with the OpenSSL RSA module.
 
 Keys are stored in PEM or DER format according to PKCS#1 v1.5. Private
 keys are compatible with OpenSSL. However, OpenSSL uses X.509 for its
@@ -17,6 +20,8 @@ Encryption:
 Signatures:
     PKCS#1 v1.5 using the following hash methods:
     MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384, SHA3-512
+    PKCS#1 v2.1 using the following hash methods: 
+    SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-224, SHA3-256, SHA3-384, SHA3-512
 
 Private keys:
     PKCS#1 v1.5 in PEM and DER format, ASN.1 type RSAPrivateKey

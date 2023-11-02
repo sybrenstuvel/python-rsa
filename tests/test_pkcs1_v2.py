@@ -12,14 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Tests PKCS #1 version 2 functionality.
+"""Tests PKCS#1 version 2.2 functionality.
 
 Most of the mocked values come from the test vectors found at:
 http://www.itomorrowmag.com/emc-plus/rsa-labs/standards-initiatives/pkcs-rsa-cryptography-standard.htm
 """
 
+import struct
+import sys
 import unittest
 
+import rsa
+from rsa import pkcs1
 from rsa import pkcs1_v2
 
 
@@ -77,3 +81,113 @@ class MGFTest(unittest.TestCase):
     def test_invalid_length(self):
         with self.assertRaises(OverflowError):
             pkcs1_v2.mgf1(b"\x06\xe1\xde\xb2", length=2 ** 50)
+
+
+class SignatureTest(unittest.TestCase):
+    def setUp(self):
+        (self.pub, self.priv) = rsa.newkeys(512)
+
+    def test_sign_verify(self):
+        """Test happy flow of sign and verify"""
+
+        message = b"je moeder"
+        hash_method = "SHA-256"
+        signature = pkcs1_v2.sign(message, self.priv, hash_method)
+        self.assertEqual(hash_method, pkcs1_v2.verify(message, signature, self.pub, hash_method))
+
+    @unittest.skipIf(sys.version_info < (3, 6), "SHA3 requires Python 3.6+")
+    def test_sign_verify_sha3(self):
+        """Test happy flow of sign and verify with SHA3-256"""
+
+        message = b"je moeder"
+        hash_method = "SHA3-256"
+        signature = pkcs1_v2.sign(message, self.priv, hash_method)
+        self.assertEqual(hash_method, pkcs1_v2.verify(message, signature, self.pub, hash_method))
+
+    def test_alter_message(self):
+        """Altering the message should let the verification fail."""
+
+        hash_method = "SHA-256"
+        signature = pkcs1_v2.sign(b"je moeder", self.priv, hash_method)
+        self.assertRaises(
+            pkcs1_v2.VerificationError,
+            pkcs1_v2.verify,
+            b"mijn moeder",
+            signature,
+            self.pub,
+            hash_method,
+        )
+
+    def test_sign_different_key_with_salt(self):
+        """Signing with another key, with salt, should let the verification fail."""
+
+        (otherpub, _) = rsa.newkeys(512)
+
+        message = b"je moeder"
+        hash_method = "SHA-256"
+        signature = pkcs1_v2.sign(message, self.priv, hash_method)
+        self.assertRaises(pkcs1_v2.VerificationError, pkcs1_v2.verify, message, signature, otherpub, hash_method)
+
+    def test_sign_different_key_without_salt(self):
+        """Signing with another key, without salt, should let the verification fail."""
+
+        (otherpub, _) = rsa.newkeys(512)
+
+        message = b"je moeder"
+        hash_method = "SHA-256"
+        signature = pkcs1_v2.sign(message, self.priv, hash_method, 0)
+        self.assertRaises(pkcs1_v2.VerificationError, pkcs1_v2.verify, message, signature, otherpub, hash_method, 0)
+
+    def test_multiple_signings_with_salt(self):
+        """Signing the same message twice, with salt, should return different signatures.
+        
+        There is a low probability that this test will fail since the salt is randomly generated.
+        """
+
+        message = struct.pack(">IIII", 0, 0, 0, 1)
+        hash_method = "SHA-1"
+        signature1 = pkcs1_v2.sign(message, self.priv, hash_method)
+        signature2 = pkcs1_v2.sign(message, self.priv, hash_method)
+
+        self.assertNotEqual(signature1, signature2)
+
+    def test_multiple_signings_without_salt(self):
+        """Signing the same message twice, without salt, should return the same signatures."""
+
+        message = struct.pack(">IIII", 0, 0, 0, 1)
+        hash_method = "SHA-1"
+        signature1 = pkcs1_v2.sign(message, self.priv, hash_method, 0)
+        signature2 = pkcs1_v2.sign(message, self.priv, hash_method, 0)
+
+        self.assertEqual(signature1, signature2)
+
+    def test_hash_sign_verify(self):
+        """Test happy flow of hash, sign, and verify"""
+
+        message = b"je moeder"
+        hash_method = "SHA-224"
+        salt_length = 20
+        msg_hash = pkcs1.compute_hash(message, hash_method)
+        signature = pkcs1_v2.sign_hash(msg_hash, self.priv, hash_method, salt_length)
+
+        self.assertTrue(pkcs1_v2.verify(message, signature, self.pub, hash_method, salt_length))
+
+    def test_prepend_zeroes(self):
+        """Prepending the signature with zeroes should be detected."""
+
+        message = b"je moeder"
+        hash_method = "SHA-256"
+        signature = pkcs1_v2.sign(message, self.priv, hash_method)
+        signature = bytes(2) + signature
+        with self.assertRaises(pkcs1_v2.VerificationError):
+            pkcs1_v2.verify(message, signature, self.pub, hash_method)
+
+    def test_apppend_zeroes(self):
+        """Apppending the signature with zeroes should be detected."""
+
+        message = b"je moeder"
+        hash_method = "SHA-256"
+        signature = pkcs1_v2.sign(message, self.priv, hash_method)
+        signature = signature + bytes(2)
+        with self.assertRaises(pkcs1_v2.VerificationError):
+            pkcs1_v2.verify(message, signature, self.pub, hash_method)
