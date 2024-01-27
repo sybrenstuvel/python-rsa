@@ -6,11 +6,10 @@ cache: pip
 # See: https://github.com/travis-ci/travis-ci/issues/3024
 
 python:
-  - "3.6"
-  - "3.7"
   - "3.8"
   - "3.9"
-  - "3.10-dev"
+  - "3.10"
+  - "3.11"
 
 install:
   - pip install -U pip setuptools  # https://github.com/pypa/virtualenv/issues/1630
@@ -18,7 +17,7 @@ install:
   - poetry install
 
 script:
-  - poetry run py.test tests/
+  - poetry run pytest tests/
 
 after_success:
   - poetry run coveralls

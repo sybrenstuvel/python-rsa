@@ -14,13 +14,12 @@
 
 """Tests string operations."""
 
-from __future__ import absolute_import
 
 import unittest
 
 import rsa
 
-unicode_string = u"Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+unicode_string = "Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 class StringTest(unittest.TestCase):

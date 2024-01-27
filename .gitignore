@@ -19,3 +19,4 @@ __pycache__/
 
 /build/
 /doc/_build/
+.vscode/settings.json
