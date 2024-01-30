@@ -209,11 +209,170 @@ class PemTest(unittest.TestCase):
         self.assertEqual(14617195220284816877, privkey.q)
 
 
+MP_B64PRIV_DER = b"MEoCAQACCDsGeWW1Om5xAgMBAAECBQDHn4npAgMA+nsCAwDHDQICcw0CAwCWDQICTjYCAwCZlQICaukCAioVAgMAgVMCAksjAgIq3g=="
+MP_PRIVATE_DER = base64.standard_b64decode(MP_B64PRIV_DER)
+
+MP_B64PUB_DER = b"MA8CCDsGeWW1Om5xAgMBAAE="
+MP_PUBLIC_DER = base64.standard_b64decode(MP_B64PUB_DER)
+
+MP_PRIVATE_PEM = (
+    b"""\
+-----BEGIN CONFUSING STUFF-----
+Cruft before the key
+
+-----BEGIN RSA PRIVATE KEY-----
+Comment: something blah
+
+"""
+    + MP_B64PRIV_DER
+    + b"""
+-----END RSA PRIVATE KEY-----
+
+Stuff after the key
+-----END CONFUSING STUFF-----
+"""
+)
+
+MP_CLEAN_PRIVATE_PEM = (
+    b"""\
+-----BEGIN RSA PRIVATE KEY-----
+"""
+    + MP_B64PRIV_DER
+    + b"""
+-----END RSA PRIVATE KEY-----
+"""
+)
+
+MP_PUBLIC_PEM = (
+    b"""\
+-----BEGIN CONFUSING STUFF-----
+Cruft before the key
+
+-----BEGIN RSA PUBLIC KEY-----
+Comment: something blah
+
+"""
+    + MP_B64PUB_DER
+    + b"""
+-----END RSA PUBLIC KEY-----
+
+Stuff after the key
+-----END CONFUSING STUFF-----
+"""
+)
+
+MP_CLEAN_PUBLIC_PEM = (
+    b"""\
+-----BEGIN RSA PUBLIC KEY-----
+"""
+    + MP_B64PUB_DER
+    + b"""
+-----END RSA PUBLIC KEY-----
+"""
+)
+
+
+class MultiprimeDerTest(unittest.TestCase):
+    """Test saving and loading multiprime DER keys."""
+
+    def test_load_multiprime_private_key(self):
+        """Test loading private DER keys."""
+
+        key = rsa.key.PrivateKey.load_pkcs1(MP_PRIVATE_DER, "DER")
+        expected = rsa.key.PrivateKey(4253220375837175409, 65537, 3349121513, 64123, 50957, [39317, 33107])
+
+        self.assertEqual(expected, key)
+        self.assertEqual(key.exp1, 29453)
+        self.assertEqual(key.exp2, 38413)
+        self.assertEqual(key.coef, 20022)
+        self.assertEqual(key.ds, [27369, 19235])
+        self.assertEqual(key.ts, [10773, 10974])
+
+    def test_save_multiprime_private_key(self):
+        """Test saving private DER keys."""
+
+        key = rsa.key.PrivateKey(4253220375837175409, 65537, 3349121513, 64123, 50957, [39317, 33107])
+        der = key.save_pkcs1("DER")
+
+        self.assertIsInstance(der, bytes)
+        self.assertEqual(MP_PRIVATE_DER, der)
+
+    def test_load_multiprime_public_key(self):
+        """Test loading public DER keys."""
+
+        key = rsa.key.PublicKey.load_pkcs1(MP_PUBLIC_DER, "DER")
+        expected = rsa.key.PublicKey(4253220375837175409, 65537)
+
+        self.assertEqual(expected, key)
+
+    def test_save_multiprime_public_key(self):
+        """Test saving public DER keys."""
+
+        key = rsa.key.PublicKey(4253220375837175409, 65537)
+        der = key.save_pkcs1("DER")
+
+        self.assertIsInstance(der, bytes)
+        self.assertEqual(MP_PUBLIC_DER, der)
+
+
+class MultiprimePemTest(unittest.TestCase):
+    """Test saving and loading multiprime PEM keys."""
+
+    def test_load_multiprime_private_key(self):
+        """Test loading private PEM files."""
+
+        key = rsa.key.PrivateKey.load_pkcs1(MP_PRIVATE_PEM, "PEM")
+        expected = rsa.key.PrivateKey(4253220375837175409, 65537, 3349121513, 64123, 50957, [39317, 33107])
+
+        self.assertEqual(expected, key)
+        self.assertEqual(key.exp1, 29453)
+        self.assertEqual(key.exp2, 38413)
+        self.assertEqual(key.coef, 20022)
+        self.assertEqual(key.ds, [27369, 19235])
+        self.assertEqual(key.ts, [10773, 10974])
+
+    def test_save_multiprime_private_key(self):
+        """Test saving private PEM files."""
+
+        key = rsa.key.PrivateKey(4253220375837175409, 65537, 3349121513, 64123, 50957, [39317, 33107])
+        pem = key.save_pkcs1("PEM")
+
+        self.assertIsInstance(pem, bytes)
+        self.assertEqual(MP_CLEAN_PRIVATE_PEM.replace(b"\n", b""), pem.replace(b"\n", b""))
+
+    def test_load_multiprime_public_key(self):
+        """Test loading public PEM files."""
+
+        key = rsa.key.PublicKey.load_pkcs1(MP_PUBLIC_PEM, "PEM")
+        expected = rsa.key.PublicKey(4253220375837175409, 65537)
+
+        self.assertEqual(expected, key)
+
+    def test_save_multiprime_public_key(self):
+        """Test saving public PEM files."""
+
+        key = rsa.key.PublicKey(4253220375837175409, 65537)
+        pem = key.save_pkcs1("PEM")
+
+        self.assertIsInstance(pem, bytes)
+        self.assertEqual(MP_CLEAN_PUBLIC_PEM, pem)
+
+
 class PickleTest(unittest.TestCase):
     """Test saving and loading keys by pickling."""
 
     def test_private_key(self):
         pk = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
+
+        pickled = pickle.dumps(pk)
+        unpickled = pickle.loads(pickled)
+        self.assertEqual(pk, unpickled)
+
+        for attr in rsa.key.AbstractKey.__slots__:
+            self.assertTrue(hasattr(unpickled, attr))
+
+    def test_multiprime_private_key(self):
+        pk = rsa.key.PrivateKey(4253220375837175409, 65537, 3349121513, 64123, 50957, [39317, 33107])
 
         pickled = pickle.dumps(pk)
         unpickled = pickle.loads(pickled)

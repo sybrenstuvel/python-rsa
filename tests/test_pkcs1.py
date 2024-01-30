@@ -63,6 +63,23 @@ class BinaryTest(unittest.TestCase):
         self.assertNotEqual(encrypted1, encrypted2)
 
 
+class MultiprimeBinaryTest(unittest.TestCase):
+    def setUp(self):
+        (self.pub, self.priv) = rsa.newkeys(256, nprimes=3)
+
+    def test_multiprime_enc_dec(self):
+        message = struct.pack(">IIII", 0, 0, 0, 1)
+        print("\n\tMessage:   %r" % message)
+
+        encrypted = pkcs1.encrypt(message, self.pub)
+        print("\tEncrypted: %r" % encrypted)
+
+        decrypted = pkcs1.decrypt(encrypted, self.priv)
+        print("\tDecrypted: %r" % decrypted)
+
+        self.assertEqual(message, decrypted)
+
+
 class ExtraZeroesTest(unittest.TestCase):
     def setUp(self):
         # Key, cyphertext, and plaintext taken from https://github.com/sybrenstuvel/python-rsa/issues/146
@@ -180,6 +197,18 @@ class SignatureTest(unittest.TestCase):
         signature = signature + bytes.fromhex("0000")
         with self.assertRaises(rsa.VerificationError):
             pkcs1.verify(message, signature, self.pub)
+
+
+class MultiprimeSignatureTest(unittest.TestCase):
+    def setUp(self):
+        (self.pub, self.priv) = rsa.newkeys(512, nprimes=3)
+
+    def test_multiprime_sign_verify(self):
+        """Test happy flow of sign and verify"""
+
+        message = b"je moeder"
+        signature = pkcs1.sign(message, self.priv, "SHA-256")
+        self.assertEqual("SHA-256", pkcs1.verify(message, signature, self.pub))
 
 
 class PaddingSizeTest(unittest.TestCase):

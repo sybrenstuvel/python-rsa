@@ -75,6 +75,19 @@ class KeyGenTest(unittest.TestCase):
         self.assertEqual(39317, p)
         self.assertEqual(33107, q)
 
+    def test_multiprime(self):
+        primes = [64123, 50957, 39317, 33107]
+        exponent = 2**2**4 + 1
+
+        def getprime(_):
+            return primes.pop(0)
+        (p, q, e, d, rs) = rsa.key.gen_keys(
+            128, accurate=False, getprime_func=getprime, exponent=exponent, nprimes=4
+        )
+        self.assertEqual(64123, p)
+        self.assertEqual(50957, q)
+        self.assertEqual(rs, [39317, 33107])
+
 
 class HashTest(unittest.TestCase):
     """Test hashing of keys"""

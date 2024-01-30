@@ -17,6 +17,8 @@
 This is the actual core RSA implementation, which is only defined
 mathematically on integers.
 """
+import itertools
+import typing
 
 
 def assert_int(var: int, name: str) -> None:
@@ -51,3 +53,37 @@ def decrypt_int(cyphertext: int, dkey: int, n: int) -> int:
 
     message = pow(cyphertext, dkey, n)
     return message
+
+
+def decrypt_int_fast(
+    cyphertext: int,
+    rs: typing.List[int],
+    ds: typing.List[int],
+    ts: typing.List[int],
+) -> int:
+    """Decrypts a cypher text more quickly using the Chinese Remainder Theorem."""
+
+    assert_int(cyphertext, "cyphertext")
+    for r in rs:
+        assert_int(r, "r")
+    for d in ds:
+        assert_int(d, "d")
+    for t in ts:
+        assert_int(t, "t")
+
+    p, q, rs = rs[0], rs[1], rs[2:]
+    exp1, exp2, ds = ds[0], ds[1], ds[2:]
+    coef, ts = ts[0], ts[1:]
+
+    M1 = pow(cyphertext, exp1, p)
+    M2 = pow(cyphertext, exp2, q)
+    h = ((M1 - M2) * coef) % p
+    m = M2 + q * h
+
+    Ms = [pow(cyphertext, d, r) for d, r in zip(ds, rs)]
+    Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x*y))
+    for R, r, M, t in zip(Rs[1:], rs, Ms, ts):
+        h = ((M - m) * t) % r
+        m += R * h
+
+    return m

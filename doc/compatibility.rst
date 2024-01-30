@@ -5,9 +5,10 @@ Compatibility with standards
 .. index:: compatibility
 
 Python-RSA implements encryption and signatures according to PKCS#1
-version 1.5. This makes it compatible with the OpenSSL RSA module.
+version 1.5. Additionally, Python-RSA implements multiprime encryption according to PKCS#1
+version 2.1. This makes it largely compatible with the OpenSSL RSA module.
 
-Keys are stored in PEM or DER format according to PKCS#1 v1.5. Private
+Keys are stored in PEM or DER format according to PKCS#1 v2.1. Private
 keys are compatible with OpenSSL. However, OpenSSL uses X.509 for its
 public keys, which are not supported.
 
