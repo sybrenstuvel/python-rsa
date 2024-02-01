@@ -20,6 +20,7 @@ Roberto Tamassia, 2002.
 
 import rsa.common
 import rsa.randnum
+from typing import Union
 
 __all__ = ["getprime", "are_relatively_prime"]
 
@@ -181,6 +182,98 @@ def are_relatively_prime(a: int, b: int) -> bool:
 
     d = gcd(a, b)
     return d == 1
+
+def _bigint_divide_by_sqrt_2(n: int) -> int:
+    """returns math.ceil(n/sqrt(2))
+    result is exact
+    :param n: integer to divide by sqrt(2).
+    :returns: math.ceil(n/sqrt(2))
+    >>> import math
+    >>> _bigint_divide_by_sqrt_2(100)
+    71
+    >>> _bigint_divide_by_sqrt_2(2**128)
+    240615969168004511545033772477625056928
+    """
+    x=n*int(2**63.5)//2**64 #initial approximation
+    target=n**2 // 2
+    while 1:#newton approximation
+        dx=(x*x-target)//(2*x)
+        x-=dx
+        if not dx:break
+    #check this meets the ceil criteria exactly
+    assert (x  )**2>target
+    assert (x-1)**2<target
+    return x
+
+def getprimebyrange(start: int,end: int,initial: Union[int,None]=None) -> int:
+    """Returns a prime number randomly chosen from range(start,end)
+
+    randomly chooses an initial point within the range
+    This can be overriden with the optional initial argument
+
+    starts at the initial point scanning range(initial,end) then trying
+    range(start,initial)
+
+    >>> p = getprimebyrange(100,200)
+    >>> 100<=p<200
+    True
+    >>> is_prime(p-1)
+    False
+    >>> is_prime(p)
+    True
+    >>> is_prime(p+1)
+    False
+
+    >>> getprimebyrange(10000,20000,initial=10000)
+    10007
+    >>> getprimebyrange(10000,20000,initial=10010)
+    10037
+    >>> #when no primes in range(initial,end), it tries range(start,initial)
+    >>> getprimebyrange(10000,10020,initial=10010)
+    10007
+    """
+    #randomly choose the initial point in the range (unless specified)
+    assert end>start
+    if initial is None:
+        initial=start+rsa.randnum.randint(end-start)-1
+    assert start<=initial<end
+    #check top part of range
+    for candidate in range(initial|1, end,2):
+        if is_prime(candidate):
+            return candidate
+    #nothing in the top part of the given range
+    #check bottom part of range
+    for candidate in range(start|1,initial,2):
+        #integer = rsa.randnum.read_random_odd_int(nbits)
+        # Test for primeness
+        if is_prime(candidate):
+            return candidate
+    #nothing the bottom half either
+    raise ValueError("no primes in range")
+
+def getprime_FIPS(nbits: int) -> int:
+    """Returns a prime number  in the range ceil(2**n/sqrt(2)) <= x < 2**n
+    the product of two such primes will always be between [2**(2*n),2**(2*n-1))]
+
+    >>> p = getprime_FIPS(128)
+    >>> is_prime(p-1)
+    False
+    >>> is_prime(p)
+    True
+    >>> is_prime(p+1)
+    False
+
+    >>> from rsa import common
+    >>> common.bit_size(p) == 128
+    True
+    >>> common.bit_size(p**2) == 256
+    True
+    """
+    end=2**nbits
+    start=_bigint_divide_by_sqrt_2(end)
+    p=getprimebyrange(start,end)
+    return p
+    
 
 
 if __name__ == "__main__":
