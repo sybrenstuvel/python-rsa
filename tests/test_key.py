@@ -39,16 +39,16 @@ class BlindingTest(unittest.TestCase):
 
 class KeyGenTest(unittest.TestCase):
     def test_custom_exponent(self):
-        pub, priv = rsa.key.newkeys(16, exponent=3)
+        public, private = rsa.key.new_keys(16, exponent=3)
 
-        self.assertEqual(3, priv.e)
-        self.assertEqual(3, pub.e)
+        self.assertEqual(3, private.e)
+        self.assertEqual(3, public.e)
 
     def test_default_exponent(self):
-        pub, priv = rsa.key.newkeys(16)
+        public, private = rsa.key.new_keys(16)
 
-        self.assertEqual(0x10001, priv.e)
-        self.assertEqual(0x10001, pub.e)
+        self.assertEqual(0x10001, private.e)
+        self.assertEqual(0x10001, public.e)
 
     def test_exponents_coefficient_calculation(self):
         pk = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
@@ -57,20 +57,20 @@ class KeyGenTest(unittest.TestCase):
         self.assertEqual(pk.exp2, 10095)
         self.assertEqual(pk.coef, 50797)
 
-    def test_custom_getprime_func(self):
+    def test_custom_get_prime_func(self):
         # List of primes to test with, in order [p, q, p, q, ....]
         # By starting with two of the same primes, we test that this is
         # properly rejected.
         primes = [64123, 64123, 64123, 50957, 39317, 33107]
 
-        def getprime(_):
+        def get_prime(_):
             return primes.pop(0)
 
         # This exponent will cause two other primes to be generated.
         exponent = 136407
 
         (p, q, e, d) = rsa.key.gen_keys(
-            64, accurate=False, getprime_func=getprime, exponent=exponent
+            64, accurate=False, getprime_func=get_prime, exponent=exponent
         )
         self.assertEqual(39317, p)
         self.assertEqual(33107, q)
@@ -93,7 +93,7 @@ class HashTest(unittest.TestCase):
     """Test hashing of keys"""
 
     def test_hash_possible(self):
-        pub, priv = rsa.key.newkeys(16)
+        pub, priv = rsa.key.new_keys(16)
 
         # This raises a TypeError when hashing isn't possible.
         hash(priv)

@@ -21,7 +21,7 @@ prevent repetitions, or other common security improvements. Use with care.
 
 """
 
-from rsa.key import newkeys, PrivateKey, PublicKey
+from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (
     encrypt,
     decrypt,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     doctest.testmod()
 
 __all__ = [
-    "newkeys",
+    "new_keys",
     "encrypt",
     "decrypt",
     "sign",

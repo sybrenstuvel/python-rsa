@@ -28,11 +28,11 @@ def assert_int(var: int, name: str) -> None:
     raise TypeError("{} should be an integer, not {}".format(name, var.__class__))
 
 
-def encrypt_int(message: int, ekey: int, n: int) -> int:
+def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
     assert_int(message, "message")
-    assert_int(ekey, "ekey")
+    assert_int(encrypt_key, "encrypt_key")
     assert_int(n, "n")
 
     if message < 0:
@@ -41,29 +41,28 @@ def encrypt_int(message: int, ekey: int, n: int) -> int:
     if message >= n:
         raise OverflowError("The message %i is too long for n=%i" % (message, n))
 
-    return pow(message, ekey, n)
+    return pow(message, encrypt_key, n)
 
 
-def decrypt_int(cyphertext: int, dkey: int, n: int) -> int:
+def decrypt_int(cypher_text: int, dkey: int, n: int) -> int:
     """Decrypts a cypher text using the decryption key 'dkey', working modulo n"""
 
-    assert_int(cyphertext, "cyphertext")
+    assert_int(cypher_text, "cypher_text")
     assert_int(dkey, "dkey")
     assert_int(n, "n")
 
-    message = pow(cyphertext, dkey, n)
-    return message
+    return pow(cypher_text, dkey, n)
 
 
 def decrypt_int_fast(
-    cyphertext: int,
+    cypher_text: int,
     rs: typing.List[int],
     ds: typing.List[int],
     ts: typing.List[int],
 ) -> int:
     """Decrypts a cypher text more quickly using the Chinese Remainder Theorem."""
 
-    assert_int(cyphertext, "cyphertext")
+    assert_int(cypher_text, "cypher_text")
     for r in rs:
         assert_int(r, "r")
     for d in ds:
@@ -75,12 +74,12 @@ def decrypt_int_fast(
     exp1, exp2, ds = ds[0], ds[1], ds[2:]
     coef, ts = ts[0], ts[1:]
 
-    M1 = pow(cyphertext, exp1, p)
-    M2 = pow(cyphertext, exp2, q)
+    M1 = pow(cypher_text, exp1, p)
+    M2 = pow(cypher_text, exp2, q)
     h = ((M1 - M2) * coef) % p
     m = M2 + q * h
 
-    Ms = [pow(cyphertext, d, r) for d, r in zip(ds, rs)]
+    Ms = [pow(cypher_text, d, r) for d, r in zip(ds, rs)]
     Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x*y))
     for R, r, M, t in zip(Rs[1:], rs, Ms, ts):
         h = ((M - m) * t) % r

@@ -30,10 +30,40 @@ Generating keys
 You can use the :py:func:`rsa.newkeys` function to create a key pair:
 
     >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512)
+
+Alternatively you can use :py
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512)
+
+Alternatively you can use :py
+
+    >>> import rsa
     >>> (pubkey, privkey) = rsa.newkeys(512)
 
 Alternatively you can use :py:meth:`rsa.PrivateKey.load_pkcs1` and
 :py:meth:`rsa.PublicKey.load_pkcs1` to load keys from a file:
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
 
     >>> import rsa
     >>> with open('private.pem', mode='rb') as privatefile:
@@ -62,6 +92,104 @@ the number of processes that your machine can run in parallel; a
 dual-core machine should use ``poolsize=2``; a quad-core
 hyperthreading machine can run two threads on each core, and thus can
 use ``poolsize=8``.
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, pool_size=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.newkeys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, pool_size=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.newkeys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, pool_size=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.newkeys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, pool_size=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.newkeys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
+
+    >>> (pubkey, privkey) = rsa.new_keys(512, poolsize=8)
+
+These are some average timings from my desktop machine (Linux 2.6,
+2.93 GHz quad-core Intel Core i7, 16 GB RAM) using 64-bit CPython 2.7.
+Since key generation is a random process, times may differ even on
+similar hardware. On all tests, we used the default
 
     >>> (pubkey, privkey) = rsa.newkeys(512, poolsize=8)
 
@@ -101,6 +229,62 @@ Encryption and decryption
 
 To encrypt or decrypt a message, use :py:func:`rsa.encrypt` resp.
 :py:func:`rsa.decrypt`. Let's say that Alice wants to send a message
+that only Bob can read.
+
+#. Bob generates a key pair, and gives the public key to Alice. This is
+   done such that Alice knows for sure that the key is really Bob's
+   (for example by handing over a USB stick that contains the key).
+
+    >>> import rsa
+    >>> (bob_pub, bob_priv) = rsa.new_keys(512)
+
+#. Alice writes a message, and encodes it in UTF-8. The RSA module
+   only operates on bytes, and not on strings, so this step is
+   necessary.
+
+    >>> message = 'hello Bob!'.encode('utf8')
+
+#. Alice encrypts the message using Bob's public key, and sends the
+   encrypted message.
+
+    >>> import rsa
+    >>> crypto = rsa.encrypt(message, bob_pub)
+
+#. Bob receives the message, and decrypts it with his private key.
+
+    >>> message = rsa.decrypt(crypto, bob_priv)
+    >>> print(message.decode('utf8'))
+    hello Bob!
+
+Since Bob kept his private key
+that only Bob can read.
+
+#. Bob generates a key pair, and gives the public key to Alice. This is
+   done such that Alice knows for sure that the key is really Bob's
+   (for example by handing over a USB stick that contains the key).
+
+    >>> import rsa
+    >>> (bob_pub, bob_priv) = rsa.new_keys(512)
+
+#. Alice writes a message, and encodes it in UTF-8. The RSA module
+   only operates on bytes, and not on strings, so this step is
+   necessary.
+
+    >>> message = 'hello Bob!'.encode('utf8')
+
+#. Alice encrypts the message using Bob's public key, and sends the
+   encrypted message.
+
+    >>> import rsa
+    >>> crypto = rsa.encrypt(message, bob_pub)
+
+#. Bob receives the message, and decrypts it with his private key.
+
+    >>> message = rsa.decrypt(crypto, bob_priv)
+    >>> print(message.decode('utf8'))
+    hello Bob!
+
+Since Bob kept his private key
 that only Bob can read.
 
 #. Bob generates a key pair, and gives the public key to Alice. This is
@@ -173,6 +357,20 @@ Signing and verification
 
 You can create a detached signature for a message using the
 :py:func:`rsa.sign` function:
+
+    >>> (pubkey, privkey) = rsa.new_keys(512)
+    >>> message = 'Go left at the blue tree'.encode()
+    >>> signature = rsa.sign(message, privkey, 'SHA-1')
+
+This hashes the message using SHA-1. Other hash methods are also
+possible, check the :py
+
+    >>> (pubkey, privkey) = rsa.new_keys(512)
+    >>> message = 'Go left at the blue tree'.encode()
+    >>> signature = rsa.sign(message, privkey, 'SHA-1')
+
+This hashes the message using SHA-1. Other hash methods are also
+possible, check the :py
 
     >>> (pubkey, privkey) = rsa.newkeys(512)
     >>> message = 'Go left at the blue tree'.encode()

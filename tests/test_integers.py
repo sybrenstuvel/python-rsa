@@ -22,7 +22,7 @@ import rsa.core
 
 class IntegerTest(unittest.TestCase):
     def setUp(self):
-        (self.pub, self.priv) = rsa.newkeys(64)
+        (self.pub, self.priv) = rsa.new_keys(64)
 
     def test_enc_dec(self):
         message = 42

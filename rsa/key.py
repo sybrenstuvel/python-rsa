@@ -695,7 +695,7 @@ class PrivateKey(AbstractKey):
 
 def find_primes(
     nbits: int,
-    getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+    getprime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
     accurate: bool = True,
     nprimes: int = 2,
 ) -> typing.List[int]:
@@ -724,7 +724,7 @@ def find_primes(
 
 def find_p_q(
     nbits: int,
-    getprime_func: typing.Callable[[int], int] = rsa.prime.getprime,
+    get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
     accurate: bool = True,
 ) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
@@ -733,7 +733,7 @@ def find_p_q(
     will not be equal.
 
     :param nbits: the number of bits in each of p and q.
-    :param getprime_func: the getprime function, defaults to
+    :param get_prime_func: the getprime function, defaults to
         :py:func:`rsa.prime.getprime`.
 
         *Introduced in Python-RSA 3.1*
@@ -766,8 +766,8 @@ def find_p_q(
     qbits = nbits - shift
 
     # Choose the two initial primes
-    p = getprime_func(pbits)
-    q = getprime_func(qbits)
+    p = get_prime_func(pbits)
+    q = get_prime_func(qbits)
 
     def is_acceptable(p: int, q: int) -> bool:
         """Returns True iff p and q are acceptable:
@@ -791,9 +791,9 @@ def find_p_q(
     while not is_acceptable(p, q):
         # Change p on one iteration and q on the other
         if change_p:
-            p = getprime_func(pbits)
+            p = get_prime_func(pbits)
         else:
-            q = getprime_func(qbits)
+            q = get_prime_func(qbits)
 
         change_p = not change_p
 
@@ -894,10 +894,10 @@ def gen_keys(
         return p, q, e, d
 
 
-def newkeys(
+def new_keys(
     nbits: int,
     accurate: bool = True,
-    poolsize: int = 1,
+    pool_size: int = 1,
     exponent: int = DEFAULT_EXPONENT,
     nprimes: int = 2,
 ) -> typing.Tuple[PublicKey, PrivateKey]:
@@ -911,7 +911,7 @@ def newkeys(
     :param accurate: when True, ``n`` will have exactly the number of bits you
         asked for. However, this makes key generation much slower. When False,
         `n`` may have slightly less bits.
-    :param poolsize: the number of processes to use to generate the prime
+    :param pool_size: the number of processes to use to generate the prime
         numbers. If set to a number > 1, a parallel algorithm will be used.
         This requires Python 2.6 or newer.
     :param exponent: the exponent for the key; only change this if you know
@@ -930,24 +930,24 @@ def newkeys(
     if nbits < 16:
         raise ValueError("Key too small")
 
-    if poolsize < 1:
-        raise ValueError("Pool size (%i) should be >= 1" % poolsize)
+    if pool_size < 1:
+        raise ValueError("Pool size (%i) should be >= 1" % pool_size)
 
     if nprimes < 2:
         raise ValueError("Number of primes (%i) should be >= 2" % nprimes)
 
     # Determine which getprime function to use
-    if poolsize > 1:
+    if pool_size > 1:
         from rsa import parallel
 
-        def getprime_func(nbits: int) -> int:
-            return parallel.getprime(nbits, poolsize=poolsize)
+        def get_prime_func(nbits: int) -> int:
+            return parallel.get_prime(nbits, pool_size=pool_size)
 
     else:
-        getprime_func = rsa.prime.getprime
+        get_prime_func = rsa.prime.get_prime
 
     # Generate the key components
-    result = gen_keys(nbits, getprime_func, accurate=accurate, exponent=exponent, nprimes=nprimes)
+    result = gen_keys(nbits, get_prime_func, accurate=accurate, exponent=exponent, nprimes=nprimes)
     if len(result) == 4:
         p, q, e, d = result
         rs = []
@@ -957,10 +957,10 @@ def newkeys(
     # Create the key objects
     n = math.prod([p, q] + rs)
 
-    return (PublicKey(n, e), PrivateKey(n, e, d, p, q, rs))
+    return PublicKey(n, e), PrivateKey(n, e, d, p, q, rs)
 
 
-__all__ = ["PublicKey", "PrivateKey", "newkeys"]
+__all__ = ["PublicKey", "PrivateKey", "new_keys"]
 
 if __name__ == "__main__":
     import doctest

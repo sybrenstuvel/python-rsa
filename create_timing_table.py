@@ -16,27 +16,27 @@
 import time
 import rsa
 
-poolsize = 8
+pool_size = 8
 accurate = True
 
 
-def run_speed_test(bitsize):
+def run_speed_test(bit_size):
     iterations = 0
     start = end = time.time()
 
     # At least a number of iterations, and at least 2 seconds
     while iterations < 10 or end - start < 2:
         iterations += 1
-        rsa.newkeys(bitsize, accurate=accurate, poolsize=poolsize)
+        rsa.new_keys(bit_size, accurate=accurate, pool_size=pool_size)
         end = time.time()
 
     duration = end - start
     dur_per_call = duration / iterations
 
     print('%5i bit: %9.3f sec. (%i iterations over %.1f seconds)' %
-          (bitsize, dur_per_call, iterations, duration))
+          (bit_size, dur_per_call, iterations, duration))
 
 
 if __name__ == '__main__':
-    for bitsize in (128, 256, 384, 512, 1024, 2048, 3072, 4096):
-        run_speed_test(bitsize)
+    for bit_size in (128, 256, 384, 512, 1024, 2048, 3072, 4096):
+        run_speed_test(bit_size)

@@ -24,7 +24,7 @@ unicode_string = "Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 class StringTest(unittest.TestCase):
     def setUp(self):
-        (self.pub, self.priv) = rsa.newkeys(384)
+        (self.pub, self.priv) = rsa.new_keys(384)
 
     def test_enc_dec(self):
         message = unicode_string.encode("utf-8")

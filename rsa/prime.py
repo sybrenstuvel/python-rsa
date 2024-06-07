@@ -20,43 +20,32 @@ Roberto Tamassia, 2002.
 
 import rsa.common
 import rsa.randnum
+import math
 
-__all__ = ["getprime", "are_relatively_prime"]
-
-
-def gcd(p: int, q: int) -> int:
-    """Returns the greatest common divisor of p and q
-
-    >>> gcd(48, 180)
-    12
-    """
-
-    while q != 0:
-        (p, q) = (q, p % q)
-    return p
+__all__ = ["get_prime", "are_relatively_prime"]
 
 
 def get_primality_testing_rounds(number: int) -> int:
     """Returns minimum number of rounds for Miller-Rabing primality testing,
-    based on number bitsize.
+    based on number bit_size.
 
     According to NIST FIPS 186-4, Appendix C, Table C.3, minimum number of
     rounds of M-R testing, using an error probability of 2 ** (-100), for
     different p, q bitsizes are:
-      * p, q bitsize: 512; rounds: 7
-      * p, q bitsize: 1024; rounds: 4
-      * p, q bitsize: 1536; rounds: 3
+      * p, q bit_size: 512; rounds: 7
+      * p, q bit_size: 1024; rounds: 4
+      * p, q bit_size: 1536; rounds: 3
     See: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
     """
 
-    # Calculate number bitsize.
-    bitsize = rsa.common.bit_size(number)
+    # Calculate number bit_size.
+    bit_size = rsa.common.bit_size(number)
     # Set number of rounds.
-    if bitsize >= 1536:
+    if bit_size >= 1536:
         return 3
-    if bitsize >= 1024:
+    if bit_size >= 1024:
         return 4
-    if bitsize >= 512:
+    if bit_size >= 512:
         return 7
     # For smaller bitsizes, set arbitrary number of rounds.
     return 10
@@ -141,10 +130,10 @@ def is_prime(number: int) -> bool:
     return miller_rabin_primality_testing(number, k + 1)
 
 
-def getprime(nbits: int) -> int:
+def get_prime(nbits: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
-    >>> p = getprime(128)
+    >>> p = get_prime(128)
     >>> is_prime(p-1)
     False
     >>> is_prime(p)
@@ -179,8 +168,7 @@ def are_relatively_prime(a: int, b: int) -> bool:
     False
     """
 
-    d = gcd(a, b)
-    return d == 1
+    return math.gcd(a, b) == 1
 
 
 if __name__ == "__main__":

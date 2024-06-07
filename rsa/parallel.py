@@ -39,12 +39,12 @@ def _find_prime(nbits: int, pipe: Connection) -> None:
             return
 
 
-def getprime(nbits: int, poolsize: int) -> int:
+def get_prime(nbits: int, pool_size: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
     Works in multiple threads at the same time.
 
-    >>> p = getprime(128, 3)
+    >>> p = get_prime(128, 3)
     >>> rsa.prime.is_prime(p-1)
     False
     >>> rsa.prime.is_prime(p)
@@ -62,7 +62,7 @@ def getprime(nbits: int, poolsize: int) -> int:
 
     # Create processes
     try:
-        procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send)) for _ in range(poolsize)]
+        procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send)) for _ in range(pool_size)]
         # Start processes
         for p in procs:
             p.start()
@@ -79,7 +79,7 @@ def getprime(nbits: int, poolsize: int) -> int:
     return result
 
 
-__all__ = ["getprime"]
+__all__ = ["get_prime"]
 
 if __name__ == "__main__":
     print("Running doctests 1000x or until failure")

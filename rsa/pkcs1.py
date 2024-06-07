@@ -167,7 +167,7 @@ def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
         block.
 
     >>> from rsa import key, common
-    >>> (pub_key, priv_key) = key.newkeys(256)
+    >>> (pub_key, priv_key) = key.new_keys(256)
     >>> message = b'hello'
     >>> crypto = encrypt(message, pub_key)
 
@@ -178,17 +178,17 @@ def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
 
     """
 
-    keylength = common.byte_size(pub_key.n)
-    padded = _pad_for_encryption(message, keylength)
+    key_length = common.byte_size(pub_key.n)
+    padded = _pad_for_encryption(message, key_length)
 
     payload = transform.bytes2int(padded)
     encrypted = core.encrypt_int(payload, pub_key.e, pub_key.n)
-    block = transform.int2bytes(encrypted, keylength)
+    block = transform.int2bytes(encrypted, key_length)
 
     return block
 
 
-def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
+def decrypt(crypto: bytes, private_key: key.PrivateKey) -> bytes:
     r"""Decrypts the given message using PKCS#1 v1.5
 
     The decryption is considered 'failed' when the resulting cleartext doesn't
@@ -196,25 +196,25 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     the message cannot be found.
 
     :param crypto: the crypto text as returned by :py:func:`rsa.encrypt`
-    :param priv_key: the :py:class:`rsa.PrivateKey` to decrypt with.
+    :param private_key: the :py:class:`rsa.PrivateKey` to decrypt with.
     :raise DecryptionError: when the decryption fails. No details are given as
         to why the code thinks the decryption fails, as this would leak
         information about the private key.
 
 
     >>> import rsa
-    >>> (pub_key, priv_key) = rsa.newkeys(256)
+    >>> (pub_key, priv_key) = rsa.new_keys(256)
 
     It works with strings:
 
     >>> crypto = encrypt(b'hello', pub_key)
-    >>> decrypt(crypto, priv_key)
+    >>> decrypt(crypto, private_key)
     b'hello'
 
     And with binary data:
 
     >>> crypto = encrypt(b'\x00\x00\x00\x00\x01', pub_key)
-    >>> decrypt(crypto, priv_key)
+    >>> decrypt(crypto, private_key)
     b'\x00\x00\x00\x00\x01'
 
     Altering the encrypted information will *likely* cause a
@@ -232,22 +232,22 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
 
     >>> crypto = encrypt(b'hello', pub_key)
     >>> crypto = crypto[0:5] + b'X' + crypto[6:] # change a byte
-    >>> decrypt(crypto, priv_key)
+    >>> decrypt(crypto, private_key)
     Traceback (most recent call last):
     ...
     rsa.pkcs1.DecryptionError: Decryption failed
 
     """
 
-    blocksize = common.byte_size(priv_key.n)
+    block_size = common.byte_size(private_key.n)
     encrypted = transform.bytes2int(crypto)
-    decrypted = priv_key.blinded_decrypt(encrypted)
-    cleartext = transform.int2bytes(decrypted, blocksize)
+    decrypted = private_key.blinded_decrypt(encrypted)
+    cleartext = transform.int2bytes(decrypted, block_size)
 
     # Detect leading zeroes in the crypto. These are not reflected in the
     # encrypted value (as leading zeroes do not influence the value of an
     # integer). This fixes CVE-2020-13757.
-    if len(crypto) > blocksize:
+    if len(crypto) > block_size:
         # This is operating on public information, so doesn't need to be constant-time.
         raise DecryptionError("Decryption failed")
 
@@ -271,14 +271,14 @@ def decrypt(crypto: bytes, priv_key: key.PrivateKey) -> bytes:
     return cleartext[sep_idx + 1 :]
 
 
-def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
+def sign_hash(hash_value: bytes, private_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
     Signs the hash with the given key. This is known as a "detached signature",
     because the message itself isn't altered.
 
     :param hash_value: A precomputed hash to sign (ignores message).
-    :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
+    :param private_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
         'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
     :return: a message signature block.
@@ -294,17 +294,17 @@ def sign_hash(hash_value: bytes, priv_key: key.PrivateKey, hash_method: str) -> 
 
     # Encrypt the hash with the private key
     cleartext = asn1code + hash_value
-    keylength = common.byte_size(priv_key.n)
-    padded = _pad_for_signing(cleartext, keylength)
+    key_length = common.byte_size(private_key.n)
+    padded = _pad_for_signing(cleartext, key_length)
 
     payload = transform.bytes2int(padded)
-    encrypted = priv_key.blinded_decrypt(payload)
-    block = transform.int2bytes(encrypted, keylength)
+    encrypted = private_key.blinded_decrypt(payload)
+    block = transform.int2bytes(encrypted, key_length)
 
     return block
 
 
-def sign(message: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
+def sign(message: bytes, private_key: key.PrivateKey, hash_method: str) -> bytes:
     """Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
@@ -313,7 +313,7 @@ def sign(message: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     :param message: the message to sign. Can be an 8-bit string or a file-like
         object. If ``message`` has a ``read()`` method, it is assumed to be a
         file-like object.
-    :param priv_key: the :py:class:`rsa.PrivateKey` to sign with
+    :param private_key: the :py:class:`rsa.PrivateKey` to sign with
     :param hash_method: the hash method used on the message. Use 'MD5', 'SHA-1',
         'SHA-224', SHA-256', 'SHA-384' or 'SHA-512'.
     :return: a message signature block.
@@ -323,7 +323,7 @@ def sign(message: bytes, priv_key: key.PrivateKey, hash_method: str) -> bytes:
     """
 
     msg_hash = compute_hash(message, hash_method)
-    return sign_hash(msg_hash, priv_key, hash_method)
+    return sign_hash(msg_hash, private_key, hash_method)
 
 
 def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
@@ -375,24 +375,24 @@ def find_signature_hash(signature: bytes, pub_key: key.PublicKey) -> str:
     :returns: the name of the used hash.
     """
 
-    keylength = common.byte_size(pub_key.n)
+    key_length = common.byte_size(pub_key.n)
     encrypted = transform.bytes2int(signature)
     decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
-    clearsig = transform.int2bytes(decrypted, keylength)
+    clear_sig = transform.int2bytes(decrypted, key_length)
 
-    return _find_method_hash(clearsig)
+    return _find_method_hash(clear_sig)
 
 
-def yield_fixedblocks(infile: typing.BinaryIO, blocksize: int) -> typing.Iterator[bytes]:
-    """Generator, yields each block of ``blocksize`` bytes in the input file.
+def yield_fixed_blocks(infile: typing.BinaryIO, block_size: int) -> typing.Iterator[bytes]:
+    """Generator, yields each block of ``block_size`` bytes in the input file.
 
     :param infile: file to read and separate in blocks.
-    :param blocksize: block size in bytes.
+    :param block_size: block size in bytes.
     :returns: a generator that yields the contents of each block
     """
 
     while True:
-        block = infile.read(blocksize)
+        block = infile.read(block_size)
 
         read_bytes = len(block)
         if read_bytes == 0:
@@ -400,7 +400,7 @@ def yield_fixedblocks(infile: typing.BinaryIO, blocksize: int) -> typing.Iterato
 
         yield block
 
-        if read_bytes < blocksize:
+        if read_bytes < block_size:
             break
 
 
@@ -426,23 +426,23 @@ def compute_hash(message: typing.Union[bytes, typing.BinaryIO], method_name: str
     else:
         assert hasattr(message, "read") and hasattr(message.read, "__call__")
         # read as 1K blocks
-        for block in yield_fixedblocks(message, 1024):
+        for block in yield_fixed_blocks(message, 1024):
             hasher.update(block)
 
     return hasher.digest()
 
 
-def _find_method_hash(clearsig: bytes) -> str:
+def _find_method_hash(clear_sig: bytes) -> str:
     """Finds the hash method.
 
-    :param clearsig: full padded ASN1 and hash.
+    :param clear_sig: full padded ASN1 and hash.
     :return: the used hash method.
     :raise VerificationFailed: when the hash method cannot be found
     """
 
-    for (hashname, asn1code) in HASH_ASN1.items():
-        if asn1code in clearsig:
-            return hashname
+    for (hash_name, asn1code) in HASH_ASN1.items():
+        if asn1code in clear_sig:
+            return hash_name
 
     raise VerificationError("Verification failed")
 

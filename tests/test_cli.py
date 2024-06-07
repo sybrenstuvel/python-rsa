@@ -81,7 +81,7 @@ class AbstractCliTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure there is a key to use
-        cls.pub_key, cls.priv_key = rsa.newkeys(512)
+        cls.pub_key, cls.priv_key = rsa.new_keys(512)
         cls.pub_fname = "%s.pub" % cls.__name__
         cls.priv_fname = "%s.key" % cls.__name__
 
