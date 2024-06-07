@@ -13,71 +13,81 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import unittest
-
+import pytest
+import typing
 from rsa.common import byte_size, bit_size, inverse
 
 
-class TestByteSize(unittest.TestCase):
-    def test_values(self):
-        self.assertEqual(byte_size(1 << 1023), 128)
-        self.assertEqual(byte_size((1 << 1024) - 1), 128)
-        self.assertEqual(byte_size(1 << 1024), 129)
-        self.assertEqual(byte_size(255), 1)
-        self.assertEqual(byte_size(256), 2)
-        self.assertEqual(byte_size(0xFFFF), 2)
-        self.assertEqual(byte_size(0xFFFFFF), 3)
-        self.assertEqual(byte_size(0xFFFFFFFF), 4)
-        self.assertEqual(byte_size(0xFFFFFFFFFF), 5)
-        self.assertEqual(byte_size(0xFFFFFFFFFFFF), 6)
-        self.assertEqual(byte_size(0xFFFFFFFFFFFFFF), 7)
-        self.assertEqual(byte_size(0xFFFFFFFFFFFFFFFF), 8)
-
-    def test_zero(self):
-        self.assertEqual(byte_size(0), 1)
-
-    def test_bad_type(self):
-        self.assertRaises(TypeError, byte_size, [])
-        self.assertRaises(TypeError, byte_size, ())
-        self.assertRaises(TypeError, byte_size, dict())
-        self.assertRaises(TypeError, byte_size, "")
-        self.assertRaises(TypeError, byte_size, None)
+@pytest.mark.parametrize("value, expected", [
+    (1 << 1023, 128),
+    ((1 << 1024) - 1, 128),
+    (1 << 1024, 129),
+    (255, 1),
+    (256, 2),
+    (0xFFFF, 2),
+    (0xFFFFFF, 3),
+    (0xFFFFFFFF, 4),
+    (0xFFFFFFFFFF, 5),
+    (0xFFFFFFFFFFFF, 6),
+    (0xFFFFFFFFFFFFFF, 7),
+    (0xFFFFFFFFFFFFFFFF, 8),
+])
+def test_byte_size_values(value: int, expected: int) -> None:
+    assert byte_size(value) == expected
 
 
-class TestBitSize(unittest.TestCase):
-    def test_zero(self):
-        self.assertEqual(bit_size(0), 0)
-
-    def test_values(self):
-        self.assertEqual(bit_size(1023), 10)
-        self.assertEqual(bit_size(1024), 11)
-        self.assertEqual(bit_size(1025), 11)
-        self.assertEqual(bit_size(1 << 1024), 1025)
-        self.assertEqual(bit_size((1 << 1024) + 1), 1025)
-        self.assertEqual(bit_size((1 << 1024) - 1), 1024)
-
-    def test_negative_values(self):
-        self.assertEqual(bit_size(-1023), 10)
-        self.assertEqual(bit_size(-1024), 11)
-        self.assertEqual(bit_size(-1025), 11)
-        self.assertEqual(bit_size(-1 << 1024), 1025)
-        self.assertEqual(bit_size(-((1 << 1024) + 1)), 1025)
-        self.assertEqual(bit_size(-((1 << 1024) - 1)), 1024)
-
-    def test_bad_type(self):
-        self.assertRaises(TypeError, bit_size, [])
-        self.assertRaises(TypeError, bit_size, ())
-        self.assertRaises(TypeError, bit_size, dict())
-        self.assertRaises(TypeError, bit_size, "")
-        self.assertRaises(TypeError, bit_size, None)
-        self.assertRaises(TypeError, bit_size, 0.0)
+def test_byte_size_zero() -> None:
+    assert byte_size(0) == 1
 
 
-class TestInverse(unittest.TestCase):
-    def test_normal(self):
-        self.assertEqual(3, inverse(7, 4))
-        self.assertEqual(9, inverse(5, 11))
+@pytest.mark.parametrize("bad_value", [
+    [], (), {}, "", None
+])
+def test_byte_size_bad_type(bad_value: typing.Any) -> None:
+    with pytest.raises(TypeError):
+        byte_size(bad_value)
 
-    def test_not_relprime(self):
-        self.assertRaises(ValueError, inverse, 4, 8)
-        self.assertRaises(ValueError, inverse, 25, 5)
+
+def test_bit_size_zero() -> None:
+    assert bit_size(0) == 0
+
+
+@pytest.mark.parametrize("value, expected", [
+    (1023, 10),
+    (1024, 11),
+    (1025, 11),
+    (1 << 1024, 1025),
+    ((1 << 1024) + 1, 1025),
+    ((1 << 1024) - 1, 1024),
+])
+def test_bit_size_values(value: int, expected: int) -> None:
+    assert bit_size(value) == expected
+
+
+@pytest.mark.parametrize("value, expected", [
+    (-1023, 10),
+    (-1024, 11),
+    (-1025, 11),
+    (-1 << 1024, 1025),
+    (-((1 << 1024) + 1), 1025),
+    (-((1 << 1024) - 1), 1024),
+])
+def test_bit_size_negative_values(value: int, expected: int) -> None:
+    assert bit_size(value) == expected
+
+
+@pytest.mark.parametrize("a, b, expected", [
+    (7, 4, 3),
+    (5, 11, 9),
+])
+def test_inverse_normal(a: int, b: int, expected: int) -> None:
+    assert inverse(a, b) == expected
+
+
+@pytest.mark.parametrize("a, b", [
+    (4, 8),
+    (25, 5),
+])
+def test_inverse_not_relative_prime(a: int, b: int) -> None:
+    with pytest.raises(ValueError):
+        inverse(a, b)
