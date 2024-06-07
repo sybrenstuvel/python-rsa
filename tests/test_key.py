@@ -70,7 +70,7 @@ class KeyGenTest(unittest.TestCase):
         exponent = 136407
 
         (p, q, e, d) = rsa.key.gen_keys(
-            64, accurate=False, getprime_func=get_prime, exponent=exponent
+            64, accurate=False, get_prime_func=get_prime, exponent=exponent
         )
         self.assertEqual(39317, p)
         self.assertEqual(33107, q)
@@ -82,7 +82,11 @@ class KeyGenTest(unittest.TestCase):
         def getprime(_):
             return primes.pop(0)
         (p, q, e, d, rs) = rsa.key.gen_keys(
-            128, accurate=False, getprime_func=getprime, exponent=exponent, nprimes=4
+            128,
+            accurate=False,
+            get_prime_func=getprime,
+            exponent=exponent,
+            n_primes=4
         )
         self.assertEqual(64123, p)
         self.assertEqual(50957, q)

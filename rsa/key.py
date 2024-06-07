@@ -695,27 +695,27 @@ class PrivateKey(AbstractKey):
 
 def find_primes(
     nbits: int,
-    getprime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
+    get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
     accurate: bool = True,
     nprimes: int = 2,
 ) -> typing.List[int]:
     """Returns a list of different primes with nbits divided evenly among them.
 
     :param nbits: the number of bits for the primes to sum to.
-    :param getprime_func: the getprime function, defaults to
+    :param get_prime_func: the getprime function, defaults to
         :py:func:`rsa.prime.getprime`.
     :param accurate: whether to enable accurate mode or not.
     :returns: list of primes in descending order.
 
     """
     if nprimes == 2:
-        return list(find_p_q(nbits // 2, getprime_func, accurate))
+        return list(find_p_q(nbits // 2, get_prime_func, accurate))
 
     quo, rem = divmod(nbits, nprimes)
     factor_lengths = [quo + 1]*rem + [quo] * (nprimes - rem)
 
     while True:
-        primes = [getprime_func(length) for length in factor_lengths]
+        primes = [get_prime_func(length) for length in factor_lengths]
         if len(set(primes)) == len(primes):
             break
 
@@ -857,10 +857,10 @@ def calculate_keys(p: int, q: int) -> typing.Tuple[int, int]:
 
 def gen_keys(
     nbits: int,
-    getprime_func: typing.Callable[[int], int],
+    get_prime_func: typing.Callable[[int], int],
     accurate: bool = True,
     exponent: int = DEFAULT_EXPONENT,
-    nprimes: int = 2,
+    n_primes: int = 2,
 ) -> typing.Tuple:
     """Generate RSA keys of nbits bits. Returns (p, q, e, d) or (p, q, e, d, rs).
 
@@ -868,19 +868,19 @@ def gen_keys(
 
     :param nbits: the total number of bits in ``p`` and ``q``. Both ``p`` and
         ``q`` will use ``nbits/2`` bits.
-    :param getprime_func: either :py:func:`rsa.prime.getprime` or a function
+    :param get_prime_func: either :py:func:`rsa.prime.getprime` or a function
         with similar signature.
     :param exponent: the exponent for the key; only change this if you know
         what you're doing, as the exponent influences how difficult your
         private key can be cracked. A very common choice for e is 65537.
     :type exponent: int
-    :param nprimes: the number of prime factors comprising the modulus.
+    :param n_primes: the number of prime factors comprising the modulus.
     """
 
     # Regenerate prime values, until calculate_keys_custom_exponent doesn't raise a
     # ValueError.
     while True:
-        primes = find_primes(nbits, getprime_func, accurate, nprimes)
+        primes = find_primes(nbits, get_prime_func, accurate, n_primes)
         p, q, rs = primes[0], primes[1], primes[2:]
         try:
             (e, d) = calculate_keys_custom_exponent(p, q, exponent=exponent, rs=rs)
@@ -947,7 +947,7 @@ def new_keys(
         get_prime_func = rsa.prime.get_prime
 
     # Generate the key components
-    result = gen_keys(nbits, get_prime_func, accurate=accurate, exponent=exponent, nprimes=nprimes)
+    result = gen_keys(nbits, get_prime_func, accurate=accurate, exponent=exponent, n_primes=nprimes)
     if len(result) == 4:
         p, q, e, d = result
         rs = []

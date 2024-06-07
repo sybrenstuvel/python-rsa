@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 import unittest
-import struct
+
 from rsa.common import byte_size, bit_size, inverse
 
 
