@@ -702,8 +702,8 @@ def find_primes(
     """Returns a list of different primes with nbits divided evenly among them.
 
     :param nbits: the number of bits for the primes to sum to.
-    :param get_prime_func: the getprime function, defaults to
-        :py:func:`rsa.prime.getprime`.
+    :param get_prime_func: the get_prime function, defaults to
+        :py:func:`rsa.prime.get_prime`.
     :param accurate: whether to enable accurate mode or not.
     :returns: list of primes in descending order.
 

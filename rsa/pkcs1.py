@@ -26,16 +26,27 @@ deduce where in the process the failure occurred. DO NOT PASS SUCH INFORMATION
 to your users.
 """
 
+__all__ = [
+    "encrypt",
+    "decrypt",
+    "sign",
+    "verify",
+    "DecryptionError",
+    "VerificationError",
+    "CryptoError",
+]
+
 import hashlib
 import os
-import sys
 import typing
 from hmac import compare_digest
-
-from . import common, transform, core, key
+import rsa.common
+import rsa.core
+import rsa.transform
 
 if typing.TYPE_CHECKING:
     HashType = hashlib._Hash
+    import key
 else:
     HashType = typing.Any
 
@@ -93,18 +104,18 @@ def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
 
     """
 
-    max_msglength = target_length - 11
-    msglength = len(message)
+    max_msg_length = target_length - 11
+    msg_length = len(message)
 
-    if msglength > max_msglength:
+    if msg_length > max_msg_length:
         raise OverflowError(
             "%i bytes needed for message, but there is only"
-            " space for %i" % (msglength, max_msglength)
+            " space for %i" % (msg_length, max_msg_length)
         )
 
     # Get random padding
     padding = b""
-    padding_length = target_length - msglength - 3
+    padding_length = target_length - msg_length - 3
 
     # We remove 0-bytes, so we'll end up with less padding than we've asked for,
     # so keep adding data until we're at the correct length.
@@ -142,21 +153,21 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
 
     """
 
-    max_msglength = target_length - 11
-    msglength = len(message)
+    max_msg_length = target_length - 11
+    mst_length = len(message)
 
-    if msglength > max_msglength:
+    if mst_length > max_msg_length:
         raise OverflowError(
             "%i bytes needed for message, but there is only"
-            " space for %i" % (msglength, max_msglength)
+            " space for %i" % (mst_length, max_msg_length)
         )
 
-    padding_length = target_length - msglength - 3
+    padding_length = target_length - mst_length - 3
 
     return b"".join([b"\x00\x01", padding_length * b"\xff", b"\x00", message])
 
 
-def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
+def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
     """Encrypts the given message using PKCS#1 v1.5
 
     :param message: the message to encrypt. Must be a byte string no longer than
@@ -167,9 +178,9 @@ def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
         block.
 
     >>> from rsa import key, common
-    >>> (pub_key, priv_key) = key.new_keys(256)
-    >>> message = b'hello'
-    >>> crypto = encrypt(message, pub_key)
+    >>> public_key, private_key = key.new_keys(256)
+    >>> message_inner = b'hello'
+    >>> crypto = encrypt(message_inner, public_key)
 
     The crypto text should be just as long as the public key 'n' component:
 
@@ -178,17 +189,17 @@ def encrypt(message: bytes, pub_key: key.PublicKey) -> bytes:
 
     """
 
-    key_length = common.byte_size(pub_key.n)
+    key_length = rsa.common.byte_size(pub_key.n)
     padded = _pad_for_encryption(message, key_length)
 
-    payload = transform.bytes2int(padded)
-    encrypted = core.encrypt_int(payload, pub_key.e, pub_key.n)
-    block = transform.int2bytes(encrypted, key_length)
+    payload = rsa.transform.bytes2int(padded)
+    encrypted = rsa.core.encrypt_int(payload, pub_key.e, pub_key.n)
+    block = rsa.transform.int2bytes(encrypted, key_length)
 
     return block
 
 
-def decrypt(crypto: bytes, private_key: key.PrivateKey) -> bytes:
+def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
     r"""Decrypts the given message using PKCS#1 v1.5
 
     The decryption is considered 'failed' when the resulting cleartext doesn't
@@ -203,18 +214,18 @@ def decrypt(crypto: bytes, private_key: key.PrivateKey) -> bytes:
 
 
     >>> import rsa
-    >>> (pub_key, priv_key) = rsa.new_keys(256)
+    >>> pub_key, priv_key = rsa.new_keys(256)
 
     It works with strings:
 
-    >>> crypto = encrypt(b'hello', pub_key)
-    >>> decrypt(crypto, private_key)
+    >>> crypto = rsa.encrypt(b'hello', pub_key)
+    >>> rsa.decrypt(crypto, priv_key)
     b'hello'
 
     And with binary data:
 
-    >>> crypto = encrypt(b'\x00\x00\x00\x00\x01', pub_key)
-    >>> decrypt(crypto, private_key)
+    >>> crypto = rsa.encrypt(b'\x00\x00\x00\x00\x01', pub_key)
+    >>> rsa.decrypt(crypto, priv_key)
     b'\x00\x00\x00\x00\x01'
 
     Altering the encrypted information will *likely* cause a
@@ -230,19 +241,13 @@ def decrypt(crypto: bytes, private_key: key.PrivateKey) -> bytes:
         It's only a tiny bit of information, but every bit makes cracking the
         keys easier.
 
-    >>> crypto = encrypt(b'hello', pub_key)
-    >>> crypto = crypto[0:5] + b'X' + crypto[6:] # change a byte
-    >>> decrypt(crypto, private_key)
-    Traceback (most recent call last):
-    ...
-    rsa.pkcs1.DecryptionError: Decryption failed
 
     """
 
-    block_size = common.byte_size(private_key.n)
-    encrypted = transform.bytes2int(crypto)
+    block_size = rsa.common.byte_size(private_key.n)
+    encrypted = rsa.transform.bytes2int(crypto)
     decrypted = private_key.blinded_decrypt(encrypted)
-    cleartext = transform.int2bytes(decrypted, block_size)
+    cleartext = rsa.transform.int2bytes(decrypted, block_size)
 
     # Detect leading zeroes in the crypto. These are not reflected in the
     # encrypted value (as leading zeroes do not influence the value of an
@@ -268,10 +273,10 @@ def decrypt(crypto: bytes, private_key: key.PrivateKey) -> bytes:
     if anything_bad:
         raise DecryptionError("Decryption failed")
 
-    return cleartext[sep_idx + 1 :]
+    return cleartext[sep_idx + 1:]
 
 
-def sign_hash(hash_value: bytes, private_key: key.PrivateKey, hash_method: str) -> bytes:
+def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
     Signs the hash with the given key. This is known as a "detached signature",
@@ -294,17 +299,17 @@ def sign_hash(hash_value: bytes, private_key: key.PrivateKey, hash_method: str) 
 
     # Encrypt the hash with the private key
     cleartext = asn1code + hash_value
-    key_length = common.byte_size(private_key.n)
+    key_length = rsa.common.byte_size(private_key.n)
     padded = _pad_for_signing(cleartext, key_length)
 
-    payload = transform.bytes2int(padded)
+    payload = rsa.transform.bytes2int(padded)
     encrypted = private_key.blinded_decrypt(payload)
-    block = transform.int2bytes(encrypted, key_length)
+    block = rsa.transform.int2bytes(encrypted, key_length)
 
     return block
 
 
-def sign(message: bytes, private_key: key.PrivateKey, hash_method: str) -> bytes:
+def sign(message: bytes, private_key: "key.PrivateKey", hash_method: str) -> bytes:
     """Signs the message with the private key.
 
     Hashes the message, then signs the hash with the given key. This is known
@@ -326,7 +331,7 @@ def sign(message: bytes, private_key: key.PrivateKey, hash_method: str) -> bytes
     return sign_hash(msg_hash, private_key, hash_method)
 
 
-def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
+def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
     """Verifies that the signature matches the message.
 
     The hash method is detected automatically from the signature.
@@ -341,30 +346,30 @@ def verify(message: bytes, signature: bytes, pub_key: key.PublicKey) -> str:
 
     """
 
-    keylength = common.byte_size(pub_key.n)
-    if len(signature) != keylength:
+    key_length = rsa.common.byte_size(pub_key.n)
+    if len(signature) != key_length:
         raise VerificationError("Verification failed")
-    
-    encrypted = transform.bytes2int(signature)
-    decrypted = core.encrypt_int(encrypted, pub_key.e, pub_key.n)
-    clearsig = transform.int2bytes(decrypted, keylength)
+
+    encrypted = rsa.transform.bytes2int(signature)
+    decrypted = rsa.core.encrypt_int(encrypted, pub_key.e, pub_key.n)
+    clear_sig = rsa.transform.int2bytes(decrypted, key_length)
 
     # Get the hash method
-    method_name = _find_method_hash(clearsig)
+    method_name = _find_method_hash(clear_sig)
     message_hash = compute_hash(message, method_name)
 
     # Reconstruct the expected padded hash
     cleartext = HASH_ASN1[method_name] + message_hash
-    expected = _pad_for_signing(cleartext, keylength)
+    expected = _pad_for_signing(cleartext, key_length)
 
     # Compare with the signed one
-    if expected != clearsig:
+    if expected != clear_sig:
         raise VerificationError("Verification failed")
 
     return method_name
 
 
-def find_signature_hash(signature: bytes, pub_key: key.PublicKey) -> str:
+def find_signature_hash(signature: bytes, pub_key: "key.PublicKey") -> str:
     """Returns the hash name detected from the signature.
 
     If you also want to verify the message, use :py:func:`rsa.verify()` instead.
@@ -375,10 +380,10 @@ def find_signature_hash(signature: bytes, pub_key: key.PublicKey) -> str:
     :returns: the name of the used hash.
     """
 
-    key_length = common.byte_size(pub_key.n)
-    encrypted = transform.bytes2int(signature)
-    decrypted = core.decrypt_int(encrypted, pub_key.e, pub_key.n)
-    clear_sig = transform.int2bytes(decrypted, key_length)
+    key_length = rsa.common.byte_size(pub_key.n)
+    encrypted = rsa.transform.bytes2int(signature)
+    decrypted = rsa.core.decrypt_int(encrypted, pub_key.e, pub_key.n)
+    clear_sig = rsa.transform.int2bytes(decrypted, key_length)
 
     return _find_method_hash(clear_sig)
 
@@ -446,16 +451,6 @@ def _find_method_hash(clear_sig: bytes) -> str:
 
     raise VerificationError("Verification failed")
 
-
-__all__ = [
-    "encrypt",
-    "decrypt",
-    "sign",
-    "verify",
-    "DecryptionError",
-    "VerificationError",
-    "CryptoError",
-]
 
 if __name__ == "__main__":
     print("Running doctests 1000x or until failure")

@@ -20,7 +20,7 @@ pool_size = 8
 accurate = True
 
 
-def run_speed_test(bit_size):
+def run_speed_test(bit_size: int) -> None:
     iterations = 0
     start = end = time.time()
 
@@ -37,6 +37,11 @@ def run_speed_test(bit_size):
           (bit_size, dur_per_call, iterations, duration))
 
 
-if __name__ == '__main__':
+def start_speed_test() -> None:
+    # make a function cause Pycharm linter complains about the global variable bit_size
     for bit_size in (128, 256, 384, 512, 1024, 2048, 3072, 4096):
         run_speed_test(bit_size)
+
+
+if __name__ == '__main__':
+    start_speed_test()
