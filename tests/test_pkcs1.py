@@ -15,7 +15,6 @@
 """Tests string operations."""
 
 import struct
-import sys
 import unittest
 
 import rsa

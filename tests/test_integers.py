@@ -14,63 +14,55 @@
 
 """Tests integer operations."""
 
-import unittest
-
+from typing import Tuple
+import pytest
 import rsa
 import rsa.core
 
 
-class IntegerTest(unittest.TestCase):
-    def setUp(self):
-        (self.pub, self.priv) = rsa.new_keys(64)
+@pytest.fixture(scope="module")
+def rsa_keys() -> Tuple[rsa.PublicKey, rsa.PrivateKey]:
+    return rsa.new_keys(64)
 
-    def test_enc_dec(self):
-        message = 42
-        print("\n\tMessage:   %d" % message)
 
-        encrypted = rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
-        print("\tEncrypted: %d" % encrypted)
+def encrypt_decrypt_test_case(message: int, public: rsa.PublicKey, private: rsa.PrivateKey) -> int:
+    encrypted = rsa.core.encrypt_int(message, public.e, public.n)
+    decrypted = rsa.core.decrypt_int(encrypted, private.d, public.n)
+    return decrypted
 
-        decrypted = rsa.core.decrypt_int(encrypted, self.priv.d, self.pub.n)
-        print("\tDecrypted: %d" % decrypted)
 
-        self.assertEqual(message, decrypted)
+def test_encrypt_decrypt(rsa_keys: Tuple[rsa.PublicKey, rsa.PrivateKey]) -> None:
+    public, private = rsa_keys
+    message = 42
 
-    def test_sign_verify(self):
-        message = 42
+    decrypted_message = encrypt_decrypt_test_case(message, public, private)
+    assert message == decrypted_message
 
-        signed = rsa.core.encrypt_int(message, self.priv.d, self.pub.n)
-        print("\n\tSigned:    %d" % signed)
 
-        verified = rsa.core.decrypt_int(signed, self.pub.e, self.pub.n)
-        print("\tVerified:  %d" % verified)
+def sign_verify_test_case(message: int, public_key: rsa.PublicKey, private_key: rsa.PrivateKey) -> int:
+    signed = rsa.core.encrypt_int(message, private_key.d, public_key.n)
+    verified = rsa.core.decrypt_int(signed, public_key.e, public_key.n)
+    return verified
 
-        self.assertEqual(message, verified)
 
-    def test_extreme_values(self):
-        # message < 0
-        message = -1
-        print("\n\tMessage:   %d" % message)
+def test_sign_verify(rsa_keys: Tuple[rsa.PublicKey, rsa.PrivateKey]) -> None:
+    public, private = rsa_keys
+    message = 42
 
-        with self.assertRaises(ValueError):
-            rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
+    verified_message = sign_verify_test_case(message, public, private)
+    assert message == verified_message
 
-        # message == 0
-        message = 0
-        print("\n\tMessage:   %d" % message)
 
-        encrypted = rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
-        print("\tEncrypted: %d" % encrypted)
+@pytest.mark.parametrize("message", [-1, 0, 1])
+def test_extreme_values(rsa_keys: Tuple[rsa.PublicKey, rsa.PrivateKey], message: int) -> None:
+    public_key, private_key = rsa_keys
 
-        decrypted = rsa.core.decrypt_int(encrypted, self.priv.d, self.pub.n)
-        print("\tDecrypted: %d" % decrypted)
-
-        self.assertEqual(message, decrypted)
-
-        # message >= n
-        message = self.pub.n
-        print("\n\tMessage:   %d" % message)
-
-        with self.assertRaises(OverflowError):
-            rsa.core.encrypt_int(message, self.pub.e, self.pub.n)
-
+    if message < 0:
+        with pytest.raises(ValueError):
+            rsa.core.encrypt_int(message, public_key.e, public_key.n)
+    elif message == 0:
+        decrypted_message = encrypt_decrypt_test_case(message, public_key, private_key)
+        assert message == decrypted_message
+    else:
+        with pytest.raises(OverflowError):
+            rsa.core.encrypt_int(public_key.n, public_key.e, public_key.n)
