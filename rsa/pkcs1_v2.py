@@ -22,9 +22,8 @@ import math
 
 from rsa import (
     pkcs1,
-    transform,
 )
-from rsa.helpers import common
+from rsa.helpers import transform
 
 
 def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import unittest
-from rsa.transform import int2bytes, bytes2int
+from rsa.helpers.transform import int2bytes, bytes2int
 
 
 class Test_int2bytes(unittest.TestCase):

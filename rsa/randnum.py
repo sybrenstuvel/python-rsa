@@ -19,8 +19,7 @@
 import os
 import struct
 
-from rsa import transform
-from rsa.helpers import common
+from rsa.helpers import common, transform
 
 
 def read_random_bits(nbits: int) -> bytes:

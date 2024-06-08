@@ -4,3 +4,8 @@ from .common import (
     chinese_remainder_theorem,
     inverse
 )
+
+from .transform import (
+    bytes2int,
+    int2bytes
+)

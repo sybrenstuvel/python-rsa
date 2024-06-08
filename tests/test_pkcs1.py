@@ -241,8 +241,8 @@ CdCiWmOJxVfRAgwBQM+e1JJwMKmxSF0CCmya6CFxO8Evdn8CDACMM3AlVC4FhlN8
         # The word 'padding' has 7 letters, so is one byte short of a valid padding length.
         padded = b"\x00\x02padding\x00" + message
 
-        payload = rsa.transform.bytes2int(padded)
+        payload = helpers_namespace.transform.bytes2int(padded)
         encrypted_value = rsa.logic.encrypt_int(payload, self.public_key.e, self.public_key.n)
-        cyphertext = rsa.transform.int2bytes(encrypted_value, keylength)
+        cyphertext = helpers_namespace.transform.int2bytes(encrypted_value, keylength)
 
         return cyphertext

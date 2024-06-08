@@ -40,7 +40,7 @@ from hmac import compare_digest
 import rsa.core as core_namespace
 import rsa.helpers as helpers_namespace
 import rsa.logic
-import rsa.transform
+import rsa.helpers.transform
 
 if typing.TYPE_CHECKING:
     HashType = hashlib._Hash
@@ -179,9 +179,9 @@ def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
     key_length = helpers_namespace.byte_size(pub_key.n)
     padded = _pad_for_encryption(message, key_length)
 
-    payload = rsa.transform.bytes2int(padded)
+    payload = rsa.helpers.transform.bytes2int(padded)
     encrypted = rsa.logic.encrypt_int(payload, pub_key.e, pub_key.n)
-    block = rsa.transform.int2bytes(encrypted, key_length)
+    block = rsa.helpers.transform.int2bytes(encrypted, key_length)
 
     return block
 
@@ -232,9 +232,9 @@ def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
     """
 
     block_size = helpers_namespace.byte_size(private_key.n)
-    encrypted = rsa.transform.bytes2int(crypto)
+    encrypted = rsa.helpers.transform.bytes2int(crypto)
     decrypted = private_key.blinded_decrypt(encrypted)
-    cleartext = rsa.transform.int2bytes(decrypted, block_size)
+    cleartext = rsa.helpers.transform.int2bytes(decrypted, block_size)
 
     # Detect leading zeroes in the crypto. These are not reflected in the
     # encrypted value (as leading zeroes do not influence the value of an
@@ -289,9 +289,9 @@ def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str
     key_length = helpers_namespace.byte_size(private_key.n)
     padded = _pad_for_signing(cleartext, key_length)
 
-    payload = rsa.transform.bytes2int(padded)
+    payload = rsa.helpers.transform.bytes2int(padded)
     encrypted = private_key.blinded_decrypt(payload)
-    block = rsa.transform.int2bytes(encrypted, key_length)
+    block = rsa.helpers.transform.int2bytes(encrypted, key_length)
 
     return block
 
@@ -337,9 +337,9 @@ def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
     if len(signature) != key_length:
         raise core_namespace.VerificationError("Verification failed")
 
-    encrypted = rsa.transform.bytes2int(signature)
+    encrypted = rsa.helpers.transform.bytes2int(signature)
     decrypted = rsa.logic.encrypt_int(encrypted, pub_key.e, pub_key.n)
-    clear_sig = rsa.transform.int2bytes(decrypted, key_length)
+    clear_sig = rsa.helpers.transform.int2bytes(decrypted, key_length)
 
     # Get the hash method
     method_name = _find_method_hash(clear_sig)
@@ -368,9 +368,9 @@ def find_signature_hash(signature: bytes, pub_key: "key.PublicKey") -> str:
     """
 
     key_length = helpers_namespace.byte_size(pub_key.n)
-    encrypted = rsa.transform.bytes2int(signature)
+    encrypted = rsa.helpers.transform.bytes2int(signature)
     decrypted = rsa.logic.decrypt_int(encrypted, pub_key.e, pub_key.n)
-    clear_sig = rsa.transform.int2bytes(decrypted, key_length)
+    clear_sig = rsa.helpers.transform.int2bytes(decrypted, key_length)
 
     return _find_method_hash(clear_sig)
 
