@@ -21,10 +21,10 @@ documentation is RFC 2437: https://tools.ietf.org/html/rfc2437
 import math
 
 from rsa import (
-    common,
     pkcs1,
     transform,
 )
+from rsa.helpers import common
 
 
 def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:

@@ -17,9 +17,11 @@
 import struct
 import unittest
 
+
 import rsa
 from rsa import pkcs1
 import rsa.core as core_namespace
+import rsa.helpers as helpers_namespace
 
 
 class BinaryTest(unittest.TestCase):
@@ -234,7 +236,7 @@ CdCiWmOJxVfRAgwBQM+e1JJwMKmxSF0CCmya6CFxO8Evdn8CDACMM3AlVC4FhlN8
 
     def encrypt_with_short_padding(self, message: bytes) -> bytes:
         # This is a copy of rsa.pkcs1.encrypt() adjusted to use the wrong padding length.
-        keylength = rsa.common.byte_size(self.public_key.n)
+        keylength = helpers_namespace.byte_size(self.public_key.n)
 
         # The word 'padding' has 7 letters, so is one byte short of a valid padding length.
         padded = b"\x00\x02padding\x00" + message

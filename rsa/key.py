@@ -40,10 +40,11 @@ import itertools
 
 import rsa.prime
 import rsa.pem
-import rsa.common
+import rsa.helpers.common
 import rsa.randnum
 import rsa.logic
 import rsa.core as core_namespace
+import rsa.helpers as helpers_namespace
 
 
 DEFAULT_EXPONENT = 65537
@@ -214,7 +215,7 @@ class AbstractKey(metaclass=abc.ABCMeta):
             if self.blindfac < 0:
                 # Compute initial blinding factor, which is rather slow to do.
                 self.blindfac = self._initial_blinding_factor()
-                self.blindfac_inverse = rsa.common.inverse(self.blindfac, self.n)
+                self.blindfac_inverse = rsa.helpers.common.inverse(self.blindfac, self.n)
             else:
                 # Reuse previous blinding factor.
                 self.blindfac = pow(self.blindfac, 2, self.n)
@@ -435,7 +436,7 @@ class PrivateKey(AbstractKey):
         # Calculate exponents and coefficient.
         self.exp1 = int(d % (p - 1))
         self.exp2 = int(d % (q - 1))
-        self.coef = rsa.common.inverse(q, p)
+        self.coef = rsa.helpers.common.inverse(q, p)
 
         # Calculate other primes' exponents and coefficients.
         self.rs = rs
@@ -742,18 +743,17 @@ def find_p_q(
     :param accurate: whether to enable accurate mode or not.
     :returns: (p, q), where p > q
 
-    >>> (p, q) = find_p_q(128)
-    >>> from rsa import common
-    >>> common.bit_size(p * q)
+    >>> import rsa.helpers as helpers_namespace_inner
+    >>> p, q = find_p_q(128)
+    >>> helpers_namespace_inner.bit_size(p * q)
     256
 
     When not in accurate mode, the number of bits can be slightly less
 
-    >>> (p, q) = find_p_q(128, accurate=False)
-    >>> from rsa import common
-    >>> common.bit_size(p * q) <= 256
+    >>> p, q = find_p_q(128, accurate=False)
+    >>> helpers_namespace_inner.bit_size(p * q) <= 256
     True
-    >>> common.bit_size(p * q) > 240
+    >>> helpers_namespace_inner.bit_size(p * q) > 240
     True
 
     """
@@ -784,7 +784,7 @@ def find_p_q(
             return True
 
         # Make sure we have just the right amount of bits
-        found_size = rsa.common.bit_size(p * q)
+        found_size = rsa.helpers.bit_size(p * q)
         return total_bits == found_size
 
     # Keep choosing other primes until they match our requirements.
@@ -825,7 +825,7 @@ def calculate_keys_custom_exponent(
     phi_n = math.prod([x - 1 for x in [p, q] + ([] if rs is None else rs)])
 
     try:
-        d = rsa.common.inverse(exponent, phi_n)
+        d = helpers_namespace.inverse(exponent, phi_n)
     except core_namespace.NotRelativePrimeError as ex:
         raise core_namespace.NotRelativePrimeError(
             exponent,

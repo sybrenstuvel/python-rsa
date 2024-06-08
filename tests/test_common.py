@@ -15,7 +15,7 @@
 
 import pytest
 import typing
-from rsa.common import byte_size, bit_size, inverse
+from rsa.helpers import byte_size, bit_size, inverse
 
 
 @pytest.mark.parametrize("value, expected", [

@@ -37,8 +37,8 @@ import hashlib
 import os
 import typing
 from hmac import compare_digest
-import rsa.common
 import rsa.core as core_namespace
+import rsa.helpers as helpers_namespace
 import rsa.logic
 import rsa.transform
 
@@ -163,19 +163,20 @@ def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
     :raise OverflowError: when the message is too large to fit in the padded
         block.
 
-    >>> from rsa import key, common
+    >>> import rsa.helpers as inner_helpers_namespace
+    >>> from rsa import key
     >>> public_key, private_key = key.new_keys(256)
     >>> message_inner = b'hello'
     >>> crypto = encrypt(message_inner, public_key)
 
     The crypto text should be just as long as the public key 'n' component:
 
-    >>> len(crypto) == common.byte_size(public_key.n)
+    >>> len(crypto) == inner_helpers_namespace.byte_size(public_key.n)
     True
 
     """
 
-    key_length = rsa.common.byte_size(pub_key.n)
+    key_length = helpers_namespace.byte_size(pub_key.n)
     padded = _pad_for_encryption(message, key_length)
 
     payload = rsa.transform.bytes2int(padded)
@@ -230,7 +231,7 @@ def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
 
     """
 
-    block_size = rsa.common.byte_size(private_key.n)
+    block_size = helpers_namespace.byte_size(private_key.n)
     encrypted = rsa.transform.bytes2int(crypto)
     decrypted = private_key.blinded_decrypt(encrypted)
     cleartext = rsa.transform.int2bytes(decrypted, block_size)
@@ -285,7 +286,7 @@ def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str
 
     # Encrypt the hash with the private key
     cleartext = asn1code + hash_value
-    key_length = rsa.common.byte_size(private_key.n)
+    key_length = helpers_namespace.byte_size(private_key.n)
     padded = _pad_for_signing(cleartext, key_length)
 
     payload = rsa.transform.bytes2int(padded)
@@ -332,7 +333,7 @@ def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
 
     """
 
-    key_length = rsa.common.byte_size(pub_key.n)
+    key_length = helpers_namespace.byte_size(pub_key.n)
     if len(signature) != key_length:
         raise core_namespace.VerificationError("Verification failed")
 
@@ -366,7 +367,7 @@ def find_signature_hash(signature: bytes, pub_key: "key.PublicKey") -> str:
     :returns: the name of the used hash.
     """
 
-    key_length = rsa.common.byte_size(pub_key.n)
+    key_length = helpers_namespace.byte_size(pub_key.n)
     encrypted = rsa.transform.bytes2int(signature)
     decrypted = rsa.logic.decrypt_int(encrypted, pub_key.e, pub_key.n)
     clear_sig = rsa.transform.int2bytes(decrypted, key_length)

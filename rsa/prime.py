@@ -18,7 +18,7 @@ Implementation based on the book Algorithm Design by Michael T. Goodrich and
 Roberto Tamassia, 2002.
 """
 
-import rsa.common
+import rsa.helpers
 import rsa.randnum
 import math
 
@@ -39,7 +39,7 @@ def get_primality_testing_rounds(number: int) -> int:
     """
 
     # Calculate number bit_size.
-    bit_size = rsa.common.bit_size(number)
+    bit_size = rsa.helpers.common.bit_size(number)
     # Set number of rounds.
     if bit_size >= 1536:
         return 3
@@ -141,7 +141,7 @@ def get_prime(nbits: int) -> int:
     >>> is_prime(p+1)
     False
 
-    >>> from rsa import common
+    >>> from rsa.helpers import common
     >>> common.bit_size(p) == 128
     True
     """

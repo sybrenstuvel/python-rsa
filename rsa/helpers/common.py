@@ -14,9 +14,10 @@
 
 """Common functionality shared by several modules."""
 
-import typing
 import math
-import rsa.core as core_namespace
+import typing
+
+import sympy
 
 
 def bit_size(num: int) -> int:
@@ -67,33 +68,7 @@ def byte_size(number: int) -> int:
     :returns:
         The number of bytes required to hold a specific long number.
     """
-    if number == 0:
-        return 1
-    return math.ceil(bit_size(number) / 8)
-
-
-def extended_gcd(a: int, b: int) -> typing.Tuple[int, int, int]:
-    """Returns a tuple (r, i, j) such that r = gcd(a, b) = ia + jb"""
-    # r = gcd(a,b) i = multiplicitive inverse of a mod b
-    #      or      j = multiplicitive inverse of b mod a
-    # Neg return values for i or j are made positive mod b or a respectively
-    # Iterateive Version is faster and uses much less stack space
-    x = 0
-    y = 1
-    lx = 1
-    ly = 0
-    oa = a  # Remember original a/b to remove
-    ob = b  # negative values from return results
-    while b != 0:
-        q = a // b
-        (a, b) = (b, a % b)
-        (x, lx) = ((lx - (q * x)), x)
-        (y, ly) = ((ly - (q * y)), y)
-    if lx < 0:
-        lx += ob  # If neg wrap modulo original b
-    if ly < 0:
-        ly += oa  # If neg wrap modulo original a
-    return a, lx, ly  # Return only positive values
+    return 1 if number == 0 else math.ceil(bit_size(number) / 8)
 
 
 def inverse(x: int, n: int) -> int:
@@ -104,48 +79,43 @@ def inverse(x: int, n: int) -> int:
     >>> (inverse(143, 4) * 143) % 4
     1
     """
-
-    (divider, inv, _) = extended_gcd(x, n)
-
-    if divider != 1:
-        raise core_namespace.NotRelativePrimeError(x, n, divider)
-
-    return inv
+    return int(sympy.mod_inverse(x, n))
 
 
-def crt(a_values: typing.Iterable[int], modulo_values: typing.Iterable[int]) -> int:
+def chinese_remainder_theorem(remainders: typing.Iterable[int], moduli: typing.Iterable[int]) -> int:
     """Chinese Remainder Theorem.
 
-    Calculates x such that x = a[i] (mod m[i]) for each i.
+    Calculates x such that x = remainders[i] (mod moduli[i]) for each i.
 
-    :param a_values: the a-values of the above equation
-    :param modulo_values: the m-values of the above equation
-    :returns: x such that x = a[i] (mod m[i]) for each i
+    :param remainders: the remainders of the equations
+    :param moduli: the moduli of the equations
+    :returns: x such that x = remainders[i] (mod moduli[i]) for each i
 
-
-    >>> crt([2, 3], [3, 5])
+    >>> chinese_remainder_theorem([2, 3], [3, 5])
     8
 
-    >>> crt([2, 3, 2], [3, 5, 7])
+    >>> chinese_remainder_theorem([2, 3, 2], [3, 5, 7])
     23
 
-    >>> crt([2, 3, 0], [7, 11, 15])
+    >>> chinese_remainder_theorem([2, 3, 0], [7, 11, 15])
     135
     """
 
-    m = 1
-    x = 0
+    total_modulus = 1
+    solution = 0
 
-    for modulo in modulo_values:
-        m *= modulo
+    # Calculate the product of all moduli
+    for modulus in moduli:
+        total_modulus *= modulus
 
-    for (m_i, a_i) in zip(modulo_values, a_values):
-        M_i = m // m_i
-        inv = inverse(M_i, m_i)
+    # Apply the Chinese Remainder Theorem formula
+    for modulus, remainder in zip(moduli, remainders):
+        partial_modulus = total_modulus // modulus
+        inverse_partial = inverse(partial_modulus, modulus)
 
-        x = (x + a_i * M_i * inv) % m
+        solution = (solution + remainder * partial_modulus * inverse_partial) % total_modulus
 
-    return x
+    return solution
 
 
 if __name__ == "__main__":

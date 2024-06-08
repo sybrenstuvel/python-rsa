@@ -4,7 +4,7 @@ import unittest
 
 import rsa.prime
 import rsa.parallel
-import rsa.common
+import rsa.helpers as helpers_namespace
 
 
 class ParallelTest(unittest.TestCase):
@@ -17,4 +17,4 @@ class ParallelTest(unittest.TestCase):
         self.assertTrue(rsa.prime.is_prime(p))
         self.assertFalse(rsa.prime.is_prime(p + 1))
 
-        self.assertEqual(1024, rsa.common.bit_size(p))
+        self.assertEqual(1024, helpers_namespace.bit_size(p))
