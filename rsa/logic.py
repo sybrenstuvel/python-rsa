@@ -19,21 +19,15 @@ mathematically on integers.
 """
 import itertools
 import typing
-
-
-def assert_int(var: int, name: str) -> None:
-    if isinstance(var, int):
-        return
-
-    raise TypeError("{} should be an integer, not {}".format(name, var.__class__))
+import rsa.core as core_namespace
 
 
 def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
-    assert_int(message, "message")
-    assert_int(encrypt_key, "encrypt_key")
-    assert_int(n, "n")
+    core_namespace.assert_int(message, "message")
+    core_namespace.assert_int(encrypt_key, "encrypt_key")
+    core_namespace.assert_int(n, "n")
 
     if message < 0:
         raise ValueError("Only non-negative numbers are supported")
@@ -47,28 +41,28 @@ def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
 def decrypt_int(cypher_text: int, dkey: int, n: int) -> int:
     """Decrypts a cypher text using the decryption key 'dkey', working modulo n"""
 
-    assert_int(cypher_text, "cypher_text")
-    assert_int(dkey, "dkey")
-    assert_int(n, "n")
+    core_namespace.assert_int(cypher_text, "cypher_text")
+    core_namespace.assert_int(dkey, "dkey")
+    core_namespace.assert_int(n, "n")
 
     return pow(cypher_text, dkey, n)
 
 
 def decrypt_int_fast(
-    cypher_text: int,
-    rs: typing.List[int],
-    ds: typing.List[int],
-    ts: typing.List[int],
+        cypher_text: int,
+        rs: typing.List[int],
+        ds: typing.List[int],
+        ts: typing.List[int],
 ) -> int:
     """Decrypts a cypher text more quickly using the Chinese Remainder Theorem."""
 
-    assert_int(cypher_text, "cypher_text")
+    core_namespace.assert_int(cypher_text, "cypher_text")
     for r in rs:
-        assert_int(r, "r")
+        core_namespace.assert_int(r, "r")
     for d in ds:
-        assert_int(d, "d")
+        core_namespace.assert_int(d, "d")
     for t in ts:
-        assert_int(t, "t")
+        core_namespace.assert_int(t, "t")
 
     p, q, rs = rs[0], rs[1], rs[2:]
     exp1, exp2, ds = ds[0], ds[1], ds[2:]
@@ -80,7 +74,7 @@ def decrypt_int_fast(
     m = M2 + q * h
 
     Ms = [pow(cypher_text, d, r) for d, r in zip(ds, rs)]
-    Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x*y))
+    Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x * y))
     for R, r, M, t in zip(Rs[1:], rs, Ms, ts):
         h = ((M - m) * t) % r
         m += R * h

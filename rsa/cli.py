@@ -25,6 +25,7 @@ import optparse
 import rsa
 import rsa.key
 import rsa.pkcs1
+import rsa.core as core_namespace
 
 HASH_METHODS = sorted(rsa.pkcs1.HASH_METHODS.keys())
 Indexable = typing.Union[typing.Tuple, typing.List[str]]
@@ -311,7 +312,7 @@ class VerifyOperation(CryptoOperation):
 
         try:
             rsa.verify(indata, signature, pub_key)
-        except rsa.VerificationError as ex:
+        except core_namespace.VerificationError as ex:
             raise SystemExit("Verification failed.") from ex
 
         print("Verification OK", file=sys.stderr)

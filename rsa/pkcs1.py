@@ -31,9 +31,6 @@ __all__ = [
     "decrypt",
     "sign",
     "verify",
-    "DecryptionError",
-    "VerificationError",
-    "CryptoError",
 ]
 
 import hashlib
@@ -41,7 +38,8 @@ import os
 import typing
 from hmac import compare_digest
 import rsa.common
-import rsa.core
+import rsa.core as core_namespace
+import rsa.logic
 import rsa.transform
 
 if typing.TYPE_CHECKING:
@@ -51,7 +49,7 @@ else:
     HashType = typing.Any
 
 # ASN.1 codes that describe the hash algorithm used.
-HASH_ASN1 = {
+HASH_ASN1: typing.Final[typing.Dict[str, bytes]] = {
     "MD5": b"\x30\x20\x30\x0c\x06\x08\x2a\x86\x48\x86\xf7\x0d\x02\x05\x05\x00\x04\x10",
     "SHA-1": b"\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14",
     "SHA-224": b"\x30\x2d\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x04\x05\x00\x04\x1c",
@@ -63,7 +61,7 @@ HASH_ASN1 = {
     "SHA3-512": b"\x30\x51\x30\x0d\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x0a\x05\x00\x04\x40",
 }
 
-HASH_METHODS: typing.Dict[str, typing.Callable[[], HashType]] = {
+HASH_METHODS: typing.Final[typing.Dict[str, typing.Callable[[], HashType]]] = {
     "MD5": hashlib.md5,
     "SHA-1": hashlib.sha1,
     "SHA-224": hashlib.sha224,
@@ -75,18 +73,6 @@ HASH_METHODS: typing.Dict[str, typing.Callable[[], HashType]] = {
     "SHA3-512": hashlib.sha3_512,
 }
 """Hash methods supported by this library."""
-
-
-class CryptoError(Exception):
-    """Base class for all exceptions in this module."""
-
-
-class DecryptionError(CryptoError):
-    """Raised when decryption fails."""
-
-
-class VerificationError(CryptoError):
-    """Raised when verification fails."""
 
 
 def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
@@ -184,7 +170,7 @@ def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
 
     The crypto text should be just as long as the public key 'n' component:
 
-    >>> len(crypto) == common.byte_size(pub_key.n)
+    >>> len(crypto) == common.byte_size(public_key.n)
     True
 
     """
@@ -193,7 +179,7 @@ def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
     padded = _pad_for_encryption(message, key_length)
 
     payload = rsa.transform.bytes2int(padded)
-    encrypted = rsa.core.encrypt_int(payload, pub_key.e, pub_key.n)
+    encrypted = rsa.logic.encrypt_int(payload, pub_key.e, pub_key.n)
     block = rsa.transform.int2bytes(encrypted, key_length)
 
     return block
@@ -254,7 +240,7 @@ def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
     # integer). This fixes CVE-2020-13757.
     if len(crypto) > block_size:
         # This is operating on public information, so doesn't need to be constant-time.
-        raise DecryptionError("Decryption failed")
+        raise core_namespace.DecryptionError("Decryption failed")
 
     # If we can't find the cleartext marker, decryption failed.
     cleartext_marker_bad = not compare_digest(cleartext[:2], b"\x00\x02")
@@ -271,7 +257,7 @@ def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
 
     anything_bad = cleartext_marker_bad | sep_idx_bad
     if anything_bad:
-        raise DecryptionError("Decryption failed")
+        raise core_namespace.DecryptionError("Decryption failed")
 
     return cleartext[sep_idx + 1:]
 
@@ -348,10 +334,10 @@ def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
 
     key_length = rsa.common.byte_size(pub_key.n)
     if len(signature) != key_length:
-        raise VerificationError("Verification failed")
+        raise core_namespace.VerificationError("Verification failed")
 
     encrypted = rsa.transform.bytes2int(signature)
-    decrypted = rsa.core.encrypt_int(encrypted, pub_key.e, pub_key.n)
+    decrypted = rsa.logic.encrypt_int(encrypted, pub_key.e, pub_key.n)
     clear_sig = rsa.transform.int2bytes(decrypted, key_length)
 
     # Get the hash method
@@ -364,7 +350,7 @@ def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
 
     # Compare with the signed one
     if expected != clear_sig:
-        raise VerificationError("Verification failed")
+        raise core_namespace.VerificationError("Verification failed")
 
     return method_name
 
@@ -382,7 +368,7 @@ def find_signature_hash(signature: bytes, pub_key: "key.PublicKey") -> str:
 
     key_length = rsa.common.byte_size(pub_key.n)
     encrypted = rsa.transform.bytes2int(signature)
-    decrypted = rsa.core.decrypt_int(encrypted, pub_key.e, pub_key.n)
+    decrypted = rsa.logic.decrypt_int(encrypted, pub_key.e, pub_key.n)
     clear_sig = rsa.transform.int2bytes(decrypted, key_length)
 
     return _find_method_hash(clear_sig)
@@ -449,7 +435,7 @@ def _find_method_hash(clear_sig: bytes) -> str:
         if asn1code in clear_sig:
             return hash_name
 
-    raise VerificationError("Verification failed")
+    raise core_namespace.VerificationError("Verification failed")
 
 
 if __name__ == "__main__":

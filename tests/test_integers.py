@@ -17,7 +17,7 @@
 from typing import Tuple
 import pytest
 import rsa
-import rsa.core
+import rsa.logic
 
 
 @pytest.fixture(scope="module")
@@ -26,8 +26,8 @@ def rsa_keys() -> Tuple[rsa.PublicKey, rsa.PrivateKey]:
 
 
 def encrypt_decrypt_test_case(message: int, public: rsa.PublicKey, private: rsa.PrivateKey) -> int:
-    encrypted = rsa.core.encrypt_int(message, public.e, public.n)
-    decrypted = rsa.core.decrypt_int(encrypted, private.d, public.n)
+    encrypted = rsa.logic.encrypt_int(message, public.e, public.n)
+    decrypted = rsa.logic.decrypt_int(encrypted, private.d, public.n)
     return decrypted
 
 
@@ -40,8 +40,8 @@ def test_encrypt_decrypt(rsa_keys: Tuple[rsa.PublicKey, rsa.PrivateKey]) -> None
 
 
 def sign_verify_test_case(message: int, public_key: rsa.PublicKey, private_key: rsa.PrivateKey) -> int:
-    signed = rsa.core.encrypt_int(message, private_key.d, public_key.n)
-    verified = rsa.core.decrypt_int(signed, public_key.e, public_key.n)
+    signed = rsa.logic.encrypt_int(message, private_key.d, public_key.n)
+    verified = rsa.logic.decrypt_int(signed, public_key.e, public_key.n)
     return verified
 
 
@@ -59,10 +59,10 @@ def test_extreme_values(rsa_keys: Tuple[rsa.PublicKey, rsa.PrivateKey], message:
 
     if message < 0:
         with pytest.raises(ValueError):
-            rsa.core.encrypt_int(message, public_key.e, public_key.n)
+            rsa.logic.encrypt_int(message, public_key.e, public_key.n)
     elif message == 0:
         decrypted_message = encrypt_decrypt_test_case(message, public_key, private_key)
         assert message == decrypted_message
     else:
         with pytest.raises(OverflowError):
-            rsa.core.encrypt_int(public_key.n, public_key.e, public_key.n)
+            rsa.logic.encrypt_int(public_key.n, public_key.e, public_key.n)

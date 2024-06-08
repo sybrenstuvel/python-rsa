@@ -42,7 +42,8 @@ import rsa.prime
 import rsa.pem
 import rsa.common
 import rsa.randnum
-import rsa.core
+import rsa.logic
+import rsa.core as core_namespace
 
 
 DEFAULT_EXPONENT = 65537
@@ -300,7 +301,7 @@ class PublicKey(AbstractKey):
         """
 
         from pyasn1.codec.der import decoder
-        from rsa.asn1 import AsnPubKey
+        from rsa.core.classes import AsnPubKey
 
         (priv, _) = decoder.decode(keyfile, asn1Spec=AsnPubKey())
         return cls(n=int(priv["modulus"]), e=int(priv["publicExponent"]))
@@ -313,7 +314,7 @@ class PublicKey(AbstractKey):
         """
 
         from pyasn1.codec.der import encoder
-        from rsa.asn1 import AsnPubKey
+        from rsa.core.classes import AsnPubKey
 
         # Create the ASN object
         asn_key = AsnPubKey()
@@ -375,7 +376,7 @@ class PublicKey(AbstractKey):
         :return: a PublicKey object
         """
 
-        from rsa.asn1 import OpenSSLPubKey
+        from rsa.core.classes import OpenSSLPubKey
         from pyasn1.codec.der import decoder
         from pyasn1.type import univ
 
@@ -546,7 +547,7 @@ class PrivateKey(AbstractKey):
 
         # Blinding and un-blinding should be using the same factor
         blinded, blindfac_inverse = self.blind(encrypted)
-        decrypted = rsa.core.decrypt_int_fast(
+        decrypted = rsa.logic.decrypt_int_fast(
             blinded,
             [self.p, self.q] + self.rs,
             [self.exp1, self.exp2] + self.ds,
@@ -825,8 +826,8 @@ def calculate_keys_custom_exponent(
 
     try:
         d = rsa.common.inverse(exponent, phi_n)
-    except rsa.common.NotRelativePrimeError as ex:
-        raise rsa.common.NotRelativePrimeError(
+    except core_namespace.NotRelativePrimeError as ex:
+        raise core_namespace.NotRelativePrimeError(
             exponent,
             phi_n,
             ex.d,

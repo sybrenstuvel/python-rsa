@@ -16,14 +16,7 @@
 
 import typing
 import math
-
-
-class NotRelativePrimeError(ValueError):
-    def __init__(self, a: int, b: int, d: int, msg: str = "") -> None:
-        super().__init__(msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
-        self.a = a
-        self.b = b
-        self.d = d
+import rsa.core as core_namespace
 
 
 def bit_size(num: int) -> int:
@@ -115,7 +108,7 @@ def inverse(x: int, n: int) -> int:
     (divider, inv, _) = extended_gcd(x, n)
 
     if divider != 1:
-        raise NotRelativePrimeError(x, n, divider)
+        raise core_namespace.NotRelativePrimeError(x, n, divider)
 
     return inv
 

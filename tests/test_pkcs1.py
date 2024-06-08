@@ -19,11 +19,12 @@ import unittest
 
 import rsa
 from rsa import pkcs1
+import rsa.core as core_namespace
 
 
 class BinaryTest(unittest.TestCase):
     def setUp(self):
-        (self.pub, self.priv) = rsa.new_keys(256)
+        self.pub, self.priv = rsa.new_keys(256)
 
     def test_enc_dec(self):
         message = struct.pack(">IIII", 0, 0, 0, 1)
@@ -48,7 +49,7 @@ class BinaryTest(unittest.TestCase):
         altered_a = (a + 1) % 256
         encrypted = encrypted[:5] + bytes([altered_a]) + encrypted[6:]
 
-        self.assertRaises(pkcs1.DecryptionError, pkcs1.decrypt, encrypted, self.priv)
+        self.assertRaises(core_namespace.DecryptionError, pkcs1.decrypt, encrypted, self.priv)
 
     def test_randomness(self):
         """Encrypting the same message twice should result in different
@@ -97,12 +98,12 @@ class ExtraZeroesTest(unittest.TestCase):
 
     def test_prepend_zeroes(self):
         cyphertext = bytes.fromhex("0000") + self.cyphertext
-        with self.assertRaises(rsa.DecryptionError):
+        with self.assertRaises(core_namespace.DecryptionError):
             rsa.decrypt(cyphertext, self.private_key)
 
     def test_append_zeroes(self):
         cyphertext = self.cyphertext + bytes.fromhex("0000")
-        with self.assertRaises(rsa.DecryptionError):
+        with self.assertRaises(core_namespace.DecryptionError):
             rsa.decrypt(cyphertext, self.private_key)
 
 
@@ -137,7 +138,7 @@ class SignatureTest(unittest.TestCase):
 
         signature = pkcs1.sign(b"je moeder", self.priv, "SHA-256")
         self.assertRaises(
-            pkcs1.VerificationError, pkcs1.verify, b"mijn moeder", signature, self.pub
+            core_namespace.VerificationError, pkcs1.verify, b"mijn moeder", signature, self.pub
         )
 
     def test_sign_different_key(self):
@@ -147,7 +148,7 @@ class SignatureTest(unittest.TestCase):
 
         message = b"je moeder"
         signature = pkcs1.sign(message, self.priv, "SHA-256")
-        self.assertRaises(pkcs1.VerificationError, pkcs1.verify, message, signature, otherpub)
+        self.assertRaises(core_namespace.VerificationError, pkcs1.verify, message, signature, otherpub)
 
     def test_multiple_signings(self):
         """Signing the same message twice should return the same signatures."""
@@ -185,7 +186,7 @@ class SignatureTest(unittest.TestCase):
         message = b"je moeder"
         signature = pkcs1.sign(message, self.priv, "SHA-256")
         signature = bytes.fromhex("0000") + signature
-        with self.assertRaises(rsa.VerificationError):
+        with self.assertRaises(core_namespace.VerificationError):
             pkcs1.verify(message, signature, self.pub)
 
     def test_apppend_zeroes(self):
@@ -194,7 +195,7 @@ class SignatureTest(unittest.TestCase):
         message = b"je moeder"
         signature = pkcs1.sign(message, self.priv, "SHA-256")
         signature = signature + bytes.fromhex("0000")
-        with self.assertRaises(rsa.VerificationError):
+        with self.assertRaises(core_namespace.VerificationError):
             pkcs1.verify(message, signature, self.pub)
 
 
@@ -228,7 +229,7 @@ CdCiWmOJxVfRAgwBQM+e1JJwMKmxSF0CCmya6CFxO8Evdn8CDACMM3AlVC4FhlN8
         self.public_key = rsa.PublicKey(n=self.private_key.n, e=self.private_key.e)
 
         cyphertext = self.encrypt_with_short_padding(b"op je hoofd")
-        with self.assertRaises(rsa.DecryptionError):
+        with self.assertRaises(rsa.core.DecryptionError):
             rsa.decrypt(cyphertext, self.private_key)
 
     def encrypt_with_short_padding(self, message: bytes) -> bytes:
@@ -239,7 +240,7 @@ CdCiWmOJxVfRAgwBQM+e1JJwMKmxSF0CCmya6CFxO8Evdn8CDACMM3AlVC4FhlN8
         padded = b"\x00\x02padding\x00" + message
 
         payload = rsa.transform.bytes2int(padded)
-        encrypted_value = rsa.core.encrypt_int(payload, self.public_key.e, self.public_key.n)
+        encrypted_value = rsa.logic.encrypt_int(payload, self.public_key.e, self.public_key.n)
         cyphertext = rsa.transform.int2bytes(encrypted_value, keylength)
 
         return cyphertext

@@ -27,8 +27,8 @@ def private_to_public() -> None:
     parser = OptionParser(
         usage="usage: %prog [options]",
         description="Reads a private key and outputs the "
-        "corresponding public key. Both private and public keys use "
-        "the format described in PKCS#1 v1.5",
+                    "corresponding public key. Both private and public keys use "
+                    "the format described in PKCS#1 v1.5",
     )
 
     parser.add_option(

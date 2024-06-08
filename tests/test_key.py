@@ -5,7 +5,7 @@ Some tests for the rsa/key.py file.
 import unittest
 
 import rsa.key
-import rsa.core
+import rsa.logic
 
 
 class BlindingTest(unittest.TestCase):
@@ -19,10 +19,10 @@ class BlindingTest(unittest.TestCase):
         pk = rsa.key.PrivateKey(3727264081, 65537, 3349121513, 65063, 57287)
 
         message = 12345
-        encrypted = rsa.core.encrypt_int(message, pk.e, pk.n)
+        encrypted = rsa.logic.encrypt_int(message, pk.e, pk.n)
 
         blinded_1, unblind_1 = pk.blind(encrypted)  # blind before decrypting
-        decrypted = rsa.core.decrypt_int(blinded_1, pk.d, pk.n)
+        decrypted = rsa.logic.decrypt_int(blinded_1, pk.d, pk.n)
         unblinded_1 = pk.unblind(decrypted, unblind_1)
 
         self.assertEqual(unblinded_1, message)
@@ -32,7 +32,7 @@ class BlindingTest(unittest.TestCase):
         self.assertNotEqual(blinded_1, blinded_2)
 
         # The unblinding should still work, though.
-        decrypted = rsa.core.decrypt_int(blinded_2, pk.d, pk.n)
+        decrypted = rsa.logic.decrypt_int(blinded_2, pk.d, pk.n)
         unblinded_2 = pk.unblind(decrypted, unblind_2)
         self.assertEqual(unblinded_2, message)
 

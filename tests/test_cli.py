@@ -14,6 +14,7 @@ from contextlib import contextmanager, redirect_stdout, redirect_stderr
 import rsa
 import rsa.cli
 import rsa.util
+import rsa.core as core_namespace
 
 
 @contextmanager
@@ -226,7 +227,7 @@ class EncryptDecryptTest(AbstractCliTest):
 
         with cli_args("-i", "encrypted.txt", self.priv_fname):
             with captured_output() as (out, err):
-                self.assertRaises(rsa.DecryptionError, rsa.cli.decrypt)
+                self.assertRaises(core_namespace.DecryptionError, rsa.cli.decrypt)
 
 
 class SignVerifyTest(AbstractCliTest):
