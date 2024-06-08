@@ -14,31 +14,56 @@
 #  limitations under the License.
 
 import time
+import functools
+import typing
+
 import rsa
+
+if typing.TYPE_CHECKING:
+    from rsa import PublicKey, PrivateKey
 
 pool_size = 8
 accurate = True
 
 
+def timeit(func: typing.Callable) -> typing.Callable:
+    """
+    decorator for measuring the working time
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        return result, elapsed_time
+    return wrapper
+
+
+@timeit
+def generate_keys(bit_size: int) -> typing.Tuple["PublicKey", "PrivateKey"]:
+    """
+    Generates a public key and private key for testing
+    """
+    return rsa.new_keys(bit_size, accurate=accurate, pool_size=pool_size)
+
+
 def run_speed_test(bit_size: int) -> None:
     iterations = 0
-    start = end = time.time()
+    total_time = 0.0
 
     # At least a number of iterations, and at least 2 seconds
-    while iterations < 10 or end - start < 2:
+    while iterations < 10 or total_time < 2:
+        _, elapsed_time = generate_keys(bit_size)
         iterations += 1
-        rsa.new_keys(bit_size, accurate=accurate, pool_size=pool_size)
-        end = time.time()
+        total_time += elapsed_time
 
-    duration = end - start
-    dur_per_call = duration / iterations
+    dur_per_call = total_time / iterations
 
-    print('%5i bit: %9.3f sec. (%i iterations over %.1f seconds)' %
-          (bit_size, dur_per_call, iterations, duration))
+    print(f'{bit_size:5} bit: {dur_per_call:9.3f} sec. ({iterations} iterations over {total_time:.1f} seconds)')
 
 
 def start_speed_test() -> None:
-    # make a function cause Pycharm linter complains about the global variable bit_size
     for bit_size in (128, 256, 384, 512, 1024, 2048, 3072, 4096):
         run_speed_test(bit_size)
 
