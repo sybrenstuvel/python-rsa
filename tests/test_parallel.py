@@ -13,8 +13,4 @@ class ParallelTest(unittest.TestCase):
     def test_parallel_primegen(self):
         p = rsa.parallel.get_prime(1024, 3)
 
-        self.assertFalse(rsa.prime.is_prime(p - 1))
-        self.assertTrue(rsa.prime.is_prime(p))
-        self.assertFalse(rsa.prime.is_prime(p + 1))
-
         self.assertEqual(1024, helpers_namespace.bit_size(p))

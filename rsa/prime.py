@@ -26,29 +26,16 @@ import sympy
 __all__ = ["get_prime", "are_relatively_prime"]
 
 
-def is_prime(number: int) -> bool:
-    """Returns True if the number is prime, and False otherwise.
-
-    >>> is_prime(2)
-    True
-    >>> is_prime(42)
-    False
-    >>> is_prime(41)
-    True
-    """
-
-    return sympy.isprime(number)
-
-
 def get_prime(nbits: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
+    >>> from sympy import isprime
     >>> p = get_prime(128)
-    >>> is_prime(p-1)
+    >>> isprime(p-1)
     False
-    >>> is_prime(p)
+    >>> isprime(p)
     True
-    >>> is_prime(p+1)
+    >>> isprime(p+1)
     False
 
     >>> from rsa.helpers import common
@@ -62,10 +49,8 @@ def get_prime(nbits: int) -> int:
         integer = rsa.randnum.read_random_odd_int(nbits)
 
         # Test for primeness
-        if is_prime(integer):
+        if sympy.isprime(integer):
             return integer
-
-            # Retry if not prime
 
 
 def are_relatively_prime(a: int, b: int) -> bool:

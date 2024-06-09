@@ -26,15 +26,18 @@ import multiprocessing as mp
 from multiprocessing.connection import Connection
 
 import rsa.prime
+import sympy
 import rsa.randnum
+
+__all__ = ["get_prime"]
 
 
 def _find_prime(nbits: int, pipe: Connection) -> None:
+    """Finds a prime number and sends it through the pipe."""
     while True:
         integer = rsa.randnum.read_random_odd_int(nbits)
 
-        # Test for primeness
-        if rsa.prime.is_prime(integer):
+        if sympy.isprime(integer):
             pipe.send(integer)
             return
 
@@ -44,26 +47,23 @@ def get_prime(nbits: int, pool_size: int) -> int:
 
     Works in multiple threads at the same time.
 
+    >>> import sympy
     >>> p = get_prime(128, 3)
-    >>> rsa.prime.is_prime(p-1)
+    >>> sympy.isprime(p-1)
     False
-    >>> rsa.prime.is_prime(p)
+    >>> sympy.isprime(p)
     True
-    >>> rsa.prime.is_prime(p+1)
+    >>> sympy.isprime(p+1)
     False
 
     >>> from rsa.helpers import common
     >>> common.bit_size(p) == 128
     True
-
     """
+    pipe_recv, pipe_send = mp.Pipe(duplex=False)
+    procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send)) for _ in range(pool_size)]
 
-    (pipe_recv, pipe_send) = mp.Pipe(duplex=False)
-
-    # Create processes
     try:
-        procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send)) for _ in range(pool_size)]
-        # Start processes
         for p in procs:
             p.start()
 
@@ -72,25 +72,23 @@ def get_prime(nbits: int, pool_size: int) -> int:
         pipe_recv.close()
         pipe_send.close()
 
-    # Terminate processes
-    for p in procs:
-        p.terminate()
+        for p in procs:
+            p.terminate()
+            p.join()
 
     return result
 
 
-__all__ = ["get_prime"]
-
 if __name__ == "__main__":
-    print("Running doctests 1000x or until failure")
+    print("Running doctests 100x or until failure")
     import doctest
 
     for count in range(100):
-        (failures, tests) = doctest.testmod()
+        failures, tests = doctest.testmod()
         if failures:
             break
 
         if count % 10 == 0 and count:
-            print("%i times" % count)
+            print(f"{count} times")
 
     print("Doctests done")

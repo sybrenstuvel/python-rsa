@@ -45,9 +45,7 @@ import rsa.logic
 import rsa.core as core_namespace
 import rsa.helpers as helpers_namespace
 
-
 DEFAULT_EXPONENT = 65537
-
 
 T = typing.TypeVar("T", bound="AbstractKey")
 
@@ -134,7 +132,7 @@ class AbstractKey(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _assert_format_exists(
-        file_format: str, methods: typing.Mapping[str, typing.Callable]
+            file_format: str, methods: typing.Mapping[str, typing.Callable]
     ) -> typing.Callable:
         """Checks whether the given file format exists in 'methods'."""
 
@@ -417,13 +415,13 @@ class PrivateKey(AbstractKey):
     __slots__ = ("d", "p", "q", "exp1", "exp2", "coef", "rs", "ds", "ts")
 
     def __init__(
-        self,
-        n: int,
-        e: int,
-        d: int,
-        p: int,
-        q: int,
-        rs: typing.Optional[typing.List[int]] = None,
+            self,
+            n: int,
+            e: int,
+            d: int,
+            p: int,
+            q: int,
+            rs: typing.Optional[typing.List[int]] = None,
     ) -> None:
         rs = [] if rs is None else rs
 
@@ -440,7 +438,7 @@ class PrivateKey(AbstractKey):
         # Calculate other primes' exponents and coefficients.
         self.rs = rs
         self.ds = [int(d % (r - 1)) for r in rs]
-        Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x*y))
+        Rs = list(itertools.accumulate([p, q] + rs, lambda x, y: x * y))
         self.ts = [pow(R, -1, r) for R, r in zip(Rs[1:], rs)]
 
     def __getitem__(self, key: str) -> int:
@@ -499,7 +497,7 @@ class PrivateKey(AbstractKey):
                 self.rs,
                 self.ds,
                 self.ts,
-             ) = state
+            ) = state
         else:
             self.n, self.e, self.d, self.p, self.q, self.exp1, self.exp2, self.coef = state
             self.rs = self.ds = self.ts = []
@@ -634,7 +632,7 @@ class PrivateKey(AbstractKey):
                 namedtype.NamedType("coefficient%d" % (i + 3), univ.Integer()),
             ) for i in range(len(self.rs))
         ]
-        
+
         class AsnPrivKey(univ.Sequence):
             componentType = namedtype.NamedTypes(
                 namedtype.NamedType("version", univ.Integer()),
@@ -695,10 +693,10 @@ class PrivateKey(AbstractKey):
 
 
 def find_primes(
-    nbits: int,
-    get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
-    accurate: bool = True,
-    nprimes: int = 2,
+        nbits: int,
+        get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
+        accurate: bool = True,
+        nprimes: int = 2,
 ) -> typing.List[int]:
     """Returns a list of different primes with nbits divided evenly among them.
 
@@ -713,7 +711,7 @@ def find_primes(
         return list(find_p_q(nbits // 2, get_prime_func, accurate))
 
     quo, rem = divmod(nbits, nprimes)
-    factor_lengths = [quo + 1]*rem + [quo] * (nprimes - rem)
+    factor_lengths = [quo + 1] * rem + [quo] * (nprimes - rem)
 
     while True:
         primes = [get_prime_func(length) for length in factor_lengths]
@@ -724,9 +722,9 @@ def find_primes(
 
 
 def find_p_q(
-    nbits: int,
-    get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
-    accurate: bool = True,
+        nbits: int,
+        get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
+        accurate: bool = True,
 ) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
 
@@ -803,10 +801,10 @@ def find_p_q(
 
 
 def calculate_keys_custom_exponent(
-    p: int,
-    q: int,
-    exponent: int,
-    rs: typing.Optional[typing.List[int]] = None,
+        p: int,
+        q: int,
+        exponent: int,
+        rs: typing.Optional[typing.List[int]] = None,
 ) -> typing.Tuple[int, int]:
     """Calculates an encryption and a decryption key given p, q and an exponent,
     and returns them as a tuple (e, d)
@@ -831,7 +829,7 @@ def calculate_keys_custom_exponent(
             phi_n,
             ex.d,
             msg="e (%d) and phi_n (%d) are not relatively prime (divider=%i)"
-            % (exponent, phi_n, ex.d),
+                % (exponent, phi_n, ex.d),
         ) from ex
 
     if (exponent * d) % phi_n != 1:
@@ -856,11 +854,11 @@ def calculate_keys(p: int, q: int) -> typing.Tuple[int, int]:
 
 
 def gen_keys(
-    nbits: int,
-    get_prime_func: typing.Callable[[int], int],
-    accurate: bool = True,
-    exponent: int = DEFAULT_EXPONENT,
-    n_primes: int = 2,
+        nbits: int,
+        get_prime_func: typing.Callable[[int], int],
+        accurate: bool = True,
+        exponent: int = DEFAULT_EXPONENT,
+        n_primes: int = 2,
 ) -> typing.Tuple:
     """Generate RSA keys of nbits bits. Returns (p, q, e, d) or (p, q, e, d, rs).
 
@@ -895,11 +893,11 @@ def gen_keys(
 
 
 def new_keys(
-    nbits: int,
-    accurate: bool = True,
-    pool_size: int = 1,
-    exponent: int = DEFAULT_EXPONENT,
-    nprimes: int = 2,
+        nbits: int,
+        accurate: bool = True,
+        pool_size: int = 1,
+        exponent: int = DEFAULT_EXPONENT,
+        nprimes: int = 2,
 ) -> typing.Tuple[PublicKey, PrivateKey]:
     """Generates public and private keys, and returns them as (pub, priv).
 
