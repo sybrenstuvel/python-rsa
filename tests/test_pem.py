@@ -77,13 +77,13 @@ class TestByteOutput(unittest.TestCase):
 
     def test_bytes_public(self):
         key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem)
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="DER"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="PEM"), bytes)
 
     def test_bytes_private(self):
         key = rsa.key.PrivateKey.load_pkcs1(private_key_pem)
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="DER"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="PEM"), bytes)
 
 
 class TestByteInput(unittest.TestCase):
@@ -91,10 +91,10 @@ class TestByteInput(unittest.TestCase):
 
     def test_bytes_public(self):
         key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem.encode("ascii"))
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="DER"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="PEM"), bytes)
 
     def test_bytes_private(self):
         key = rsa.key.PrivateKey.load_pkcs1(private_key_pem.encode("ascii"))
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="DER"), bytes)
+        self.assertIsInstance(key.save_pkcs1(file_format="PEM"), bytes)

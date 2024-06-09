@@ -160,7 +160,7 @@ class KeygenTest(AbstractCliTest):
 
         # If we can load the file as der, it's good enough.
         with open("test_cli_privkey_out.der", "rb") as derfile:
-            rsa.PrivateKey.load_pkcs1(derfile.read(), format="DER")
+            rsa.PrivateKey.load_pkcs1(derfile.read(), file_format="DER")
 
     @cleanup_files("test_cli_privkey_out.pem", "test_cli_pubkey_out.pem")
     def test_keygen_pub_out_pem(self):

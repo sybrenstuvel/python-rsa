@@ -40,7 +40,6 @@ import itertools
 
 import rsa.prime
 import rsa.pem
-import rsa.helpers.common
 import rsa.randnum
 import rsa.logic
 import rsa.core as core_namespace
@@ -112,14 +111,14 @@ class AbstractKey(metaclass=abc.ABCMeta):
         """
 
     @classmethod
-    def load_pkcs1(cls: typing.Type[T], keyfile: bytes, format: str = "PEM") -> T:
+    def load_pkcs1(cls: typing.Type[T], keyfile: bytes, file_format: str = "PEM") -> T:
         """Loads a key in PKCS#1 DER or PEM format.
 
         :param keyfile: contents of a DER- or PEM-encoded file that contains
             the key.
         :type keyfile: bytes
-        :param format: the format of the file to load; 'PEM' or 'DER'
-        :type format: str
+        :param file_format: the format of the file to load; 'PEM' or 'DER'
+        :type file_format: str
 
         :return: the loaded key
         :rtype: AbstractKey
@@ -130,7 +129,7 @@ class AbstractKey(metaclass=abc.ABCMeta):
             "DER": cls._load_pkcs1_der,
         }
 
-        method = cls._assert_format_exists(format, methods)
+        method = cls._assert_format_exists(file_format, methods)
         return method(keyfile)
 
     @staticmethod
@@ -147,11 +146,11 @@ class AbstractKey(metaclass=abc.ABCMeta):
                 "Unsupported format: %r, try one of %s" % (file_format, formats)
             ) from ex
 
-    def save_pkcs1(self, format: str = "PEM") -> bytes:
+    def save_pkcs1(self, file_format: str = "PEM") -> bytes:
         """Saves the key in PKCS#1 DER or PEM format.
 
-        :param format: the format to save; 'PEM' or 'DER'
-        :type format: str
+        :param file_format: the format to save; 'PEM' or 'DER'
+        :type file_format: str
         :returns: the DER- or PEM-encoded key.
         :rtype: bytes
         """
@@ -161,7 +160,7 @@ class AbstractKey(metaclass=abc.ABCMeta):
             "DER": self._save_pkcs1_der,
         }
 
-        method = self._assert_format_exists(format, methods)
+        method = self._assert_format_exists(file_format, methods)
         return method()
 
     def blind(self, message: int) -> typing.Tuple[int, int]:
@@ -183,7 +182,7 @@ class AbstractKey(metaclass=abc.ABCMeta):
         """Performs blinding on the message using random number 'blindfac_inverse'.
 
         :param blinded: the blinded message, as integer, to unblind.
-        :param blindfac: the factor to unblind with.
+        :param blindfac_inverse: the factor to unblind with.
         :return: the original message.
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
@@ -602,11 +601,11 @@ class PrivateKey(AbstractKey):
 
         n, e, d, p, q = map(int, priv[1:6])
         exp1, exp2, coef = map(int, priv[6:9])
-        rs = map(int, priv[9::3])
-        ds = map(int, priv[10::3])
-        ts = map(int, priv[11::3])
+        rs = list(map(int, priv[9::3]))
+        ds = list(map(int, priv[10::3]))
+        ts = list(map(int, priv[11::3]))
 
-        key = cls(n, e, d, p, q, list(rs))
+        key = cls(n, e, d, p, q, rs)
 
         if (key.exp1, key.exp2, key.coef, key.rs, key.ds, key.ts) != (exp1, exp2, coef, rs, ds, ts):
             warnings.warn(

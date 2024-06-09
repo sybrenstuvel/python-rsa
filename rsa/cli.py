@@ -82,12 +82,12 @@ def keygen() -> None:
     # Save public key
     if cli.pubout:
         print("Writing public key to %s" % cli.pubout, file=sys.stderr)
-        data = pub_key.save_pkcs1(format=cli.form)
+        data = pub_key.save_pkcs1(file_format=cli.form)
         with open(cli.pubout, "wb") as outfile:
             outfile.write(data)
 
     # Save private key
-    data = private_key.save_pkcs1(format=cli.form)
+    data = private_key.save_pkcs1(file_format=cli.form)
 
     if cli.out:
         print("Writing private key to %s" % cli.out, file=sys.stderr)
