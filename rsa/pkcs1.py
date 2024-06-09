@@ -181,9 +181,8 @@ def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
 
     payload = rsa.helpers.transform.bytes2int(padded)
     encrypted = rsa.logic.encrypt_int(payload, pub_key.e, pub_key.n)
-    block = rsa.helpers.transform.int2bytes(encrypted, key_length)
 
-    return block
+    return rsa.helpers.transform.int2bytes(encrypted, key_length)
 
 
 def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:

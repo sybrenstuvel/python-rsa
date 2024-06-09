@@ -32,18 +32,18 @@ of pyasn1.
 """
 
 import abc
+import itertools
 import math
 import threading
 import typing
 import warnings
-import itertools
 
-import rsa.prime
-import rsa.pem
-import rsa.randnum
-import rsa.logic
 import rsa.core as core_namespace
 import rsa.helpers as helpers_namespace
+import rsa.logic
+import rsa.pem
+import rsa.prime
+import rsa.randnum
 
 DEFAULT_EXPONENT = 65537
 
@@ -141,10 +141,10 @@ class AbstractKey(metaclass=abc.ABCMeta):
         except KeyError as ex:
             formats = ", ".join(sorted(methods.keys()))
             raise ValueError(
-                "Unsupported format: %r, try one of %s" % (file_format, formats)
+                f"Unsupported format: {file_format}, try one of {formats}"
             ) from ex
 
-    def save_pkcs1(self, file_format: str = "PEM") -> bytes:
+    def save_pkcs1(self, file_format: typing.Literal["PEM", "DER"] = "PEM") -> bytes:
         """Saves the key in PKCS#1 DER or PEM format.
 
         :param file_format: the format to save; 'PEM' or 'DER'
@@ -165,7 +165,6 @@ class AbstractKey(metaclass=abc.ABCMeta):
         """Performs blinding on the message.
 
         :param message: the message, as integer, to blind.
-        :param r: the random number to blind with.
         :return: tuple (the blinded message, the inverse of the used blinding factor)
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
@@ -301,8 +300,8 @@ class PublicKey(AbstractKey):
         from pyasn1.codec.der import decoder
         from rsa.core.classes import AsnPubKey
 
-        (priv, _) = decoder.decode(keyfile, asn1Spec=AsnPubKey())
-        return cls(n=int(priv["modulus"]), e=int(priv["publicExponent"]))
+        private, _ = decoder.decode(keyfile, asn1Spec=AsnPubKey())
+        return cls(n=int(private["modulus"]), e=int(private["publicExponent"]))
 
     def _save_pkcs1_der(self) -> bytes:
         """Saves the public key in PKCS#1 DER format.
@@ -577,7 +576,7 @@ class PrivateKey(AbstractKey):
 
         from pyasn1.codec.der import decoder
 
-        (priv, _) = decoder.decode(keyfile)
+        priv, _ = decoder.decode(keyfile)
 
         # ASN.1 contents of DER encoded private key:
         #
@@ -625,6 +624,18 @@ class PrivateKey(AbstractKey):
         from pyasn1.type import univ, namedtype
         from pyasn1.codec.der import encoder
 
+        component_names = [
+            "version",
+            "modulus",
+            "publicExponent",
+            "privateExponent",
+            "prime1",
+            "prime2",
+            "exponent1",
+            "exponent2",
+            "coefficient"
+        ]
+
         other_fields = [
             (
                 namedtype.NamedType("prime%d" % (i + 3), univ.Integer()),
@@ -633,35 +644,31 @@ class PrivateKey(AbstractKey):
             ) for i in range(len(self.rs))
         ]
 
-        class AsnPrivKey(univ.Sequence):
+        class AsnPrivateKey(univ.Sequence):
             componentType = namedtype.NamedTypes(
-                namedtype.NamedType("version", univ.Integer()),
-                namedtype.NamedType("modulus", univ.Integer()),
-                namedtype.NamedType("publicExponent", univ.Integer()),
-                namedtype.NamedType("privateExponent", univ.Integer()),
-                namedtype.NamedType("prime1", univ.Integer()),
-                namedtype.NamedType("prime2", univ.Integer()),
-                namedtype.NamedType("exponent1", univ.Integer()),
-                namedtype.NamedType("exponent2", univ.Integer()),
-                namedtype.NamedType("coefficient", univ.Integer()),
+                *[namedtype.NamedType(name, univ.Integer()) for name in component_names],
                 *list(itertools.chain(*other_fields))
             )
 
         # Create the ASN object
-        asn_key = AsnPrivKey()
-        asn_key.setComponentByName("version", 0)
-        asn_key.setComponentByName("modulus", self.n)
-        asn_key.setComponentByName("publicExponent", self.e)
-        asn_key.setComponentByName("privateExponent", self.d)
-        asn_key.setComponentByName("prime1", self.p)
-        asn_key.setComponentByName("prime2", self.q)
-        asn_key.setComponentByName("exponent1", self.exp1)
-        asn_key.setComponentByName("exponent2", self.exp2)
-        asn_key.setComponentByName("coefficient", self.coef)
-        for i, (r, d, t) in enumerate(zip(self.rs, self.ds, self.ts), start=3):
-            asn_key.setComponentByName("prime%d" % i, r)
-            asn_key.setComponentByName("exponent%d" % i, d)
-            asn_key.setComponentByName("coefficient%d" % i, t)
+        asn_key = AsnPrivateKey()
+        components = {
+            "version": 0,
+            "modulus": self.n,
+            "publicExponent": self.e,
+            "privateExponent": self.d,
+            "prime1": self.p,
+            "prime2": self.q,
+            "exponent1": self.exp1,
+            "exponent2": self.exp2,
+            "coefficient": self.coef,
+            **{"prime%d" % i: r for i, r in enumerate(self.rs, start=3)},
+            **{"exponent%d" % i: d for i, d in enumerate(self.ds, start=3)},
+            **{"coefficient%d" % i: t for i, t in enumerate(self.ts, start=3)}
+        }
+
+        for name, value in components.items():
+            asn_key.setComponentByName(name, value)
 
         return encoder.encode(asn_key)
 

@@ -99,7 +99,7 @@ def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     if not isinstance(contents, bytes):
         contents = contents.encode("ascii")
 
-    (pem_start, pem_end) = _markers(pem_marker)
+    pem_start, pem_end = _markers(pem_marker)
     pem_lines = [line for line in _pem_lines(contents, pem_start, pem_end)]
 
     # Base64-decode the contents
@@ -119,7 +119,7 @@ def save_pem(contents: bytes, pem_marker: FlexiText) -> bytes:
 
     """
 
-    (pem_start, pem_end) = _markers(pem_marker)
+    pem_start, pem_end = _markers(pem_marker)
 
     b64 = base64.standard_b64encode(contents).replace(b"\n", b"")
     pem_lines = [pem_start]
