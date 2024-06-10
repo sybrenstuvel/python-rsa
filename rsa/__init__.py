@@ -20,6 +20,11 @@ WARNING: this implementation does not use compression of the cleartext input to
 prevent repetitions, or other common security improvements. Use with care.
 
 """
+import pathlib
+import json
+import logging
+import logging.config
+import atexit
 
 from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (
@@ -35,6 +40,26 @@ from rsa.pkcs1 import (
 __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2023-04-23"
 __version__ = "4.10-dev0"
+
+
+def setup_logger() -> None:
+    folder = pathlib.Path("logs")
+
+    if not folder.exists():
+        folder.mkdir()
+
+    config_file = pathlib.Path("rsa/config/logger_config.json")
+
+    with open(config_file, "r") as f_in:
+        config = json.load(f_in)
+
+    logging.config.dictConfig(config)
+
+    queue_handler = logging.getHandlerByName("queue_handler")
+
+    if queue_handler is not None:
+        atexit.register(queue_handler.close)
+
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
