@@ -18,8 +18,11 @@
 
 import os
 import struct
+import logging
 
 from rsa.helpers import common, transform
+
+logger = logging.getLogger(__name__)
 
 
 def read_random_bits(n_bits: int) -> bytes:
@@ -29,15 +32,19 @@ def read_random_bits(n_bits: int) -> bytes:
     only the lower bits set.
     """
 
-    nbytes, rbits = divmod(n_bits, 8)
+    n_bytes, r_bits = divmod(n_bits, 8)
+
+    logger.debug(f'read_random_bits: {n_bytes=}, {r_bits=}')
 
     # Get the random bytes
-    randomdata = os.urandom(nbytes)
+    randomdata = os.urandom(n_bytes)
+
+    logger.debug(randomdata)
 
     # Add the remaining random bits
-    if rbits > 0:
+    if r_bits > 0:
         randomvalue = ord(os.urandom(1))
-        randomvalue >>= 8 - rbits
+        randomvalue >>= 8 - r_bits
         randomdata = struct.pack("B", randomvalue) + randomdata
 
     return randomdata

@@ -48,7 +48,7 @@ def setup_logger() -> None:
     if not folder.exists():
         folder.mkdir()
 
-    config_file = pathlib.Path("rsa/config/logger_config.json")
+    config_file = pathlib.Path(__file__).resolve().parent / "core/config/logger_config.json"
 
     with open(config_file, "r") as f_in:
         config = json.load(f_in)
@@ -69,6 +69,8 @@ def setup_logger() -> None:
     if queue_handler is not None:
         atexit.register(queue_handler.close)
 
+
+setup_logger()
 
 # Do doctest if we're run directly
 if __name__ == "__main__":
