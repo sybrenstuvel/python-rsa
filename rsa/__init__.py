@@ -25,6 +25,7 @@ import json
 import logging
 import logging.config
 import atexit
+import sys
 
 from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (
@@ -54,20 +55,6 @@ def setup_logger() -> None:
         config = json.load(f_in)
 
     logging.config.dictConfig(config)
-
-    # mypy founds errors, why???
-    # queue_handler = logging.getHandlerByName("queue_handler")
-
-    logger = logging.getLogger(__name__)
-
-    queue_handler = None
-    for handler in logger.handlers:
-        if handler.get_name() == "queue_handler":
-            queue_handler = handler
-            break
-
-    if queue_handler is not None:
-        atexit.register(queue_handler.close)
 
 
 setup_logger()
