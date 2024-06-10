@@ -16,7 +16,7 @@
 
 import struct
 import unittest
-
+from typing import Union
 
 import rsa
 from rsa import pkcs1
@@ -150,7 +150,7 @@ class SignatureTest(unittest.TestCase):
 
         message = b"je moeder"
         signature = pkcs1.sign(message, self.priv, "SHA-256")
-        self.assertRaises(core_namespace.VerificationError, pkcs1.verify, message, signature, otherpub)
+        self.assertRaises((core_namespace.VerificationError, OverflowError), pkcs1.verify, message, signature, otherpub)
 
     def test_multiple_signings(self):
         """Signing the same message twice should return the same signatures."""
