@@ -52,7 +52,11 @@ def decrypt_int(cypher_text: int, decryption_key: int, n: int) -> int:
     core_namespace.assert_int(decryption_key, "dkey")
     core_namespace.assert_int(n, "n")
 
-    return pow(cypher_text, decryption_key, n)
+    result = pow(cypher_text, decryption_key, n)
+
+    logger.debug(f"decrypt_int({cypher_text}, {decryption_key}) => {result=}")
+
+    return result
 
 
 def decrypt_int_fast(

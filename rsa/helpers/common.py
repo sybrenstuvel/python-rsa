@@ -101,12 +101,8 @@ def chinese_remainder_theorem(remainders: typing.Iterable[int], moduli: typing.I
     135
     """
 
-    total_modulus = 1
+    total_modulus = sympy.prod(moduli, start=1)
     solution = 0
-
-    # Calculate the product of all moduli
-    for modulus in moduli:
-        total_modulus *= modulus
 
     # Apply the Chinese Remainder Theorem formula
     for modulus, remainder in zip(moduli, remainders):

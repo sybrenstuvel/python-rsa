@@ -20,12 +20,10 @@ WARNING: this implementation does not use compression of the cleartext input to
 prevent repetitions, or other common security improvements. Use with care.
 
 """
-import pathlib
 import json
 import logging
 import logging.config
-import atexit
-import sys
+import pathlib
 
 from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (
@@ -44,17 +42,26 @@ __version__ = "4.10-dev0"
 
 
 def setup_logger() -> None:
-    folder = pathlib.Path("logs")
+    project_root = next(
+        p for p in pathlib.Path(__file__).parents if p.parts[-1] == 'python-rsa'
+    )
 
-    if not folder.exists():
-        folder.mkdir()
+    log_folder = project_root / "logs"
+    log_folder.mkdir(exist_ok=True)
 
-    config_file = pathlib.Path(__file__).resolve().parent / "core/config/logger_config.json"
+    config_file = project_root / "rsa/core/config/logger_config.json"
 
     with open(config_file, "r") as f_in:
         config = json.load(f_in)
 
+    for handler in config.get("handlers", {}).values():
+        if "filename" in handler:
+            handler["filename"] = str(log_folder / pathlib.Path(handler["filename"]).name)
+
     logging.config.dictConfig(config)
+
+    logger = logging.getLogger(__name__)
+    logger.info("Logger is set up.")
 
 
 setup_logger()
