@@ -31,6 +31,9 @@ __all__ = [
     "decrypt",
     "sign",
     "verify",
+    "find_signature_hash",
+    "sign_hash",
+    "compute_hash"
 ]
 
 import hashlib
