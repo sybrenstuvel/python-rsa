@@ -55,7 +55,16 @@ def setup_logger() -> None:
 
     logging.config.dictConfig(config)
 
-    queue_handler = logging.getHandlerByName("queue_handler")
+    # mypy founds errors, why???
+    # queue_handler = logging.getHandlerByName("queue_handler")
+
+    logger = logging.getLogger(__name__)
+
+    queue_handler = None
+    for handler in logger.handlers:
+        if handler.get_name() == "queue_handler":
+            queue_handler = handler
+            break
 
     if queue_handler is not None:
         atexit.register(queue_handler.close)

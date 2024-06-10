@@ -15,7 +15,7 @@
 """Functions for PKCS#1 version 1.5 encryption and signing
 
 This module implements certain functionality from PKCS#1 version 1.5. For a
-very clear example, read http://www.di-mgt.com.au/rsa_alg.html#pkcs1schemes
+very clear example, read https://www.di-mgt.com.au/rsa_alg.html#pkcs1schemes
 
 At least 8 bytes of random padding is used when encrypting a message. This makes
 these methods much more secure than the ones in the ``rsa`` module.
