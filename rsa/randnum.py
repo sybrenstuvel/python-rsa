@@ -22,14 +22,14 @@ import struct
 from rsa.helpers import common, transform
 
 
-def read_random_bits(nbits: int) -> bytes:
+def read_random_bits(n_bits: int) -> bytes:
     """Reads 'nbits' random bits.
 
     If nbits isn't a whole number of bytes, an extra byte will be appended with
     only the lower bits set.
     """
 
-    nbytes, rbits = divmod(nbits, 8)
+    nbytes, rbits = divmod(n_bits, 8)
 
     # Get the random bytes
     randomdata = os.urandom(nbytes)
@@ -43,27 +43,27 @@ def read_random_bits(nbits: int) -> bytes:
     return randomdata
 
 
-def read_random_int(nbits: int) -> int:
+def read_random_int(n_bits: int) -> int:
     """Reads a random integer of approximately nbits bits."""
 
-    randomdata = read_random_bits(nbits)
+    randomdata = read_random_bits(n_bits)
     value = transform.bytes2int(randomdata)
 
     # Ensure that the number is large enough to just fill out the required
     # number of bits.
-    value |= 1 << (nbits - 1)
+    value |= 1 << (n_bits - 1)
 
     return value
 
 
-def read_random_odd_int(nbits: int) -> int:
+def read_random_odd_int(n_bits: int) -> int:
     """Reads a random odd integer of approximately nbits bits.
 
     >>> read_random_odd_int(512) & 1
     1
     """
 
-    value = read_random_int(nbits)
+    value = read_random_int(n_bits)
 
     # Make sure it's odd
     return value | 1

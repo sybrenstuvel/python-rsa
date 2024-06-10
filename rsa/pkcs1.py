@@ -290,9 +290,8 @@ def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str
 
     payload = rsa.helpers.transform.bytes2int(padded)
     encrypted = private_key.blinded_decrypt(payload)
-    block = rsa.helpers.transform.int2bytes(encrypted, key_length)
 
-    return block
+    return rsa.helpers.transform.int2bytes(encrypted, key_length)
 
 
 def sign(message: bytes, private_key: "key.PrivateKey", hash_method: str) -> bytes:

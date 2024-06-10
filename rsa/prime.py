@@ -26,7 +26,7 @@ import sympy
 __all__ = ["get_prime", "are_relatively_prime"]
 
 
-def get_prime(nbits: int) -> int:
+def get_prime(n_bits: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
     >>> from sympy import isprime
@@ -43,10 +43,10 @@ def get_prime(nbits: int) -> int:
     True
     """
 
-    assert nbits > 3  # the loop will hang on too small numbers
+    assert n_bits > 3  # the loop will hang on too small numbers
 
     while True:
-        integer = rsa.randnum.read_random_odd_int(nbits)
+        integer = rsa.randnum.read_random_odd_int(n_bits)
 
         # Test for primeness
         if sympy.isprime(integer):

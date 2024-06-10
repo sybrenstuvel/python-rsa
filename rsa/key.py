@@ -53,14 +53,14 @@ T = typing.TypeVar("T", bound="AbstractKey")
 class AbstractKey(metaclass=abc.ABCMeta):
     """Abstract superclass for private and public keys."""
 
-    __slots__ = ("n", "e", "blindfac", "blindfac_inverse", "mutex")
+    __slots__ = ("n", "e", "blind_factor", "blind_factor_inverse", "mutex")
 
     def __init__(self, n: int, e: int) -> None:
         self.n = n
         self.e = e
 
         # These will be computed properly on the first call to blind().
-        self.blindfac = self.blindfac_inverse = -1
+        self.blind_factor = self.blind_factor_inverse = -1
 
         # Used to protect updates to the blinding factor in multi-threaded
         # environments.
@@ -171,22 +171,22 @@ class AbstractKey(metaclass=abc.ABCMeta):
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
-        blindfac, blindfac_inverse = self._update_blinding_factor()
-        blinded = (message * pow(blindfac, self.e, self.n)) % self.n
-        return blinded, blindfac_inverse
+        blind_factor, blind_factor_inverse = self._update_blinding_factor()
+        blinded = (message * pow(blind_factor, self.e, self.n)) % self.n
+        return blinded, blind_factor_inverse
 
-    def unblind(self, blinded: int, blindfac_inverse: int) -> int:
-        """Performs blinding on the message using random number 'blindfac_inverse'.
+    def unblind(self, blinded: int, blind_factor_inverse: int) -> int:
+        """Performs blinding on the message using random number 'blind_factor_inverse'.
 
         :param blinded: the blinded message, as integer, to unblind.
-        :param blindfac_inverse: the factor to unblind with.
+        :param blind_factor_inverse: the factor to unblind with.
         :return: the original message.
 
         The blinding is such that message = unblind(decrypt(blind(encrypt(message))).
 
         See https://en.wikipedia.org/wiki/Blinding_%28cryptography%29
         """
-        return (blindfac_inverse * blinded) % self.n
+        return (blind_factor_inverse * blinded) % self.n
 
     def _initial_blinding_factor(self) -> int:
         for _ in range(1000):
@@ -208,16 +208,16 @@ class AbstractKey(metaclass=abc.ABCMeta):
         """
 
         with self.mutex:
-            if self.blindfac < 0:
+            if self.blind_factor < 0:
                 # Compute initial blinding factor, which is rather slow to do.
-                self.blindfac = self._initial_blinding_factor()
-                self.blindfac_inverse = rsa.helpers.common.inverse(self.blindfac, self.n)
+                self.blind_factor = self._initial_blinding_factor()
+                self.blind_factor_inverse = rsa.helpers.common.inverse(self.blind_factor, self.n)
             else:
                 # Reuse previous blinding factor.
-                self.blindfac = pow(self.blindfac, 2, self.n)
-                self.blindfac_inverse = pow(self.blindfac_inverse, 2, self.n)
+                self.blind_factor = pow(self.blind_factor, 2, self.n)
+                self.blind_factor_inverse = pow(self.blind_factor_inverse, 2, self.n)
 
-            return self.blindfac, self.blindfac_inverse
+            return self.blind_factor, self.blind_factor_inverse
 
 
 class PublicKey(AbstractKey):
@@ -250,7 +250,7 @@ class PublicKey(AbstractKey):
         return getattr(self, key)
 
     def __repr__(self) -> str:
-        return "PublicKey(%i, %i)" % (self.n, self.e)
+        return f"PublicKey({self.n}, {self.e})"
 
     def __getstate__(self) -> typing.Tuple[int, int]:
         """Returns the key as tuple for pickling."""
@@ -377,7 +377,7 @@ class PublicKey(AbstractKey):
         from pyasn1.codec.der import decoder
         from pyasn1.type import univ
 
-        (keyinfo, _) = decoder.decode(keyfile, asn1Spec=OpenSSLPubKey())
+        keyinfo, _ = decoder.decode(keyfile, asn1Spec=OpenSSLPubKey())
 
         if keyinfo["header"]["oid"] != univ.ObjectIdentifier("1.2.840.113549.1.1.1"):
             raise TypeError("This is not a DER-encoded OpenSSL-compatible public key")
@@ -703,7 +703,7 @@ def find_primes(
         nbits: int,
         get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
         accurate: bool = True,
-        nprimes: int = 2,
+        n_primes: int = 2,
 ) -> typing.List[int]:
     """Returns a list of different primes with nbits divided evenly among them.
 
@@ -711,14 +711,14 @@ def find_primes(
     :param get_prime_func: the get_prime function, defaults to
         :py:func:`rsa.prime.get_prime`.
     :param accurate: whether to enable accurate mode or not.
+    :param n_primes: the number of prime factors comprising the modulus.
     :returns: list of primes in descending order.
-
     """
-    if nprimes == 2:
+    if n_primes == 2:
         return list(find_p_q(nbits // 2, get_prime_func, accurate))
 
-    quo, rem = divmod(nbits, nprimes)
-    factor_lengths = [quo + 1] * rem + [quo] * (nprimes - rem)
+    quo, rem = divmod(nbits, n_primes)
+    factor_lengths = [quo + 1] * rem + [quo] * (n_primes - rem)
 
     while True:
         primes = [get_prime_func(length) for length in factor_lengths]
@@ -767,12 +767,12 @@ def find_p_q(
     # Make sure that p and q aren't too close or the factoring programs can
     # factor n.
     shift = nbits // 16
-    pbits = nbits + shift
-    qbits = nbits - shift
+    p_bits = nbits + shift
+    q_bits = nbits - shift
 
     # Choose the two initial primes
-    p = get_prime_func(pbits)
-    q = get_prime_func(qbits)
+    p = get_prime_func(p_bits)
+    q = get_prime_func(q_bits)
 
     def is_acceptable(p: int, q: int) -> bool:
         """Returns True iff p and q are acceptable:
@@ -796,9 +796,9 @@ def find_p_q(
     while not is_acceptable(p, q):
         # Change p on one iteration and q on the other
         if change_p:
-            p = get_prime_func(pbits)
+            p = get_prime_func(p_bits)
         else:
-            q = get_prime_func(qbits)
+            q = get_prime_func(q_bits)
 
         change_p = not change_p
 
@@ -861,7 +861,7 @@ def calculate_keys(p: int, q: int) -> typing.Tuple[int, int]:
 
 
 def gen_keys(
-        nbits: int,
+        n_bits: int,
         get_prime_func: typing.Callable[[int], int],
         accurate: bool = True,
         exponent: int = DEFAULT_EXPONENT,
@@ -871,7 +871,7 @@ def gen_keys(
 
     Note: this can take a long time, depending on the key size.
 
-    :param nbits: the total number of bits in ``p`` and ``q``. Both ``p`` and
+    :param n_bits: the total number of bits in ``p`` and ``q``. Both ``p`` and
         ``q`` will use ``nbits/2`` bits.
     :param get_prime_func: either :py:func:`rsa.prime.getprime` or a function
         with similar signature.
@@ -880,12 +880,13 @@ def gen_keys(
         private key can be cracked. A very common choice for e is 65537.
     :type exponent: int
     :param n_primes: the number of prime factors comprising the modulus.
+    :param accurate: whether to enable accurate mode or not
     """
 
     # Regenerate prime values, until calculate_keys_custom_exponent doesn't raise a
     # ValueError.
     while True:
-        primes = find_primes(nbits, get_prime_func, accurate, n_primes)
+        primes = find_primes(n_bits, get_prime_func, accurate, n_primes)
         p, q, rs = primes[0], primes[1], primes[2:]
         try:
             (e, d) = calculate_keys_custom_exponent(p, q, exponent=exponent, rs=rs)
@@ -900,11 +901,11 @@ def gen_keys(
 
 
 def new_keys(
-        nbits: int,
+        number_of_bits: int,
         accurate: bool = True,
         pool_size: int = 1,
         exponent: int = DEFAULT_EXPONENT,
-        nprimes: int = 2,
+        n_primes: int = 2,
 ) -> typing.Tuple[PublicKey, PrivateKey]:
     """Generates public and private keys, and returns them as (pub, priv).
 
@@ -912,7 +913,7 @@ def new_keys(
     :py:class:`rsa.PublicKey` object. The private key is also known as the
     'decryption key' and is a :py:class:`rsa.PrivateKey` object.
 
-    :param nbits: the number of bits required to store the modulus ``n``.
+    :param number_of_bits: the number of bits required to store the modulus ``n``.
     :param accurate: when True, ``n`` will have exactly the number of bits you
         asked for. However, this makes key generation much slower. When False,
         `n`` may have slightly less bits.
@@ -923,7 +924,7 @@ def new_keys(
         what you're doing, as the exponent influences how difficult your
         private key can be cracked. A very common choice for e is 65537.
     :type exponent: int
-    :param nprimes: the number of prime factors comprising the modulus.
+    :param n_primes: the number of prime factors comprising the modulus.
 
     :returns: a tuple (:py:class:`rsa.PublicKey`, :py:class:`rsa.PrivateKey`)
 
@@ -932,27 +933,34 @@ def new_keys(
 
     """
 
-    if nbits < 16:
+    if number_of_bits < 16:
         raise ValueError("Key too small")
 
     if pool_size < 1:
         raise ValueError("Pool size (%i) should be >= 1" % pool_size)
 
-    if nprimes < 2:
-        raise ValueError("Number of primes (%i) should be >= 2" % nprimes)
+    if n_primes < 2:
+        raise ValueError("Number of primes (%i) should be >= 2" % n_primes)
 
-    # Determine which getprime function to use
+    # Determine which get_prime function to use
     if pool_size > 1:
         from rsa import parallel
 
-        def get_prime_func(nbits: int) -> int:
-            return parallel.get_prime(nbits, pool_size=pool_size)
+        def get_prime_func(n_bits: int) -> int:
+            return parallel.get_prime(n_bits, pool_size=pool_size)
 
     else:
         get_prime_func = rsa.prime.get_prime
 
     # Generate the key components
-    result = gen_keys(nbits, get_prime_func, accurate=accurate, exponent=exponent, n_primes=nprimes)
+    result = gen_keys(
+        number_of_bits,
+        get_prime_func,
+        accurate=accurate,
+        exponent=exponent,
+        n_primes=n_primes
+    )
+
     if len(result) == 4:
         p, q, e, d = result
         rs = []
