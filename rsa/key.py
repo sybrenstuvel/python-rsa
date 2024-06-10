@@ -45,7 +45,7 @@ import rsa.pem
 import rsa.prime
 import rsa.randnum
 
-DEFAULT_EXPONENT = 65537
+DEFAULT_EXPONENT: typing.Final[int] = 65537
 
 T = typing.TypeVar("T", bound="AbstractKey")
 
@@ -445,22 +445,8 @@ class PrivateKey(AbstractKey):
 
     def __repr__(self) -> str:
         if self.rs:
-            return "PrivateKey(%i, %i, %i, %i, %i, %s)" % (
-                self.n,
-                self.e,
-                self.d,
-                self.p,
-                self.q,
-                self.rs,
-            )
-        else:
-            return "PrivateKey(%i, %i, %i, %i, %i)" % (
-                self.n,
-                self.e,
-                self.d,
-                self.p,
-                self.q,
-            )
+            return f"PrivateKey({self.n}, {self.e}, {self.d}, {self.p}, {self.q}, {self.rs})"
+        return f"PrivateKey({self.n}, {self.e}, {self.d}, {self.p}, {self.q})"
 
     def __getstate__(self) -> typing.Tuple:
         """Returns the key as tuple for pickling."""
@@ -543,14 +529,14 @@ class PrivateKey(AbstractKey):
         """
 
         # Blinding and un-blinding should be using the same factor
-        blinded, blindfac_inverse = self.blind(encrypted)
+        blinded, blind_factor_inverse = self.blind(encrypted)
         decrypted = rsa.logic.decrypt_int_fast(
             blinded,
             [self.p, self.q] + self.rs,
             [self.exp1, self.exp2] + self.ds,
             [self.coef] + self.ts,
         )
-        return self.unblind(decrypted, blindfac_inverse)
+        return self.unblind(decrypted, blind_factor_inverse)
 
     @classmethod
     def _load_pkcs1_der(cls, keyfile: bytes) -> "PrivateKey":
@@ -576,7 +562,7 @@ class PrivateKey(AbstractKey):
 
         from pyasn1.codec.der import decoder
 
-        priv, _ = decoder.decode(keyfile)
+        private, _ = decoder.decode(keyfile)
 
         # ASN.1 contents of DER encoded private key:
         #
@@ -593,14 +579,14 @@ class PrivateKey(AbstractKey):
         #     otherPrimeInfos   OtherPrimeInfos OPTIONAL
         # }
 
-        if priv[0] != 0:
-            raise ValueError("Unable to read this file, version %s != 0" % priv[0])
+        if private[0] != 0:
+            raise ValueError("Unable to read this file, version %s != 0" % private[0])
 
-        n, e, d, p, q = map(int, priv[1:6])
-        exp1, exp2, coef = map(int, priv[6:9])
-        rs = list(map(int, priv[9::3]))
-        ds = list(map(int, priv[10::3]))
-        ts = list(map(int, priv[11::3]))
+        n, e, d, p, q = map(int, private[1:6])
+        exp1, exp2, coef = map(int, private[6:9])
+        rs = list(map(int, private[9::3]))
+        ds = list(map(int, private[10::3]))
+        ts = list(map(int, private[11::3]))
 
         key = cls(n, e, d, p, q, rs)
 
@@ -841,7 +827,7 @@ def calculate_keys_custom_exponent(
 
     if (exponent * d) % phi_n != 1:
         raise ValueError(
-            "e (%d) and d (%d) are not mult. inv. modulo " "phi_n (%d)" % (exponent, d, phi_n)
+            f"e ({exponent}) and d ({d}) are not mult. inv. modulo " f"phi_n ({phi_n})"
         )
 
     return exponent, d
@@ -937,10 +923,10 @@ def new_keys(
         raise ValueError("Key too small")
 
     if pool_size < 1:
-        raise ValueError("Pool size (%i) should be >= 1" % pool_size)
+        raise ValueError(f"Pool size ({pool_size}) should be >= 1")
 
     if n_primes < 2:
-        raise ValueError("Number of primes (%i) should be >= 2" % n_primes)
+        raise ValueError(f"Number of primes ({n_primes}) should be >= 2")
 
     # Determine which get_prime function to use
     if pool_size > 1:

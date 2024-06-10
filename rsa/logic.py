@@ -23,7 +23,7 @@ import rsa.core as core_namespace
 
 
 def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
-    """Encrypts a message using encryption key 'ekey', working modulo n"""
+    """Encrypts a message using encryption key 'encrypt_key', working modulo n"""
 
     core_namespace.assert_int(message, "message")
     core_namespace.assert_int(encrypt_key, "encrypt_key")
@@ -33,19 +33,19 @@ def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
         raise ValueError("Only non-negative numbers are supported")
 
     if message >= n:
-        raise OverflowError("The message %i is too long for n=%i" % (message, n))
+        raise OverflowError(f"The message {message} is too long for n={n}")
 
     return pow(message, encrypt_key, n)
 
 
-def decrypt_int(cypher_text: int, dkey: int, n: int) -> int:
+def decrypt_int(cypher_text: int, decryption_key: int, n: int) -> int:
     """Decrypts a cypher text using the decryption key 'dkey', working modulo n"""
 
     core_namespace.assert_int(cypher_text, "cypher_text")
-    core_namespace.assert_int(dkey, "dkey")
+    core_namespace.assert_int(decryption_key, "dkey")
     core_namespace.assert_int(n, "n")
 
-    return pow(cypher_text, dkey, n)
+    return pow(cypher_text, decryption_key, n)
 
 
 def decrypt_int_fast(
