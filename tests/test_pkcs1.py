@@ -67,7 +67,7 @@ class BinaryTest(unittest.TestCase):
 
 class MultiprimeBinaryTest(unittest.TestCase):
     def setUp(self):
-        (self.pub, self.priv) = rsa.new_keys(256, nprimes=3)
+        (self.pub, self.priv) = rsa.new_keys(256, n_primes=3)
 
     def test_multiprime_enc_dec(self):
         message = struct.pack(">IIII", 0, 0, 0, 1)
@@ -146,7 +146,7 @@ class SignatureTest(unittest.TestCase):
     def test_sign_different_key(self):
         """Signing with another key should let the verification fail."""
 
-        (otherpub, _) = rsa.new_keys(512)
+        otherpub, _ = rsa.new_keys(512)
 
         message = b"je moeder"
         signature = pkcs1.sign(message, self.priv, "SHA-256")
@@ -203,7 +203,7 @@ class SignatureTest(unittest.TestCase):
 
 class MultiprimeSignatureTest(unittest.TestCase):
     def setUp(self):
-        (self.pub, self.priv) = rsa.new_keys(512, nprimes=3)
+        (self.pub, self.priv) = rsa.new_keys(512, n_primes=3)
 
     def test_multiprime_sign_verify(self):
         """Test happy flow of sign and verify"""

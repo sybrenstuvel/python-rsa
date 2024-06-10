@@ -63,6 +63,126 @@ Python-RSA also allows you to generate RSA keys with multiple primes:
 Python-RSA also allows you to generate RSA keys with multiple primes:
 
     >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, n_primes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.newkeys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, n_primes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.newkeys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, n_primes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.newkeys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, n_primes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.newkeys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
+    >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
+
+    >>> import rsa
+    >>> with open('private.pem', mode='rb') as privatefile:
+    ...     keydata = privatefile.read()
+    >>> privkey = rsa.PrivateKey.load_pkcs1(keydata)
+
+Python-RSA also allows you to generate RSA keys with multiple primes:
+
+    >>> import rsa
     >>> (pubkey, privkey) = rsa.new_keys(512, nprimes=3)
 
     >>> import rsa
