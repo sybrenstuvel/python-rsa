@@ -26,23 +26,23 @@ import rsa.helpers as helpers_namespace
 
 class BinaryTest(unittest.TestCase):
     def setUp(self):
-        self.pub, self.priv = rsa.new_keys(256)
+        self.public, self.private = rsa.new_keys(256)
 
     def test_enc_dec(self):
         message = struct.pack(">IIII", 0, 0, 0, 1)
         print("\n\tMessage:   %r" % message)
 
-        encrypted = pkcs1.encrypt(message, self.pub)
+        encrypted = pkcs1.encrypt(message, self.public)
         print("\tEncrypted: %r" % encrypted)
 
-        decrypted = pkcs1.decrypt(encrypted, self.priv)
+        decrypted = pkcs1.decrypt(encrypted, self.private)
         print("\tDecrypted: %r" % decrypted)
 
         self.assertEqual(message, decrypted)
 
     def test_decoding_failure(self):
         message = struct.pack(">IIII", 0, 0, 0, 1)
-        encrypted = pkcs1.encrypt(message, self.pub)
+        encrypted = pkcs1.encrypt(message, self.public)
 
         # Alter the encrypted stream
         a = encrypted[5]
@@ -51,7 +51,7 @@ class BinaryTest(unittest.TestCase):
         altered_a = (a + 1) % 256
         encrypted = encrypted[:5] + bytes([altered_a]) + encrypted[6:]
 
-        self.assertRaises(core_namespace.DecryptionError, pkcs1.decrypt, encrypted, self.priv)
+        self.assertRaises(core_namespace.DecryptionError, pkcs1.decrypt, encrypted, self.private)
 
     def test_randomness(self):
         """Encrypting the same message twice should result in different
@@ -59,8 +59,8 @@ class BinaryTest(unittest.TestCase):
         """
 
         message = struct.pack(">IIII", 0, 0, 0, 1)
-        encrypted1 = pkcs1.encrypt(message, self.pub)
-        encrypted2 = pkcs1.encrypt(message, self.pub)
+        encrypted1 = pkcs1.encrypt(message, self.public)
+        encrypted2 = pkcs1.encrypt(message, self.public)
 
         self.assertNotEqual(encrypted1, encrypted2)
 
