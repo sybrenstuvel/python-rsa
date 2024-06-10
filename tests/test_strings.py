@@ -14,26 +14,28 @@
 
 """Tests string operations."""
 
-
-import unittest
+import pytest
 
 import rsa
 
 unicode_string = "Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
-class StringTest(unittest.TestCase):
-    def setUp(self):
-        (self.pub, self.priv) = rsa.new_keys(384)
+@pytest.fixture
+def rsa_keys():
+    public, private = rsa.new_keys(384)
+    return public, private
 
-    def test_enc_dec(self):
-        message = unicode_string.encode("utf-8")
-        print("\n\tMessage:   %r" % message)
 
-        encrypted = rsa.encrypt(message, self.pub)
-        print("\tEncrypted: %r" % encrypted)
+def test_enc_dec(rsa_keys):
+    public, private = rsa_keys
+    message = unicode_string.encode("utf-8")
+    print("\n\tMessage:   %r" % message)
 
-        decrypted = rsa.decrypt(encrypted, self.priv)
-        print("\tDecrypted: %r" % decrypted)
+    encrypted = rsa.encrypt(message, public)
+    print("\tEncrypted: %r" % encrypted)
 
-        self.assertEqual(message, decrypted)
+    decrypted = rsa.decrypt(encrypted, private)
+    print("\tDecrypted: %r" % decrypted)
+
+    assert message == decrypted
