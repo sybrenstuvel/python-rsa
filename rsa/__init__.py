@@ -43,54 +43,6 @@ __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2023-04-23"
 __version__ = "4.10-dev0"
 
-logger = logging.getLogger(__name__)
-
-
-def setup_logger() -> None:
-    project_root = next(
-        p for p in pathlib.Path(__file__).parents if p.parts[-1] == 'python-rsa'
-    )
-
-    log_folder = project_root / "logs"
-    log_folder.mkdir(exist_ok=True)
-
-    with open(project_root / "rsa/core/config/logger_config.json", "r") as f_in:
-        config = json.load(f_in)
-
-    for handler in config.get("handlers", {}).values():
-        if "filename" in handler:
-            handler["filename"] = str(log_folder / pathlib.Path(handler["filename"]).name)
-
-    logging.config.dictConfig(config)
-
-    log_queue = queue.Queue(config["queue_handler"]["queue_size"])
-
-    queue_handler = logging.handlers.QueueHandler(log_queue)
-    logger.addHandler(queue_handler)
-
-    file_handler = config["handlers"]["file"]
-    stderr_handler = config["handlers"]["stderr"]
-
-    listener = logging.handlers.QueueListener(log_queue, file_handler, stderr_handler)
-    listener.start()
-
-    def cleanup():
-        try:
-            listener.stop()
-        except Exception as e:
-            logger.error("Error stopping QueueListener: %s", e)
-        finally:
-            queue_handler.close()
-            for handler in logger.handlers:
-                handler.close()
-
-    atexit.register(cleanup)
-
-    logger.debug("logger is configured")
-
-
-setup_logger()
-
 # Do doctest if we're run directly
 if __name__ == "__main__":
     import doctest

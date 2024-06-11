@@ -22,8 +22,6 @@ import logging
 
 from rsa.helpers import common, transform
 
-logger = logging.getLogger(__name__)
-
 
 def read_random_bits(n_bits: int) -> bytes:
     """Reads 'nbits' random bits.
@@ -34,12 +32,8 @@ def read_random_bits(n_bits: int) -> bytes:
 
     n_bytes, r_bits = divmod(n_bits, 8)
 
-    logger.debug(f'read_random_bits: {n_bytes=}, {r_bits=}')
-
     # Get the random bytes
     randomdata = os.urandom(n_bytes)
-
-    logger.debug(randomdata)
 
     # Add the remaining random bits
     if r_bits > 0:

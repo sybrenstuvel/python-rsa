@@ -18,11 +18,8 @@ This is the actual core RSA implementation, which is only defined
 mathematically on integers.
 """
 import itertools
-import logging
 import typing
 import rsa.core as core_namespace
-
-logger = logging.getLogger(__name__)
 
 
 def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
@@ -38,11 +35,7 @@ def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
     if message >= n:
         raise OverflowError(f"The message {message} is too long for n={n}")
 
-    result = pow(message, encrypt_key, n)
-
-    logger.debug(f"encrypt_int({message=}, {encrypt_key=}, {n=}) => {result=}")
-
-    return result
+    return pow(message, encrypt_key, n)
 
 
 def decrypt_int(cypher_text: int, decryption_key: int, n: int) -> int:
@@ -52,11 +45,7 @@ def decrypt_int(cypher_text: int, decryption_key: int, n: int) -> int:
     core_namespace.assert_int(decryption_key, "dkey")
     core_namespace.assert_int(n, "n")
 
-    result = pow(cypher_text, decryption_key, n)
-
-    logger.debug(f"decrypt_int({cypher_text}, {decryption_key}) => {result=}")
-
-    return result
+    return pow(cypher_text, decryption_key, n)
 
 
 def decrypt_int_fast(
