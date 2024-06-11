@@ -25,41 +25,63 @@ Introduced in Python-RSA 3.1.
 import multiprocessing as mp
 from multiprocessing.connection import Connection
 
-import rsa.prime
 import sympy
-import rsa.randnum
+import math
+import rsa.utils.randnum
 
-__all__ = ["get_prime"]
+__all__ = ["get_prime", "are_relatively_prime"]
+
+
+def are_relatively_prime(a: int, b: int) -> bool:
+    """Returns True if a and b are relatively prime, and False if they
+    are not.
+
+    >>> are_relatively_prime(2, 3)
+    True
+    >>> are_relatively_prime(2, 4)
+    False
+    """
+
+    return math.gcd(a, b) == 1
+
+
+def get_prime(nbits: int, pool_size: int = 1) -> int:
+    """
+    interface between multiprocessing and single.
+    """
+    if pool_size == 1:
+        return _get_prime_single_thread(n_bits=nbits)
+    return _get_prime_multi_thread(nbits=nbits, pool_size=pool_size)
 
 
 def _find_prime(nbits: int, pipe: Connection) -> None:
     """Finds a prime number and sends it through the pipe."""
     while True:
-        integer = rsa.randnum.read_random_odd_int(nbits)
+        integer = rsa.utils.randnum.read_random_odd_int(nbits)
 
         if sympy.isprime(integer):
             pipe.send(integer)
             return
 
 
-def get_prime(nbits: int, pool_size: int) -> int:
+def _get_prime_multi_thread(nbits: int, pool_size: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
-    Works in multiple threads at the same time.
+        Works in multiple threads at the same time.
 
-    >>> import sympy
-    >>> p = get_prime(128, 3)
-    >>> sympy.isprime(p-1)
-    False
-    >>> sympy.isprime(p)
-    True
-    >>> sympy.isprime(p+1)
-    False
+        >>> import sympy
+        >>> p = get_prime(128, 3)
+        >>> sympy.isprime(p-1)
+        False
+        >>> sympy.isprime(p)
+        True
+        >>> sympy.isprime(p+1)
+        False
 
-    >>> from rsa.helpers import common
-    >>> common.bit_size(p) == 128
-    True
-    """
+        >>> from rsa.helpers import common
+        >>> common.bit_size(p) == 128
+        True
+        """
     pipe_recv, pipe_send = mp.Pipe(duplex=False)
     procs = [mp.Process(target=_find_prime, args=(nbits, pipe_send)) for _ in range(pool_size)]
 
@@ -77,6 +99,33 @@ def get_prime(nbits: int, pool_size: int) -> int:
             p.join()
 
     return result
+
+
+def _get_prime_single_thread(n_bits: int) -> int:
+    """Returns a prime number that can be stored in 'nbits' bits.
+
+    >>> from sympy import isprime
+    >>> p = get_prime(128)
+    >>> isprime(p-1)
+    False
+    >>> isprime(p)
+    True
+    >>> isprime(p+1)
+    False
+
+    >>> from rsa.helpers import common
+    >>> common.bit_size(p) == 128
+    True
+    """
+
+    assert n_bits > 3  # the loop will hang on too small numbers
+
+    while True:
+        integer = rsa.utils.randnum.read_random_odd_int(n_bits)
+
+        # Test for primeness
+        if sympy.isprime(integer):
+            return integer
 
 
 if __name__ == "__main__":

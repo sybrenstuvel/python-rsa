@@ -40,10 +40,11 @@ import warnings
 
 import rsa.core as core_namespace
 import rsa.helpers as helpers_namespace
+import rsa.utils as utils_namespace
 import rsa.logic
 import rsa.pem
-import rsa.prime
-import rsa.randnum
+import rsa.utils.prime
+import rsa.utils.randnum
 
 DEFAULT_EXPONENT: typing.Final[int] = 65537
 
@@ -190,8 +191,8 @@ class AbstractKey(metaclass=abc.ABCMeta):
 
     def _initial_blinding_factor(self) -> int:
         for _ in range(1000):
-            blind_r = rsa.randnum.randint(self.n - 1)
-            if rsa.prime.are_relatively_prime(self.n, blind_r):
+            blind_r = rsa.utils.randnum.randint(self.n - 1)
+            if rsa.utils.prime.are_relatively_prime(self.n, blind_r):
                 return blind_r
         raise RuntimeError("unable to find blinding factor")
 
@@ -687,7 +688,7 @@ class PrivateKey(AbstractKey):
 
 def find_primes(
         nbits: int,
-        get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
+        get_prime_func: typing.Callable[[int], int] = utils_namespace.get_prime,
         accurate: bool = True,
         n_primes: int = 2,
 ) -> typing.List[int]:
@@ -716,7 +717,7 @@ def find_primes(
 
 def find_p_q(
         nbits: int,
-        get_prime_func: typing.Callable[[int], int] = rsa.prime.get_prime,
+        get_prime_func: typing.Callable[[int], int] = utils_namespace.get_prime,
         accurate: bool = True,
 ) -> typing.Tuple[int, int]:
     """Returns a tuple of two different primes of nbits bits each.
@@ -928,20 +929,10 @@ def new_keys(
     if n_primes < 2:
         raise ValueError(f"Number of primes ({n_primes}) should be >= 2")
 
-    # Determine which get_prime function to use
-    if pool_size > 1:
-        from rsa import parallel
-
-        def get_prime_func(n_bits: int) -> int:
-            return parallel.get_prime(n_bits, pool_size=pool_size)
-
-    else:
-        get_prime_func = rsa.prime.get_prime
-
     # Generate the key components
     result = gen_keys(
         number_of_bits,
-        get_prime_func,
+        lambda n_bits: utils_namespace.get_prime(n_bits, pool_size=pool_size),
         accurate=accurate,
         exponent=exponent,
         n_primes=n_primes
