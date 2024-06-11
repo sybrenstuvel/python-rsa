@@ -20,13 +20,6 @@ WARNING: this implementation does not use compression of the cleartext input to
 prevent repetitions, or other common security improvements. Use with care.
 
 """
-import atexit
-import json
-import logging
-import logging.config
-import logging.handlers
-import pathlib
-import queue
 
 from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (

@@ -51,12 +51,12 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-"pyrsa-priv2pub" = "rsa.util:private_to_public"
-"pyrsa-keygen" = "rsa.cli:keygen"
-"pyrsa-encrypt" = "rsa.cli:encrypt"
-"pyrsa-decrypt" = "rsa.cli:decrypt"
-"pyrsa-sign" = "rsa.cli:sign"
-"pyrsa-verify" = "rsa.cli:verify"
+"pyrsa-priv2pub" = "cli.util:private_to_public"
+"pyrsa-keygen" = "cli.option_parser.py:keygen"
+"pyrsa-encrypt" = "cli.option_parser.py:encrypt"
+"pyrsa-decrypt" = "cli.option_parser.py:decrypt"
+"pyrsa-sign" = "cli.option_parser.py:sign"
+"pyrsa-verify" = "cli.option_parser.py:verify"
 
 [tool.black]
 line-length = 100
