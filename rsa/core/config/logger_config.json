@@ -21,14 +21,21 @@
       "filename": "logs/debug-info.log",
       "maxBytes": 10000,
       "backupCount": 3
+    },
+    "queue_handler": {
+      "class": "logging.handlers.QueueHandler",
+      "handlers": [
+        "stderr",
+        "file"
+      ],
+      "respect_handler_level": true
     }
   },
   "loggers": {
     "root": {
       "level": "DEBUG",
       "handlers": [
-        "stderr",
-        "file"
+        "queue_handler"
       ]
     }
   }

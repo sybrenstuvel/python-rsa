@@ -10,7 +10,7 @@ def main() -> None:
 
     decrypted_message = rsa.decrypt(message, private_key)
 
-    print(decrypted_message.decode())
+    print(decrypted_message)
 
     with open("decrypted.message", "wb") as f:
         f.write(decrypted_message)

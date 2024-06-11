@@ -20,10 +20,13 @@ WARNING: this implementation does not use compression of the cleartext input to
 prevent repetitions, or other common security improvements. Use with care.
 
 """
+import atexit
 import json
 import logging
 import logging.config
+import logging.handlers
 import pathlib
+import queue
 
 from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (
@@ -40,6 +43,8 @@ __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2023-04-23"
 __version__ = "4.10-dev0"
 
+logger = logging.getLogger(__name__)
+
 
 def setup_logger() -> None:
     project_root = next(
@@ -49,9 +54,7 @@ def setup_logger() -> None:
     log_folder = project_root / "logs"
     log_folder.mkdir(exist_ok=True)
 
-    config_file = project_root / "rsa/core/config/logger_config.json"
-
-    with open(config_file, "r") as f_in:
+    with open(project_root / "rsa/core/config/logger_config.json", "r") as f_in:
         config = json.load(f_in)
 
     for handler in config.get("handlers", {}).values():
@@ -60,8 +63,30 @@ def setup_logger() -> None:
 
     logging.config.dictConfig(config)
 
-    logger = logging.getLogger(__name__)
-    logger.info("Logger is set up.")
+    log_queue = queue.Queue(config["queue_handler"]["queue_size"])
+
+    queue_handler = logging.handlers.QueueHandler(log_queue)
+    logger.addHandler(queue_handler)
+
+    file_handler = config["handlers"]["file"]
+    stderr_handler = config["handlers"]["stderr"]
+
+    listener = logging.handlers.QueueListener(log_queue, file_handler, stderr_handler)
+    listener.start()
+
+    def cleanup():
+        try:
+            listener.stop()
+        except Exception as e:
+            logger.error("Error stopping QueueListener: %s", e)
+        finally:
+            queue_handler.close()
+            for handler in logger.handlers:
+                handler.close()
+
+    atexit.register(cleanup)
+
+    logger.debug("logger is configured")
 
 
 setup_logger()
@@ -72,15 +97,15 @@ if __name__ == "__main__":
 
     doctest.testmod()
 
-__all__ = [
-    "new_keys",
-    "encrypt",
-    "decrypt",
-    "sign",
-    "verify",
-    "PublicKey",
-    "PrivateKey",
-    "find_signature_hash",
-    "compute_hash",
-    "sign_hash",
-]
+    __all__ = [
+        "new_keys",
+        "encrypt",
+        "decrypt",
+        "sign",
+        "verify",
+        "PublicKey",
+        "PrivateKey",
+        "find_signature_hash",
+        "compute_hash",
+        "sign_hash",
+    ]

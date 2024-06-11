@@ -9,7 +9,7 @@ def main() -> None:
 
     encrypted_message = rsa.encrypt(message, public_key)
 
-    print(encrypted_message.decode())
+    print(encrypted_message)
 
     with open("encrypted.message", "wb") as f:
         f.write(encrypted_message)
