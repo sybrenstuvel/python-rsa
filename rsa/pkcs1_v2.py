@@ -20,13 +20,18 @@ documentation is RFC 2437: https://tools.ietf.org/html/rfc2437
 
 import math
 import rsa
+import logging
 
 from rsa import (
     pkcs1,
 )
 from rsa.helpers import transform
+import rsa.helpers.decorators as decorators
+
+logger = logging.getLogger(__name__)
 
 
+@decorators.log_decorator(logger)
 def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:
     """
     MGF1 is a Mask Generation Function based on a hash function.

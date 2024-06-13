@@ -40,9 +40,9 @@ import warnings
 
 import rsa.core as core_namespace
 import rsa.helpers as helpers_namespace
-import rsa.utils as utils_namespace
 import rsa.logic
 import rsa.pem
+import rsa.utils as utils_namespace
 import rsa.utils.prime
 import rsa.utils.randnum
 
@@ -962,7 +962,7 @@ if __name__ == "__main__":
                 break
 
             if (count % 10 == 0 and count) or count == 1:
-                print("%i times" % count)
+                print(f"{count} times")
     except KeyboardInterrupt:
         print("Aborted")
     else:

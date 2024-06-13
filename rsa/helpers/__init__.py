@@ -11,3 +11,5 @@ from .transform import (
 )
 
 from .doctest_starter import run
+
+from .decorators import log_decorator

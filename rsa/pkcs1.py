@@ -39,11 +39,13 @@ __all__ = [
 import hashlib
 import os
 import typing
+import logging
 from hmac import compare_digest
 import rsa.core as core_namespace
 import rsa.helpers as helpers_namespace
 import rsa.logic
 import rsa.helpers.transform
+import rsa.helpers.decorators as decorators
 
 if typing.TYPE_CHECKING:
     HashType = hashlib._Hash
@@ -77,7 +79,10 @@ HASH_METHODS: typing.Final[typing.Dict[str, typing.Callable[[], HashType]]] = {
 }
 """Hash methods supported by this library."""
 
+logger = logging.getLogger(__name__)
 
+
+@decorators.log_decorator(logger)
 def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
     r"""Pads the message for encryption, returning the padded message.
 
@@ -123,6 +128,7 @@ def _pad_for_encryption(message: bytes, target_length: int) -> bytes:
     return b"".join([b"\x00\x02", padding, b"\x00", message])
 
 
+@decorators.log_decorator(logger)
 def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     r"""Pads the message for signing, returning the padded message.
 
@@ -156,6 +162,7 @@ def _pad_for_signing(message: bytes, target_length: int) -> bytes:
     return b"".join([b"\x00\x01", padding_length * b"\xff", b"\x00", message])
 
 
+@decorators.log_decorator(logger)
 def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
     """Encrypts the given message using PKCS#1 v1.5
 
@@ -188,6 +195,7 @@ def encrypt(message: bytes, pub_key: "key.PublicKey") -> bytes:
     return rsa.helpers.transform.int2bytes(encrypted, key_length)
 
 
+@decorators.log_decorator(logger)
 def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
     r"""Decrypts the given message using PKCS#1 v1.5
 
@@ -265,6 +273,7 @@ def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
     return cleartext[sep_idx + 1:]
 
 
+@decorators.log_decorator(logger)
 def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str) -> bytes:
     """Signs a precomputed hash with the private key.
 
@@ -297,6 +306,7 @@ def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str
     return rsa.helpers.transform.int2bytes(encrypted, key_length)
 
 
+@decorators.log_decorator(logger)
 def sign(message: bytes, private_key: "key.PrivateKey", hash_method: str) -> bytes:
     """Signs the message with the private key.
 
@@ -319,6 +329,7 @@ def sign(message: bytes, private_key: "key.PrivateKey", hash_method: str) -> byt
     return sign_hash(msg_hash, private_key, hash_method)
 
 
+@decorators.log_decorator(logger)
 def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
     """Verifies that the signature matches the message.
 
@@ -357,6 +368,7 @@ def verify(message: bytes, signature: bytes, pub_key: "key.PublicKey") -> str:
     return method_name
 
 
+@decorators.log_decorator(logger)
 def find_signature_hash(signature: bytes, pub_key: "key.PublicKey") -> str:
     """Returns the hash name detected from the signature.
 
@@ -376,6 +388,7 @@ def find_signature_hash(signature: bytes, pub_key: "key.PublicKey") -> str:
     return _find_method_hash(clear_sig)
 
 
+@decorators.log_decorator(logger)
 def yield_fixed_blocks(infile: typing.BinaryIO, block_size: int) -> typing.Iterator[bytes]:
     """Generator, yields each block of ``block_size`` bytes in the input file.
 
@@ -397,6 +410,7 @@ def yield_fixed_blocks(infile: typing.BinaryIO, block_size: int) -> typing.Itera
             break
 
 
+@decorators.log_decorator(logger)
 def compute_hash(message: typing.Union[bytes, typing.BinaryIO], method_name: str) -> bytes:
     """Returns the message digest.
 
@@ -425,6 +439,7 @@ def compute_hash(message: typing.Union[bytes, typing.BinaryIO], method_name: str
     return hasher.digest()
 
 
+@decorators.log_decorator(logger)
 def _find_method_hash(clear_sig: bytes) -> str:
     """Finds the hash method.
 

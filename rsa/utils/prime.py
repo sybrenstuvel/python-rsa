@@ -28,10 +28,15 @@ from multiprocessing.connection import Connection
 import sympy
 import math
 import rsa.utils.randnum
+import rsa.helpers.decorators as decorators
+import logging
 
 __all__ = ["get_prime", "are_relatively_prime"]
 
+logger = logging.getLogger(__name__)
 
+
+@decorators.log_decorator(logger)
 def are_relatively_prime(a: int, b: int) -> bool:
     """Returns True if a and b are relatively prime, and False if they
     are not.
@@ -45,6 +50,7 @@ def are_relatively_prime(a: int, b: int) -> bool:
     return math.gcd(a, b) == 1
 
 
+@decorators.log_decorator(logger)
 def get_prime(nbits: int, pool_size: int = 1) -> int:
     """
     interface between multiprocessing and single.
@@ -54,6 +60,7 @@ def get_prime(nbits: int, pool_size: int = 1) -> int:
     return _get_prime_multi_thread(nbits=nbits, pool_size=pool_size)
 
 
+@decorators.log_decorator(logger)
 def _find_prime(nbits: int, pipe: Connection) -> None:
     """Finds a prime number and sends it through the pipe."""
     while True:
@@ -64,6 +71,7 @@ def _find_prime(nbits: int, pipe: Connection) -> None:
             return
 
 
+@decorators.log_decorator(logger)
 def _get_prime_multi_thread(nbits: int, pool_size: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 
@@ -101,6 +109,7 @@ def _get_prime_multi_thread(nbits: int, pool_size: int) -> int:
     return result
 
 
+@decorators.log_decorator(logger)
 def _get_prime_single_thread(n_bits: int) -> int:
     """Returns a prime number that can be stored in 'nbits' bits.
 

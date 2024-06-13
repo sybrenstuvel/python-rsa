@@ -19,9 +19,14 @@ mathematically on integers.
 """
 import itertools
 import typing
+import logging
 import rsa.core as core_namespace
+import rsa.helpers.decorators as decorators
+
+logger = logging.getLogger(__name__)
 
 
+@decorators.log_decorator(logger)
 def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
     """Encrypts a message using encryption key 'encrypt_key', working modulo n"""
 
@@ -38,6 +43,7 @@ def encrypt_int(message: int, encrypt_key: int, n: int) -> int:
     return pow(message, encrypt_key, n)
 
 
+@decorators.log_decorator(logger)
 def decrypt_int(cypher_text: int, decryption_key: int, n: int) -> int:
     """Decrypts a cypher text using the decryption key 'dkey', working modulo n"""
 
@@ -48,6 +54,7 @@ def decrypt_int(cypher_text: int, decryption_key: int, n: int) -> int:
     return pow(cypher_text, decryption_key, n)
 
 
+@decorators.log_decorator(logger)
 def decrypt_int_fast(
         cypher_text: int,
         rs: typing.List[int],

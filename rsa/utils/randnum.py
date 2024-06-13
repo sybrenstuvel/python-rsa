@@ -19,10 +19,14 @@
 import os
 import struct
 import logging
+import rsa.helpers.decorators as decorators
 
 from rsa.helpers import common, transform
 
+logger = logging.getLogger(__name__)
 
+
+@decorators.log_decorator(logger)
 def read_random_bits(n_bits: int) -> bytes:
     """Reads 'nbits' random bits.
 
@@ -44,6 +48,7 @@ def read_random_bits(n_bits: int) -> bytes:
     return randomdata
 
 
+@decorators.log_decorator(logger)
 def read_random_int(n_bits: int) -> int:
     """Reads a random integer of approximately nbits bits."""
 
@@ -57,6 +62,7 @@ def read_random_int(n_bits: int) -> int:
     return value
 
 
+@decorators.log_decorator(logger)
 def read_random_odd_int(n_bits: int) -> int:
     """Reads a random odd integer of approximately nbits bits.
 
@@ -70,6 +76,7 @@ def read_random_odd_int(n_bits: int) -> int:
     return value | 1
 
 
+@decorators.log_decorator(logger)
 def randint(maxvalue: int) -> int:
     """Returns a random integer x with 1 <= x <= maxvalue
 

@@ -16,10 +16,15 @@
 
 import math
 import typing
+import logging
+import rsa.helpers.decorators as decorators
 
 import sympy
 
+logger = logging.getLogger(__name__)
 
+
+@decorators.log_decorator(logger)
 def bit_size(num: int) -> int:
     """
     Number of bits needed to represent a integer excluding any prefix
@@ -48,6 +53,7 @@ def bit_size(num: int) -> int:
         raise TypeError("bit_size(num) only supports integers, not %r" % type(num)) from ex
 
 
+@decorators.log_decorator(logger)
 def byte_size(number: int) -> int:
     """
     Returns the number of bytes required to hold a specific long number.
@@ -71,6 +77,7 @@ def byte_size(number: int) -> int:
     return 1 if number == 0 else math.ceil(bit_size(number) / 8)
 
 
+@decorators.log_decorator(logger)
 def inverse(x: int, n: int) -> int:
     """Returns the inverse of x % n under multiplication, a.k.a x^-1 (mod n)
 
@@ -82,6 +89,7 @@ def inverse(x: int, n: int) -> int:
     return int(sympy.mod_inverse(x, n))
 
 
+@decorators.log_decorator(logger)
 def chinese_remainder_theorem(remainders: typing.Iterable[int], moduli: typing.Iterable[int]) -> int:
     """Chinese Remainder Theorem.
 

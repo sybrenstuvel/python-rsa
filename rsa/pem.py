@@ -16,11 +16,16 @@
 
 import base64
 import typing
+import logging
+import rsa.helpers.decorators as decorators
 
 # Should either be ASCII strings or bytes.
 FlexiText = typing.Union[str, bytes]
 
+logger = logging.getLogger(__name__)
 
+
+@decorators.log_decorator(logger)
 def _markers(pem_marker: FlexiText) -> typing.Tuple[bytes, bytes]:
     """
     Returns the start and end PEM markers, as bytes.
@@ -35,6 +40,7 @@ def _markers(pem_marker: FlexiText) -> typing.Tuple[bytes, bytes]:
     )
 
 
+@decorators.log_decorator(logger)
 def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iterator[bytes]:
     """Generator over PEM lines between pem_start and pem_end."""
 
@@ -75,6 +81,7 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
         raise ValueError(f'No PEM end marker "{pem_end!r}" found')
 
 
+@decorators.log_decorator(logger)
 def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     """Loads a PEM file.
 
@@ -102,6 +109,7 @@ def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     return base64.standard_b64decode(pem)
 
 
+@decorators.log_decorator(logger)
 def save_pem(contents: bytes, pem_marker: FlexiText) -> bytes:
     """Saves a PEM file.
 
