@@ -203,18 +203,18 @@ def decrypt(crypto: bytes, private_key: "key.PrivateKey") -> bytes:
 
 
     >>> import rsa
-    >>> pub_key, priv_key = rsa.new_keys(256)
+    >>> public_key_doc, private_key_doc = rsa.new_keys(256)
 
     It works with strings:
 
-    >>> crypto = rsa.encrypt(b'hello', pub_key)
-    >>> rsa.decrypt(crypto, priv_key)
+    >>> crypto_doc = rsa.encrypt(b'hello', public_key_doc)
+    >>> rsa.decrypt(crypto_doc, private_key_doc)
     b'hello'
 
     And with binary data:
 
-    >>> crypto = rsa.encrypt(b'\x00\x00\x00\x00\x01', pub_key)
-    >>> rsa.decrypt(crypto, priv_key)
+    >>> crypto_doc = rsa.encrypt(b'\x00\x00\x00\x00\x01', public_key_doc)
+    >>> rsa.decrypt(crypto_doc, private_key_doc)
     b'\x00\x00\x00\x00\x01'
 
     Altering the encrypted information will *likely* cause a
@@ -283,7 +283,7 @@ def sign_hash(hash_value: bytes, private_key: "key.PrivateKey", hash_method: str
 
     # Get the ASN1 code for this hash method
     if hash_method not in HASH_ASN1:
-        raise ValueError("Invalid hash method: %s" % hash_method)
+        raise ValueError(f"Invalid hash method: {hash_method}")
     asn1code = HASH_ASN1[hash_method]
 
     # Encrypt the hash with the private key
@@ -441,15 +441,4 @@ def _find_method_hash(clear_sig: bytes) -> str:
 
 
 if __name__ == "__main__":
-    print("Running doctests 1000x or until failure")
-    import doctest
-
-    for count in range(1000):
-        (failures, tests) = doctest.testmod()
-        if failures:
-            break
-
-        if count % 100 == 0 and count:
-            print("%i times" % count)
-
-    print("Doctests done")
+    rsa.helpers.doctest_starter.run()

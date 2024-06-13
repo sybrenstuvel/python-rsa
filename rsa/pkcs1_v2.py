@@ -19,6 +19,7 @@ documentation is RFC 2437: https://tools.ietf.org/html/rfc2437
 """
 
 import math
+import rsa
 
 from rsa import (
     pkcs1,
@@ -52,19 +53,15 @@ def mgf1(seed: bytes, length: int, hasher: str = "SHA-1") -> bytes:
         hash_length = pkcs1.HASH_METHODS[hasher]().digest_size
     except KeyError as ex:
         raise ValueError(
-            "Invalid `hasher` specified. Please select one of: {hash_list}".format(
-                hash_list=", ".join(sorted(pkcs1.HASH_METHODS.keys()))
-            )
+            f"Invalid `hasher` specified."
+            f" Please select one of: {', '.join(sorted(pkcs1.HASH_METHODS.keys()))}"
         ) from ex
 
     # If l > 2^32(hLen), output "mask too long" and stop.
     if length > (2 ** 32 * hash_length):
         raise OverflowError(
-            "Desired length should be at most 2**32 times the hasher's output "
-            "length ({hash_length} for {hasher} function)".format(
-                hash_length=hash_length,
-                hasher=hasher,
-            )
+            f"Desired length should be at most 2**32 times the hasher's output "
+            f"length ({hash_length} for {hasher} function)"
         )
 
     # Looping `counter` from 0 to ceil(l / hLen)-1, build `output` based on the
@@ -87,15 +84,4 @@ __all__ = [
 ]
 
 if __name__ == "__main__":
-    print("Running doctests 1000x or until failure")
-    import doctest
-
-    for count in range(1000):
-        (failures, tests) = doctest.testmod()
-        if failures:
-            break
-
-        if count % 100 == 0 and count:
-            print("%i times" % count)
-
-    print("Doctests done")
+    rsa.helpers.doctest_starter.run()

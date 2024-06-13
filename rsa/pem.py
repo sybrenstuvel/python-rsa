@@ -41,23 +41,18 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
     in_pem_part = False
     seen_pem_start = False
 
-    for line in contents.splitlines():
-        line = line.strip()
-
-        # Skip empty lines
-        if not line:
-            continue
+    for line in filter(None, map(bytes.strip, contents.splitlines())):
 
         # Handle start marker
         if line == pem_start:
             if in_pem_part:
-                raise ValueError('Seen start marker "%r" twice' % pem_start)
+                raise ValueError(f'Seen start marker "{pem_start!r}" twice')
 
             in_pem_part = True
             seen_pem_start = True
             continue
 
-        # Skip stuff before first marker
+        # Skip stuff before first   marker
         if not in_pem_part:
             continue
 
@@ -74,10 +69,10 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
 
     # Do some sanity checks
     if not seen_pem_start:
-        raise ValueError('No PEM start marker "%r" found' % pem_start)
+        raise ValueError(f'No PEM start marker "{pem_start!r}" found')
 
     if in_pem_part:
-        raise ValueError('No PEM end marker "%r" found' % pem_end)
+        raise ValueError(f'No PEM end marker "{pem_end!r}" found')
 
 
 def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
@@ -122,13 +117,6 @@ def save_pem(contents: bytes, pem_marker: FlexiText) -> bytes:
     pem_start, pem_end = _markers(pem_marker)
 
     b64 = base64.standard_b64encode(contents).replace(b"\n", b"")
-    pem_lines = [pem_start]
-
-    for block_start in range(0, len(b64), 64):
-        block = b64[block_start : block_start + 64]
-        pem_lines.append(block)
-
-    pem_lines.append(pem_end)
-    pem_lines.append(b"")
+    pem_lines = [pem_start] + [b64[i:i + 64] for i in range(0, len(b64), 64)] + [pem_end, b""]
 
     return b"\n".join(pem_lines)

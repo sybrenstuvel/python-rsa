@@ -9,3 +9,5 @@ from .transform import (
     bytes2int,
     int2bytes
 )
+
+from .doctest_starter import run
