@@ -5,12 +5,12 @@ import logging.config
 import logging.handlers
 import pathlib
 import queue
-from typing import Any, Dict, Callable
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
 
-def run_once(f) -> Callable:
+def run_once(f):
     def wrapper(*args, **kwargs):
         if not wrapper.has_run:
             wrapper.has_run = True
@@ -52,7 +52,7 @@ class LoggingConfigurator:
 class LoggingSetup:
     def __init__(self, configurator: LoggingConfigurator) -> None:
         self.configurator = configurator
-        self.log_queue = queue.Queue(-1)
+        self.log_queue: queue.Queue[int] = queue.Queue(-1)
         self.queue_handler = self.setup_queue_handler()
         self.listener = self.setup_queue_listener()
         self.register_cleanup()
@@ -93,4 +93,3 @@ def setup_logging() -> None:
     """Set up logging configuration. On production, change logger mode to INFO."""
     project_root = next(p for p in pathlib.Path(__file__).parents if p.parts[-1] == 'python-rsa')
     LoggingSetup(LoggingConfigurator(project_root))
-
