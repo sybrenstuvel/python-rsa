@@ -4,6 +4,8 @@ import time
 import typing
 import rsa.core.config.logger_setup
 
+rsa.core.config.logger_setup.setup_logging()
+
 
 def log_decorator(logger: logging.Logger):
     def decorator(func: typing.Callable) -> typing.Callable:
