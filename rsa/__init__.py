@@ -20,15 +20,20 @@ WARNING: this implementation does not use compression of the cleartext input to
 prevent repetitions, or other common security improvements. Use with care.
 
 """
+import atexit
+import json
+import logging
+import logging.config
+import logging.handlers
+import pathlib
+import queue
 
-from rsa.key import newkeys, PrivateKey, PublicKey
+from rsa.key import new_keys, PrivateKey, PublicKey
 from rsa.pkcs1 import (
     encrypt,
     decrypt,
     sign,
     verify,
-    DecryptionError,
-    VerificationError,
     find_signature_hash,
     sign_hash,
     compute_hash,
@@ -38,23 +43,24 @@ __author__ = "Sybren Stuvel, Barry Mead and Yesudeep Mangalapilly"
 __date__ = "2023-04-23"
 __version__ = "4.10-dev0"
 
+
+
+
 # Do doctest if we're run directly
 if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
 
-__all__ = [
-    "newkeys",
-    "encrypt",
-    "decrypt",
-    "sign",
-    "verify",
-    "PublicKey",
-    "PrivateKey",
-    "DecryptionError",
-    "VerificationError",
-    "find_signature_hash",
-    "compute_hash",
-    "sign_hash",
-]
+    __all__ = [
+        "new_keys",
+        "encrypt",
+        "decrypt",
+        "sign",
+        "verify",
+        "PublicKey",
+        "PrivateKey",
+        "find_signature_hash",
+        "compute_hash",
+        "sign_hash",
+    ]

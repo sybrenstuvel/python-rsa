@@ -13,10 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import unittest
-
-from rsa.pem import _markers
+import pytest
 import rsa.key
+from rsa.pem import _markers
+
 
 # 512-bit key. Too small for practical purposes, but good enough for testing with.
 public_key_pem = """
@@ -43,58 +43,48 @@ prime1 = 96275860229939261876671084930484419185939191875438854026071315955024109
 prime2 = 88103681619592083641803383393198542599284510949756076218404908654323473741407
 
 
-class TestMarkers(unittest.TestCase):
-    def test_values(self):
-        self.assertEqual(
-            _markers("RSA PRIVATE KEY"),
-            (b"-----BEGIN RSA PRIVATE KEY-----", b"-----END RSA PRIVATE KEY-----"),
-        )
+def test_markers():
+    assert _markers("RSA PRIVATE KEY") == (b"-----BEGIN RSA PRIVATE KEY-----", b"-----END RSA PRIVATE KEY-----")
 
 
-class TestBytesAndStrings(unittest.TestCase):
-    """Test that we can use PEM in both Unicode strings and bytes."""
-
-    def test_unicode_public(self):
-        key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem)
-        self.assertEqual(prime1 * prime2, key.n)
-
-    def test_bytes_public(self):
-        key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem.encode("ascii"))
-        self.assertEqual(prime1 * prime2, key.n)
-
-    def test_unicode_private(self):
-        key = rsa.key.PrivateKey.load_pkcs1(private_key_pem)
-        self.assertEqual(prime1 * prime2, key.n)
-
-    def test_bytes_private(self):
-        key = rsa.key.PrivateKey.load_pkcs1(private_key_pem.encode("ascii"))
-        self.assertEqual(prime1, key.p)
-        self.assertEqual(prime2, key.q)
+@pytest.mark.parametrize("pem_data", [
+    public_key_pem.encode(),
+    public_key_pem.encode("ascii")
+])
+def test_public_key_loading(pem_data):
+    key = rsa.key.PublicKey.load_pkcs1_openssl_pem(pem_data)
+    assert key.n == prime1 * prime2
 
 
-class TestByteOutput(unittest.TestCase):
-    """Tests that PEM and DER are returned as bytes."""
-
-    def test_bytes_public(self):
-        key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem)
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
-
-    def test_bytes_private(self):
-        key = rsa.key.PrivateKey.load_pkcs1(private_key_pem)
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
+@pytest.mark.parametrize("pem_data", [
+    private_key_pem.encode(),
+    private_key_pem.encode("ascii")
+])
+def test_private_key_loading(pem_data):
+    key = rsa.key.PrivateKey.load_pkcs1(pem_data)
+    assert key.p == prime1
+    assert key.q == prime2
 
 
-class TestByteInput(unittest.TestCase):
-    """Tests that PEM and DER can be loaded from bytes."""
+def test_byte_output_public():
+    key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem.encode())
+    assert isinstance(key.save_pkcs1(file_format="DER"), bytes)
+    assert isinstance(key.save_pkcs1(file_format="PEM"), bytes)
 
-    def test_bytes_public(self):
-        key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem.encode("ascii"))
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
 
-    def test_bytes_private(self):
-        key = rsa.key.PrivateKey.load_pkcs1(private_key_pem.encode("ascii"))
-        self.assertIsInstance(key.save_pkcs1(format="DER"), bytes)
-        self.assertIsInstance(key.save_pkcs1(format="PEM"), bytes)
+def test_byte_output_private():
+    key = rsa.key.PrivateKey.load_pkcs1(private_key_pem.encode())
+    assert isinstance(key.save_pkcs1(file_format="DER"), bytes)
+    assert isinstance(key.save_pkcs1(file_format="PEM"), bytes)
+
+
+def test_byte_input_public():
+    key = rsa.key.PublicKey.load_pkcs1_openssl_pem(public_key_pem.encode("ascii"))
+    assert isinstance(key.save_pkcs1(file_format="DER"), bytes)
+    assert isinstance(key.save_pkcs1(file_format="PEM"), bytes)
+
+
+def test_byte_input_private():
+    key = rsa.key.PrivateKey.load_pkcs1(private_key_pem.encode("ascii"))
+    assert isinstance(key.save_pkcs1(file_format="DER"), bytes)
+    assert isinstance(key.save_pkcs1(file_format="PEM"), bytes)

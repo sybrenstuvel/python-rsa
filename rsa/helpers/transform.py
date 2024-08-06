@@ -18,8 +18,13 @@ From bytes to a number, number to bytes, etc.
 """
 
 import math
+import logging
+import rsa.helpers.decorators as decorators
+
+logger = logging.getLogger(__name__)
 
 
+@decorators.log_decorator(logger)
 def bytes2int(raw_bytes: bytes) -> int:
     r"""Converts a list of bytes or an 8-bit string to an integer.
 
@@ -34,6 +39,7 @@ def bytes2int(raw_bytes: bytes) -> int:
     return int.from_bytes(raw_bytes, "big", signed=False)
 
 
+@decorators.log_decorator(logger)
 def int2bytes(number: int, fill_size: int = 0) -> bytes:
     """
     Convert an unsigned integer to bytes (big-endian)::

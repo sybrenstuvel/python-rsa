@@ -16,11 +16,16 @@
 
 import base64
 import typing
+import logging
+import rsa.helpers.decorators as decorators
 
 # Should either be ASCII strings or bytes.
 FlexiText = typing.Union[str, bytes]
 
+logger = logging.getLogger(__name__)
 
+
+@decorators.log_decorator(logger)
 def _markers(pem_marker: FlexiText) -> typing.Tuple[bytes, bytes]:
     """
     Returns the start and end PEM markers, as bytes.
@@ -35,29 +40,25 @@ def _markers(pem_marker: FlexiText) -> typing.Tuple[bytes, bytes]:
     )
 
 
+@decorators.log_decorator(logger)
 def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iterator[bytes]:
     """Generator over PEM lines between pem_start and pem_end."""
 
     in_pem_part = False
     seen_pem_start = False
 
-    for line in contents.splitlines():
-        line = line.strip()
-
-        # Skip empty lines
-        if not line:
-            continue
+    for line in filter(None, map(bytes.strip, contents.splitlines())):
 
         # Handle start marker
         if line == pem_start:
             if in_pem_part:
-                raise ValueError('Seen start marker "%r" twice' % pem_start)
+                raise ValueError(f'Seen start marker "{pem_start!r}" twice')
 
             in_pem_part = True
             seen_pem_start = True
             continue
 
-        # Skip stuff before first marker
+        # Skip stuff before first   marker
         if not in_pem_part:
             continue
 
@@ -74,12 +75,13 @@ def _pem_lines(contents: bytes, pem_start: bytes, pem_end: bytes) -> typing.Iter
 
     # Do some sanity checks
     if not seen_pem_start:
-        raise ValueError('No PEM start marker "%r" found' % pem_start)
+        raise ValueError(f'No PEM start marker "{pem_start!r}" found')
 
     if in_pem_part:
-        raise ValueError('No PEM end marker "%r" found' % pem_end)
+        raise ValueError(f'No PEM end marker "{pem_end!r}" found')
 
 
+@decorators.log_decorator(logger)
 def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     """Loads a PEM file.
 
@@ -99,7 +101,7 @@ def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     if not isinstance(contents, bytes):
         contents = contents.encode("ascii")
 
-    (pem_start, pem_end) = _markers(pem_marker)
+    pem_start, pem_end = _markers(pem_marker)
     pem_lines = [line for line in _pem_lines(contents, pem_start, pem_end)]
 
     # Base64-decode the contents
@@ -107,6 +109,7 @@ def load_pem(contents: FlexiText, pem_marker: FlexiText) -> bytes:
     return base64.standard_b64decode(pem)
 
 
+@decorators.log_decorator(logger)
 def save_pem(contents: bytes, pem_marker: FlexiText) -> bytes:
     """Saves a PEM file.
 
@@ -119,16 +122,9 @@ def save_pem(contents: bytes, pem_marker: FlexiText) -> bytes:
 
     """
 
-    (pem_start, pem_end) = _markers(pem_marker)
+    pem_start, pem_end = _markers(pem_marker)
 
     b64 = base64.standard_b64encode(contents).replace(b"\n", b"")
-    pem_lines = [pem_start]
-
-    for block_start in range(0, len(b64), 64):
-        block = b64[block_start : block_start + 64]
-        pem_lines.append(block)
-
-    pem_lines.append(pem_end)
-    pem_lines.append(b"")
+    pem_lines = [pem_start] + [b64[i:i + 64] for i in range(0, len(b64), 64)] + [pem_end, b""]
 
     return b"\n".join(pem_lines)

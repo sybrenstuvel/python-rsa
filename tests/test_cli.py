@@ -12,8 +12,9 @@ import unittest
 from contextlib import contextmanager, redirect_stdout, redirect_stderr
 
 import rsa
-import rsa.cli
-import rsa.util
+import cli.option_parser
+import cli.util
+import rsa.core as core_namespace
 
 
 @contextmanager
@@ -81,7 +82,7 @@ class AbstractCliTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure there is a key to use
-        cls.pub_key, cls.priv_key = rsa.newkeys(512)
+        cls.pub_key, cls.priv_key = rsa.new_keys(512)
         cls.pub_fname = "%s.pub" % cls.__name__
         cls.priv_fname = "%s.key" % cls.__name__
 
@@ -115,12 +116,12 @@ class AbstractCliTest(unittest.TestCase):
 class KeygenTest(AbstractCliTest):
     def test_keygen_no_args(self):
         with captured_output(), cli_args():
-            self.assertExits(1, rsa.cli.keygen)
+            self.assertExits(1, cli.option_parser.keygen)
 
     def test_keygen_priv_stdout(self):
         with captured_output() as (out, err):
             with cli_args(128):
-                rsa.cli.keygen()
+                cli.option_parser.keygen()
 
         lines = get_bytes_out(out).splitlines()
         self.assertEqual(b"-----BEGIN RSA PRIVATE KEY-----", lines[0])
@@ -133,7 +134,7 @@ class KeygenTest(AbstractCliTest):
     def test_keygen_priv_out_pem(self):
         with captured_output() as (out, err):
             with cli_args("--out=test_cli_privkey_out.pem", "--form=PEM", 128):
-                rsa.cli.keygen()
+                cli.option_parser.keygen()
 
         # The key size should be shown on stderr
         self.assertTrue("128-bit key" in err.getvalue())
@@ -149,7 +150,7 @@ class KeygenTest(AbstractCliTest):
     def test_keygen_priv_out_der(self):
         with captured_output() as (out, err):
             with cli_args("--out=test_cli_privkey_out.der", "--form=DER", 128):
-                rsa.cli.keygen()
+                cli.option_parser.keygen()
 
         # The key size should be shown on stderr
         self.assertTrue("128-bit key" in err.getvalue())
@@ -159,7 +160,7 @@ class KeygenTest(AbstractCliTest):
 
         # If we can load the file as der, it's good enough.
         with open("test_cli_privkey_out.der", "rb") as derfile:
-            rsa.PrivateKey.load_pkcs1(derfile.read(), format="DER")
+            rsa.PrivateKey.load_pkcs1(derfile.read(), file_format="DER")
 
     @cleanup_files("test_cli_privkey_out.pem", "test_cli_pubkey_out.pem")
     def test_keygen_pub_out_pem(self):
@@ -170,7 +171,7 @@ class KeygenTest(AbstractCliTest):
                 "--form=PEM",
                 256,
             ):
-                rsa.cli.keygen()
+                cli.option_parser.keygen()
 
         # The key size should be shown on stderr
         self.assertTrue("256-bit key" in err.getvalue())
@@ -187,11 +188,11 @@ class KeygenTest(AbstractCliTest):
 class EncryptDecryptTest(AbstractCliTest):
     def test_empty_decrypt(self):
         with captured_output(), cli_args():
-            self.assertExits(1, rsa.cli.decrypt)
+            self.assertExits(1, cli.option_parser.decrypt)
 
     def test_empty_encrypt(self):
         with captured_output(), cli_args():
-            self.assertExits(1, rsa.cli.encrypt)
+            self.assertExits(1, cli.option_parser.encrypt)
 
     @cleanup_files("encrypted.txt", "cleartext.txt")
     def test_encrypt_decrypt(self):
@@ -200,11 +201,11 @@ class EncryptDecryptTest(AbstractCliTest):
 
         with cli_args("-i", "cleartext.txt", "--out=encrypted.txt", self.pub_fname):
             with captured_output():
-                rsa.cli.encrypt()
+                cli.option_parser.encrypt()
 
         with cli_args("-i", "encrypted.txt", self.priv_fname):
             with captured_output() as (out, err):
-                rsa.cli.decrypt()
+                cli.option_parser.decrypt()
 
         # We should have the original cleartext on stdout now.
         output = get_bytes_out(out)
@@ -217,7 +218,7 @@ class EncryptDecryptTest(AbstractCliTest):
 
         with cli_args("-i", "cleartext.txt", "--out=encrypted.txt", self.pub_fname):
             with captured_output():
-                rsa.cli.encrypt()
+                cli.option_parser.encrypt()
 
         # Change a few bytes in the encrypted stream.
         with open("encrypted.txt", "r+b") as encfile:
@@ -226,17 +227,17 @@ class EncryptDecryptTest(AbstractCliTest):
 
         with cli_args("-i", "encrypted.txt", self.priv_fname):
             with captured_output() as (out, err):
-                self.assertRaises(rsa.DecryptionError, rsa.cli.decrypt)
+                self.assertRaises(core_namespace.DecryptionError, cli.option_parser.decrypt)
 
 
 class SignVerifyTest(AbstractCliTest):
     def test_empty_verify(self):
         with captured_output(), cli_args():
-            self.assertExits(1, rsa.cli.verify)
+            self.assertExits(1, cli.option_parser.verify)
 
     def test_empty_sign(self):
         with captured_output(), cli_args():
-            self.assertExits(1, rsa.cli.sign)
+            self.assertExits(1, cli.option_parser.sign)
 
     @cleanup_files("signature.txt", "cleartext.txt")
     def test_sign_verify(self):
@@ -245,11 +246,11 @@ class SignVerifyTest(AbstractCliTest):
 
         with cli_args("-i", "cleartext.txt", "--out=signature.txt", self.priv_fname, "SHA-256"):
             with captured_output():
-                rsa.cli.sign()
+                cli.option_parser.sign()
 
         with cli_args("-i", "cleartext.txt", self.pub_fname, "signature.txt"):
             with captured_output() as (out, err):
-                rsa.cli.verify()
+                cli.option_parser.verify()
 
         self.assertFalse(b"Verification OK" in get_bytes_out(out))
 
@@ -260,7 +261,7 @@ class SignVerifyTest(AbstractCliTest):
 
         with cli_args("-i", "cleartext.txt", "--out=signature.txt", self.priv_fname, "SHA-256"):
             with captured_output():
-                rsa.cli.sign()
+                cli.option_parser.sign()
 
         # Change a few bytes in the cleartext file.
         with open("cleartext.txt", "r+b") as encfile:
@@ -269,7 +270,7 @@ class SignVerifyTest(AbstractCliTest):
 
         with cli_args("-i", "cleartext.txt", self.pub_fname, "signature.txt"):
             with captured_output() as (out, err):
-                self.assertExits("Verification failed.", rsa.cli.verify)
+                self.assertExits("Verification failed.", cli.option_parser.verify)
 
 
 class PrivatePublicTest(AbstractCliTest):
@@ -280,7 +281,7 @@ class PrivatePublicTest(AbstractCliTest):
 
         with cli_args("-i", self.priv_fname, "-o", "test_private_to_public.pem"):
             with captured_output():
-                rsa.util.private_to_public()
+                cli.util.private_to_public()
 
         # Check that the key is indeed valid.
         with open("test_private_to_public.pem", "rb") as pemfile:

@@ -25,6 +25,7 @@ import optparse
 import rsa
 import rsa.key
 import rsa.pkcs1
+import rsa.core as core_namespace
 
 HASH_METHODS = sorted(rsa.pkcs1.HASH_METHODS.keys())
 Indexable = typing.Union[typing.Tuple, typing.List[str]]
@@ -35,8 +36,8 @@ def keygen() -> None:
 
     # Parse the CLI options
     parser = optparse.OptionParser(
-        usage="usage: %prog [options] keysize",
-        description='Generates a new RSA key pair of "keysize" bits.',
+        usage="usage: %prog [options] key_size",
+        description='Generates a new RSA key pair of "key_size" bits.',
     )
 
     parser.add_option(
@@ -69,24 +70,24 @@ def keygen() -> None:
         raise SystemExit(1)
 
     try:
-        keysize = int(cli_args[0])
+        key_size = int(cli_args[0])
     except ValueError as ex:
         parser.print_help()
         print("Not a valid number: %s" % cli_args[0], file=sys.stderr)
         raise SystemExit(1) from ex
 
-    print("Generating %i-bit key" % keysize, file=sys.stderr)
-    (pub_key, priv_key) = rsa.newkeys(keysize)
+    print("Generating %i-bit key" % key_size, file=sys.stderr)
+    (pub_key, private_key) = rsa.new_keys(key_size)
 
     # Save public key
     if cli.pubout:
         print("Writing public key to %s" % cli.pubout, file=sys.stderr)
-        data = pub_key.save_pkcs1(format=cli.form)
+        data = pub_key.save_pkcs1(file_format=cli.form)
         with open(cli.pubout, "wb") as outfile:
             outfile.write(data)
 
     # Save private key
-    data = priv_key.save_pkcs1(format=cli.form)
+    data = private_key.save_pkcs1(file_format=cli.form)
 
     if cli.out:
         print("Writing private key to %s" % cli.out, file=sys.stderr)
@@ -139,13 +140,13 @@ class CryptoOperation(metaclass=abc.ABCMeta):
 
         key = self.read_key(cli_args[0], cli.keyform)
 
-        indata = self.read_infile(cli.input)
+        indata = self.read_in_file(cli.input)
 
         print(self.operation_progressive.title(), file=sys.stderr)
-        outdata = self.perform_operation(indata, key, cli_args)
+        out_data = self.perform_operation(indata, key, cli_args)
 
         if self.has_output:
-            self.write_outfile(outdata, cli.output)
+            self.write_outfile(out_data, cli.output)
 
     def parse_cli(self) -> typing.Tuple[optparse.Values, typing.List[str]]:
         """Parse the CLI options
@@ -175,36 +176,38 @@ class CryptoOperation(metaclass=abc.ABCMeta):
 
         return cli, cli_args
 
-    def read_key(self, filename: str, keyform: str) -> rsa.key.AbstractKey:
+    def read_key(self, filename: str, key_form: str) -> rsa.key.AbstractKey:
         """Reads a public or private key."""
 
         print("Reading %s key from %s" % (self.keyname, filename), file=sys.stderr)
         with open(filename, "rb") as keyfile:
-            keydata = keyfile.read()
+            key_data = keyfile.read()
 
-        return self.key_class.load_pkcs1(keydata, keyform)
+        return self.key_class.load_pkcs1(key_data, key_form)
 
-    def read_infile(self, inname: str) -> bytes:
+    @staticmethod
+    def read_in_file(in_name: str) -> bytes:
         """Read the input file"""
 
-        if inname:
-            print("Reading input from %s" % inname, file=sys.stderr)
-            with open(inname, "rb") as infile:
+        if in_name:
+            print("Reading input from %s" % in_name, file=sys.stderr)
+            with open(in_name, "rb") as infile:
                 return infile.read()
 
         print("Reading input from stdin", file=sys.stderr)
         return sys.stdin.buffer.read()
 
-    def write_outfile(self, outdata: bytes, outname: str) -> None:
+    @staticmethod
+    def write_outfile(out_data: bytes, out_name: str) -> None:
         """Write the output file"""
 
-        if outname:
-            print("Writing output to %s" % outname, file=sys.stderr)
-            with open(outname, "wb") as outfile:
-                outfile.write(outdata)
+        if out_name:
+            print("Writing output to %s" % out_name, file=sys.stderr)
+            with open(out_name, "wb") as outfile:
+                outfile.write(out_data)
         else:
             print("Writing output to stdout", file=sys.stderr)
-            sys.stdout.buffer.write(outdata)
+            sys.stdout.buffer.write(out_data)
 
 
 class EncryptOperation(CryptoOperation):
@@ -240,11 +243,11 @@ class DecryptOperation(CryptoOperation):
     key_class = rsa.PrivateKey
 
     def perform_operation(
-        self, indata: bytes, priv_key: rsa.key.AbstractKey, cli_args: Indexable = ()
+        self, in_data: bytes, private_key: rsa.key.AbstractKey, cli_args: Indexable = ()
     ) -> bytes:
         """Decrypts files."""
-        assert isinstance(priv_key, rsa.key.PrivateKey)
-        return rsa.decrypt(indata, priv_key)
+        assert isinstance(private_key, rsa.key.PrivateKey)
+        return rsa.decrypt(in_data, private_key)
 
 
 class SignOperation(CryptoOperation):
@@ -268,16 +271,16 @@ class SignOperation(CryptoOperation):
     )
 
     def perform_operation(
-        self, indata: bytes, priv_key: rsa.key.AbstractKey, cli_args: Indexable
+        self, indata: bytes, private_key: rsa.key.AbstractKey, cli_args: Indexable
     ) -> bytes:
         """Signs files."""
-        assert isinstance(priv_key, rsa.key.PrivateKey)
+        assert isinstance(private_key, rsa.key.PrivateKey)
 
         hash_method = cli_args[1]
         if hash_method not in HASH_METHODS:
             raise SystemExit("Invalid hash method, choose one of %s" % ", ".join(HASH_METHODS))
 
-        return rsa.sign(indata, priv_key, hash_method)
+        return rsa.sign(indata, private_key, hash_method)
 
 
 class VerifyOperation(CryptoOperation):
@@ -309,7 +312,7 @@ class VerifyOperation(CryptoOperation):
 
         try:
             rsa.verify(indata, signature, pub_key)
-        except rsa.VerificationError as ex:
+        except core_namespace.VerificationError as ex:
             raise SystemExit("Verification failed.") from ex
 
         print("Verification OK", file=sys.stderr)

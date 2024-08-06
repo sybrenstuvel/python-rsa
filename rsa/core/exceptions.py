@@ -12,30 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Tests string operations."""
+"""ASN.1 definitions.
 
-import pytest
-
-import rsa
-
-unicode_string = "Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+Not all ASN.1-handling code use these definitions, but when it does, they should be here.
+"""
 
 
-@pytest.fixture
-def rsa_keys():
-    public, private = rsa.new_keys(384)
-    return public, private
+class CryptoError(Exception):
+    """Base class for all exceptions in this module."""
 
 
-def test_enc_dec(rsa_keys):
-    public, private = rsa_keys
-    message = unicode_string.encode("utf-8")
-    print("\n\tMessage:   %r" % message)
+class DecryptionError(CryptoError):
+    """Raised when decryption fails."""
 
-    encrypted = rsa.encrypt(message, public)
-    print("\tEncrypted: %r" % encrypted)
 
-    decrypted = rsa.decrypt(encrypted, private)
-    print("\tDecrypted: %r" % decrypted)
+class VerificationError(CryptoError):
+    """Raised when verification fails."""
 
-    assert message == decrypted
+
+class NotRelativePrimeError(ValueError):
+    def __init__(self, a: int, b: int, d: int, msg: str = "") -> None:
+        super().__init__(msg or "%d and %d are not relatively prime, divider=%i" % (a, b, d))
+        self.a = a
+        self.b = b
+        self.d = d

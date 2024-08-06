@@ -12,30 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Tests string operations."""
+"""ASN.1 definitions.
 
-import pytest
-
-import rsa
-
-unicode_string = "Euro=\u20ac ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+Not all ASN.1-handling code use these definitions, but when it does, they should be here.
+"""
 
 
-@pytest.fixture
-def rsa_keys():
-    public, private = rsa.new_keys(384)
-    return public, private
+def assert_int(var: int, name: str) -> None:
+    if isinstance(var, int):
+        return
 
-
-def test_enc_dec(rsa_keys):
-    public, private = rsa_keys
-    message = unicode_string.encode("utf-8")
-    print("\n\tMessage:   %r" % message)
-
-    encrypted = rsa.encrypt(message, public)
-    print("\tEncrypted: %r" % encrypted)
-
-    decrypted = rsa.decrypt(encrypted, private)
-    print("\tDecrypted: %r" % decrypted)
-
-    assert message == decrypted
+    raise TypeError("{} should be an integer, not {}".format(name, var.__class__))

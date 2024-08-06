@@ -10,6 +10,7 @@ python:
   - "3.9"
   - "3.10"
   - "3.11"
+  - "3.12"
 
 install:
   - pip install -U pip setuptools  # https://github.com/pypa/virtualenv/issues/1630
