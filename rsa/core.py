@@ -28,6 +28,14 @@ def assert_int(var: int, name: str) -> None:
     raise TypeError("{} should be an integer, not {}".format(name, var.__class__))
 
 
+def assert_length(message: int, n: int) -> None:
+    if message < 0:
+        raise ValueError("Only non-negative numbers are supported")
+
+    if message >= n:
+        raise OverflowError("The message %i is too long for n=%i" % (message, n))
+
+
 def encrypt_int(message: int, ekey: int, n: int) -> int:
     """Encrypts a message using encryption key 'ekey', working modulo n"""
 
@@ -35,11 +43,7 @@ def encrypt_int(message: int, ekey: int, n: int) -> int:
     assert_int(ekey, "ekey")
     assert_int(n, "n")
 
-    if message < 0:
-        raise ValueError("Only non-negative numbers are supported")
-
-    if message >= n:
-        raise OverflowError("The message %i is too long for n=%i" % (message, n))
+    assert_length(message, n)
 
     return pow(message, ekey, n)
 
@@ -50,6 +54,8 @@ def decrypt_int(cyphertext: int, dkey: int, n: int) -> int:
     assert_int(cyphertext, "cyphertext")
     assert_int(dkey, "dkey")
     assert_int(n, "n")
+
+    assert_length(cyphertext, n)
 
     message = pow(cyphertext, dkey, n)
     return message
