@@ -66,6 +66,7 @@ def decrypt_int_fast(
     rs: typing.List[int],
     ds: typing.List[int],
     ts: typing.List[int],
+    n: int,
 ) -> int:
     """Decrypts a cypher text more quickly using the Chinese Remainder Theorem."""
 
@@ -76,6 +77,8 @@ def decrypt_int_fast(
         assert_int(d, "d")
     for t in ts:
         assert_int(t, "t")
+    
+    assert_length(cyphertext, n)
 
     p, q, rs = rs[0], rs[1], rs[2:]
     exp1, exp2, ds = ds[0], ds[1], ds[2:]

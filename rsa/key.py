@@ -551,6 +551,7 @@ class PrivateKey(AbstractKey):
             [self.p, self.q] + self.rs,
             [self.exp1, self.exp2] + self.ds,
             [self.coef] + self.ts,
+            self.n,
         )
         return self.unblind(decrypted, blindfac_inverse)
 
