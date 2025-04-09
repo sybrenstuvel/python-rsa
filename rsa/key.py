@@ -600,11 +600,11 @@ class PrivateKey(AbstractKey):
 
         n, e, d, p, q = map(int, priv[1:6])
         exp1, exp2, coef = map(int, priv[6:9])
-        rs = map(int, priv[9::3])
-        ds = map(int, priv[10::3])
-        ts = map(int, priv[11::3])
+        rs = [int(x) for x in priv[9::3]]
+        ds = [int(x) for x in priv[10::3]]
+        ts = [int(x) for x in priv[11::3]]
 
-        key = cls(n, e, d, p, q, list(rs))
+        key = cls(n, e, d, p, q, rs)
 
         if (key.exp1, key.exp2, key.coef, key.rs, key.ds, key.ts) != (exp1, exp2, coef, rs, ds, ts):
             warnings.warn(
