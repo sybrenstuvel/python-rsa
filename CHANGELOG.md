@@ -1,5 +1,10 @@
 # Python-RSA changelog
 
+## Version 4.9.1 - release 2025-04-16
+
+- Final release, just to add a note about the 'archived' status of the project.
+  No other changes. See `README.md` for more info.
+
 ## Version 4.9 - release 2022-07-20
 
 - Remove debug logging from `rsa/key.py`
