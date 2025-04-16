@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rsa"
-version = "4.9"
+version = "4.9.1"
 license = "Apache-2.0"
 description = "Pure-Python RSA implementation"
 readme = "README.md"

@@ -98,8 +98,8 @@ index-servers =
 pip install twine
 
 poetry build
-twine check dist/rsa-4.9.tar.gz dist/rsa-4.9-*.whl
-twine upload -r rsa dist/rsa-4.9.tar.gz dist/rsa-4.9-*.whl
+twine check dist/rsa-4.9.1.tar.gz dist/rsa-4.9.1-*.whl
+twine upload -r rsa dist/rsa-4.9.1.tar.gz dist/rsa-4.9.1-*.whl
 ```
 
 The `pip install twine` is necessary as Python-RSA requires Python >= 3.6, and
