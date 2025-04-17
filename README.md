@@ -31,10 +31,13 @@ Sybren
 
 # Pure Python RSA implementation
 
+[![RSA Downloads Last Month](https://assets.piptrends.com/get-last-month-downloads-badge/rsa.svg 'RSA Downloads Last Month by pip Trends')](https://piptrends.com/package/rsa)
 [![PyPI](https://img.shields.io/pypi/v/rsa.svg)](https://pypi.org/project/rsa/)
 [![Build Status](https://travis-ci.org/sybrenstuvel/python-rsa.svg?branch=master)](https://travis-ci.org/sybrenstuvel/python-rsa)
 [![Coverage Status](https://coveralls.io/repos/github/sybrenstuvel/python-rsa/badge.svg?branch=master)](https://coveralls.io/github/sybrenstuvel/python-rsa?branch=master)
 [![Code Climate](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/codeclimate/codeclimate/maintainability)
+
+.. image:: https://assets.piptrends.com/get-last-month-downloads-badge/rsa.svg :alt: rsa Downloads Last Month by pip Trends :target: https://piptrends.com/package/rsa
 
 [Python-RSA](https://stuvel.eu/rsa) is a pure-Python RSA implementation. It supports
 encryption and decryption, signing and verifying signatures, and key
