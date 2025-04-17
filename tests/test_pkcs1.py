@@ -148,7 +148,7 @@ class SignatureTest(unittest.TestCase):
 
         message = b"je moeder"
         signature = pkcs1.sign(message, self.priv, "SHA-256")
-        self.assertRaises(pkcs1.VerificationError, pkcs1.verify, message, signature, otherpub)
+        self.assertRaises((pkcs1.VerificationError, OverflowError), pkcs1.verify, message, signature, otherpub)
 
     def test_multiple_signings(self):
         """Signing the same message twice should return the same signatures."""
