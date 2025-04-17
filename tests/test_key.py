@@ -58,10 +58,12 @@ class KeyGenTest(unittest.TestCase):
         self.assertEqual(pk.coef, 50797)
 
     def test_custom_getprime_func(self):
-        # List of primes to test with, in order [p, q, p, q, ....]
+        # List of prime pairs to test with, in order [p, q, p, q, ....]
         # By starting with two of the same primes, we test that this is
         # properly rejected.
-        primes = [64123, 64123, 64123, 50957, 39317, 33107]
+        primes = [64123, 64123,#fail due to equality
+                  64123, 50957,#fail due to exponent (totient divisibility)
+                  39317, 33107]#working pair
 
         def getprime(_):
             return primes.pop(0)
